@@ -170,7 +170,7 @@ tid_t
 thread_create (const char *name, int priority,
                thread_func *function, void *aux) 
 {
-	printf("thread create name : %s\n", name);
+//	printf("thread create name : %s\n", name);
   struct thread *t;
   struct kernel_thread_frame *kf;
   struct switch_entry_frame *ef;
@@ -597,7 +597,7 @@ uint32_t thread_stack_ofs = offsetof (struct thread, stack);
 
 void
 thread_go_to_sleep(struct thread* t){
-	list_push_back(&blockS_list, &t->elem);
+	list_push_back(&blockS_list, &t->elemS);
 	thread_block();
 }
 
@@ -607,10 +607,10 @@ thread_check_awake(int64_t tick){
 	for ( e = list_begin(&blockS_list); e != list_end(&blockS_list);
 				e = list_next(e))
 	{
-		struct thread* t = list_entry (e, struct thread, allelem);
-		if (t != NULL && t->sleepTime < tick){
-			list_remove(e);
+		struct thread* t = list_entry (e, struct thread, elemS);
+		if (t != NULL && t->sleepTime <= tick){
 			thread_unblock(t);
+			list_remove(e);
 		}
 	}
 

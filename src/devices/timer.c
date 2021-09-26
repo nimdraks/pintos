@@ -95,7 +95,7 @@ timer_sleep (int64_t ticks)
 
 	struct thread* t = thread_current();
 	t->sleepTime = start + ticks;
-	printf("timer thread name : %s", t->name );
+//	printf("timer thread name : %s\n", t->name );
 
 	old_level = intr_disable();
 	if (t->sleepTime > timer_ticks()){
