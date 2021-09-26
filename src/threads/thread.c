@@ -28,6 +28,9 @@ static struct list ready_list;
    when they are first scheduled and removed when they exit. */
 static struct list all_list;
 
+/* List of block list by timer_sleep */
+static struct list blockS_list;
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -92,6 +95,7 @@ thread_init (void)
   lock_init (&tid_lock);
   list_init (&ready_list);
   list_init (&all_list);
+	list_init (&blockS_list);
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -166,6 +170,7 @@ tid_t
 thread_create (const char *name, int priority,
                thread_func *function, void *aux) 
 {
+	printf("thread create name : %s\n", name);
   struct thread *t;
   struct kernel_thread_frame *kf;
   struct switch_entry_frame *ef;
@@ -585,3 +590,31 @@ allocate_tid (void)
 /* Offset of `stack' member within `struct thread'.
    Used by switch.S, which can't figure it out on its own. */
 uint32_t thread_stack_ofs = offsetof (struct thread, stack);
+
+
+
+
+
+void
+thread_go_to_sleep(struct thread* t){
+	list_push_back(&blockS_list, &t->elem);
+	thread_block();
+}
+
+void
+thread_check_awake(int64_t tick){
+	struct list_elem* e;
+	for ( e = list_begin(&blockS_list); e != list_end(&blockS_list);
+				e = list_next(e))
+	{
+		struct thread* t = list_entry (e, struct thread, allelem);
+		if (t != NULL && t->sleepTime < tick){
+			list_remove(e);
+			thread_unblock(t);
+		}
+	}
+
+
+}
+
+
