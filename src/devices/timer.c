@@ -91,16 +91,15 @@ timer_sleep (int64_t ticks)
 {
 	enum intr_level old_level;
   int64_t start = timer_ticks ();
-  //ASSERT (intr_get_level () == INTR_ON);
-
 	struct thread* t = thread_current();
-	t->sleepTime = start + ticks;
-//	printf("timer thread name : %s\n", t->name );
 
+	t->sleepTime = start + ticks;
 	old_level = intr_disable();
+
 	if (t->sleepTime > timer_ticks()){
 		thread_go_to_sleep(t);
 	}
+
 	intr_set_level(old_level);
 
 }
