@@ -144,6 +144,7 @@ int thread_get_load_avg (void);
 
 void thread_go_to_sleep(struct thread*);
 void thread_check_awake(int64_t tick);
+bool thread_highest_priority_into_front(struct thread* cur);
 
 
 
