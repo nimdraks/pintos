@@ -228,7 +228,7 @@ thread_block (void)
 {
   ASSERT (!intr_context ());
   ASSERT (intr_get_level () == INTR_OFF);
-
+	thread_highest_priority_into_front(thread_current());
   thread_current ()->status = THREAD_BLOCKED;
   schedule ();
 }
@@ -309,6 +309,7 @@ thread_exit (void)
   /* Remove thread from all threads list, set our status to dying,
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
+	thread_highest_priority_into_front(thread_current());
   intr_disable ();
   list_remove (&thread_current()->allelem);
   thread_current ()->status = THREAD_DYING;
@@ -631,6 +632,11 @@ thread_check_awake(int64_t tick){
 
 bool
 thread_highest_priority_into_front(struct thread* cur){
+	if (list_empty(&ready_list)){
+		return false;
+	}
+
+
 	struct list_elem* highest_e=list_begin(&ready_list);
 	struct list_elem* e=highest_e;
 	struct thread* highest_t = list_entry(highest_e, struct thread, elem);
