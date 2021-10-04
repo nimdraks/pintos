@@ -256,7 +256,7 @@ thread_unblock (struct thread *t)
 	t->status = THREAD_READY;
   intr_set_level (old_level);
 
-	if(cur->priority < t->priority && !cur->name=="idle"){
+	if(cur->priority < t->priority && strcmp(cur->name, "idle") != 0 ){
 		thread_yield();
 	}
 
@@ -326,9 +326,9 @@ thread_yield (void)
   
   ASSERT (!intr_context ());
 
-//	if ( !thread_highest_priority_into_front(cur) ){
-//		return;
-//	}
+	if ( !thread_highest_priority_into_front(cur) ){
+		return;
+	}
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
@@ -360,6 +360,7 @@ void
 thread_set_priority (int new_priority) 
 {
   thread_current ()->priority = new_priority;
+	thread_yield();
 }
 
 /* Returns the current thread's priority. */
@@ -651,8 +652,9 @@ thread_highest_priority_into_front(struct thread* cur){
 	}
 
 
-	if(cur->priority < highest_t->priority)
+	if(cur->priority <= highest_t->priority){
 		return true;
+	}
 
 	return false;
 }
