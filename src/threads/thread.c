@@ -256,8 +256,7 @@ thread_unblock (struct thread *t)
 	t->status = THREAD_READY;
   intr_set_level (old_level);
 
-  printf("check %s", t->name);
-	if(cur->priority < t->priority){
+	if(cur->priority < t->priority && !cur->name=="idle"){
 		thread_yield();
 	}
 
