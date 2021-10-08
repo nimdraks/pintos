@@ -228,7 +228,7 @@ thread_block (void)
 {
   ASSERT (!intr_context ());
   ASSERT (intr_get_level () == INTR_OFF);
-
+	thread_highest_priority_into_front(thread_current());
   thread_current ()->status = THREAD_BLOCKED;
   schedule ();
 }
@@ -245,14 +245,21 @@ void
 thread_unblock (struct thread *t) 
 {
   enum intr_level old_level;
-
   ASSERT (is_thread (t));
+
+	struct thread* cur = thread_current();
 
   old_level = intr_disable ();
   ASSERT (t->status == THREAD_BLOCKED);
-  list_push_back (&ready_list, &t->elem);
-  t->status = THREAD_READY;
+
+	list_push_back (&ready_list, &t->elem);
+	t->status = THREAD_READY;
   intr_set_level (old_level);
+
+	if(cur->priority < t->priority && strcmp(cur->name, "idle") != 0 ){
+		thread_yield();
+	}
+
 }
 
 /* Returns the name of the running thread. */
@@ -302,6 +309,7 @@ thread_exit (void)
   /* Remove thread from all threads list, set our status to dying,
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
+	thread_highest_priority_into_front(thread_current());
   intr_disable ();
   list_remove (&thread_current()->allelem);
   thread_current ()->status = THREAD_DYING;
@@ -318,6 +326,10 @@ thread_yield (void)
   enum intr_level old_level;
   
   ASSERT (!intr_context ());
+
+	if ( !thread_highest_priority_into_front(cur) ){
+		return;
+	}
 
   old_level = intr_disable ();
   if (cur != idle_thread) 
@@ -349,6 +361,7 @@ void
 thread_set_priority (int new_priority) 
 {
   thread_current ()->priority = new_priority;
+	thread_yield();
 }
 
 /* Returns the current thread's priority. */
@@ -560,6 +573,7 @@ thread_schedule_tail (struct thread *prev)
 static void
 schedule (void) 
 {
+	
   struct thread *cur = running_thread ();
   struct thread *next = next_thread_to_run ();
   struct thread *prev = NULL;
@@ -613,8 +627,45 @@ thread_check_awake(int64_t tick){
 			list_remove(e);
 		}
 	}
-
-
 }
+
+
+bool
+thread_highest_priority_into_front(struct thread* cur){
+	if (list_empty(&ready_list)){
+		return false;
+	}
+
+
+	struct list_elem* highest_e=list_begin(&ready_list);
+	struct list_elem* e=highest_e;
+	struct thread* highest_t = list_entry(highest_e, struct thread, elem);
+	struct thread* t = highest_t;
+
+	for ( e = list_begin(&ready_list); e != list_end(&ready_list);
+				e = list_next(e))
+	{
+		t = list_entry (e, struct thread, elem);
+		if (t->priority > highest_t->priority){
+			highest_t = t;
+			highest_e = e;
+		}
+	}
+
+	if (highest_e != list_begin(&ready_list)){
+		list_remove(highest_e);
+		list_push_front(&ready_list, &highest_t->elem);	
+	}
+
+
+	if(cur->priority <= highest_t->priority){
+		return true;
+	}
+
+	return false;
+}
+
+
+
 
 
