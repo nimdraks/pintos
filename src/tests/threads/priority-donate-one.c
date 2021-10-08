@@ -38,6 +38,7 @@ test_priority_donate_one (void)
   msg ("This thread should have priority %d.  Actual priority: %d.",
        PRI_DEFAULT + 2, thread_get_priority ());
   lock_release (&lock);
+//	msg ("This thread priority %d", thread_get_priority());
   msg ("acquire2, acquire1 must already have finished, in that order.");
   msg ("This should be the last line before finishing this test.");
 }
@@ -47,6 +48,7 @@ acquire1_thread_func (void *lock_)
 {
   struct lock *lock = lock_;
 
+//	msg ("DEBUG1: try to get the lock");
   lock_acquire (lock);
   msg ("acquire1: got the lock");
   lock_release (lock);
@@ -58,6 +60,7 @@ acquire2_thread_func (void *lock_)
 {
   struct lock *lock = lock_;
 
+//	msg ("DEBUG2: try to get the lock");
   lock_acquire (lock);
   msg ("acquire2: got the lock");
   lock_release (lock);

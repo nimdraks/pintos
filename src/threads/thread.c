@@ -652,7 +652,7 @@ thread_highest_priority_into_front(struct thread* cur){
 		}
 	}
 
-	if (highest_t != t){
+	if (highest_e != list_begin(&ready_list)){
 		list_remove(highest_e);
 		list_push_front(&ready_list, &highest_t->elem);	
 	}

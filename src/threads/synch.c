@@ -113,12 +113,12 @@ sema_up (struct semaphore *sema)
   ASSERT (sema != NULL);
 
   old_level = intr_disable ();
+	sema->value++;
   if (!list_empty (&sema->waiters)) {
 		put_highest_front(&sema->waiters);
     thread_unblock (list_entry (list_pop_front (&sema->waiters),
                                 struct thread, elem));
 	}
-  sema->value++;
   intr_set_level (old_level);
 }
 
@@ -197,9 +197,17 @@ lock_acquire (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
-
+/*	
+	struct thread* cur_lock_holder = lock->holder;
+	if (cur_lock_holder != NULL){
+		if (cur_lock_holder->priority < thread_current()->priority){
+			cur_lock_holder->priority = thread_current()->priority;
+		}
+	}
+*/
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
+//	lock->holder_priority = thread_current ()->priority;
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -233,6 +241,7 @@ lock_release (struct lock *lock)
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
+//	lock->holder->priority = lock->holder_priority;
   lock->holder = NULL;
   sema_up (&lock->semaphore);
 }
@@ -360,7 +369,7 @@ void put_highest_front(struct list* list){
     }
   }
 
-  if (highest_t != t){
+  if (highest_e != list_begin(list)){
     list_remove(highest_e);
     list_push_front(list, &highest_t->elem);
   }
