@@ -254,11 +254,12 @@ thread_unblock (struct thread *t)
 
 	list_push_back (&ready_list, &t->elem);
 	t->status = THREAD_READY;
-  intr_set_level (old_level);
 
 	if(cur->priority < t->priority && strcmp(cur->name, "idle") != 0 ){
 		thread_yield();
 	}
+
+  intr_set_level (old_level);
 
 }
 
@@ -326,13 +327,13 @@ thread_yield (void)
   enum intr_level old_level;
   
   ASSERT (!intr_context ());
+  old_level = intr_disable ();
 
 	if ( !thread_highest_priority_into_front(cur) ){
 		return;
 	}
 
-  old_level = intr_disable ();
-  if (cur != idle_thread) 
+ if (cur != idle_thread) 
     list_push_back (&ready_list, &cur->elem);
   cur->status = THREAD_READY;
   schedule ();
@@ -486,6 +487,8 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = priority;
+	list_init(&t->lock_own_list);
+	t->wait_lock = (struct lock*) NULL;
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
 }
