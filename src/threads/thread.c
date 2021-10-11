@@ -170,7 +170,6 @@ tid_t
 thread_create (const char *name, int priority,
                thread_func *function, void *aux) 
 {
-//	printf("thread create name : %s\n", name);
   struct thread *t;
   struct kernel_thread_frame *kf;
   struct switch_entry_frame *ef;
@@ -254,11 +253,12 @@ thread_unblock (struct thread *t)
 
 	list_push_back (&ready_list, &t->elem);
 	t->status = THREAD_READY;
-  intr_set_level (old_level);
 
 	if(cur->priority < t->priority && strcmp(cur->name, "idle") != 0 ){
 		thread_yield();
 	}
+
+  intr_set_level (old_level);
 
 }
 
@@ -309,8 +309,8 @@ thread_exit (void)
   /* Remove thread from all threads list, set our status to dying,
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
-	thread_highest_priority_into_front(thread_current());
   intr_disable ();
+	thread_highest_priority_into_front(thread_current());
   list_remove (&thread_current()->allelem);
   thread_current ()->status = THREAD_DYING;
   schedule ();
@@ -326,13 +326,13 @@ thread_yield (void)
   enum intr_level old_level;
   
   ASSERT (!intr_context ());
+  old_level = intr_disable ();
 
 	if ( !thread_highest_priority_into_front(cur) ){
 		return;
 	}
 
-  old_level = intr_disable ();
-  if (cur != idle_thread) 
+ if (cur != idle_thread) 
     list_push_back (&ready_list, &cur->elem);
   cur->status = THREAD_READY;
   schedule ();
@@ -360,7 +360,8 @@ thread_foreach (thread_action_func *func, void *aux)
 void
 thread_set_priority (int new_priority) 
 {
-  thread_current ()->priority = new_priority;
+  thread_current ()->priority = thread_current()->original_priority = new_priority;
+	thread_update_priority_from_lock_list(thread_current());
 	thread_yield();
 }
 
@@ -485,7 +486,9 @@ init_thread (struct thread *t, const char *name, int priority)
   t->status = THREAD_BLOCKED;
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
-  t->priority = priority;
+  t->priority = t->original_priority = priority;
+	list_init(&t->lock_own_list);
+	t->wait_lock = (struct lock*) NULL;
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
 }
@@ -642,20 +645,22 @@ thread_highest_priority_into_front(struct thread* cur){
 	struct thread* highest_t = list_entry(highest_e, struct thread, elem);
 	struct thread* t = highest_t;
 
-	for ( e = list_begin(&ready_list); e != list_end(&ready_list);
-				e = list_next(e))
+	for ( e = list_rbegin(&ready_list); e != list_rend(&ready_list);
+				e = list_prev(e))
 	{
 		t = list_entry (e, struct thread, elem);
-		if (t->priority > highest_t->priority){
+		if (t->priority >= highest_t->priority){
 			highest_t = t;
 			highest_e = e;
 		}
 	}
 
+
 	if (highest_e != list_begin(&ready_list)){
 		list_remove(highest_e);
 		list_push_front(&ready_list, &highest_t->elem);	
 	}
+
 
 
 	if(cur->priority <= highest_t->priority){
@@ -665,7 +670,45 @@ thread_highest_priority_into_front(struct thread* cur){
 	return false;
 }
 
+void
+thread_update_priority_from_lock_list(struct thread* t){
+	if(t == NULL)
+		return;
+	
+	if(list_empty(&t->lock_own_list)){
+		t->priority = t->original_priority;
+		return;
+	}
 
+	int prev_priority = t->priority;
+	t->priority = t->original_priority;
+	struct list_elem* e=list_begin(&t->lock_own_list);
+	for ( e = list_begin(&t->lock_own_list); e != list_end(&t->lock_own_list);
+				e = list_next(e))
+	{
+		struct lock* l = list_entry (e, struct lock, elem);
+		if(l == NULL || list_empty(&l->semaphore.waiters)){
+			continue;			
+		}
+		struct list_elem* le=list_begin(&l->semaphore.waiters);
+		for ( le = list_begin(&l->semaphore.waiters); le != list_end(&l->semaphore.waiters);
+				le = list_next(le))
+		{
+			struct thread* lt = list_entry(le, struct thread, elem);
+			if(lt->priority > t->priority){
+				t->priority = lt->priority;
+			}
+		}		
+	}
+
+	if (t->priority != prev_priority){
+		if(t->wait_lock!=NULL){
+			thread_update_priority_from_lock_list(t->wait_lock->holder);
+		}
+
+	}
+
+}
 
 
 

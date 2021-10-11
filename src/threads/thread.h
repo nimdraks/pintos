@@ -91,11 +91,17 @@ struct thread
 		int64_t sleepTime;
     struct list_elem allelem;           /* List element for all threads list. */
 
+	
     /* Shared between thread.c and synch.c. */
     struct list_elem elem;              /* List element. */
 
 		/* blockSlist */
 		struct list_elem elemS;
+
+		/* for priority donation */
+		struct list lock_own_list;
+		struct lock* wait_lock;
+		int original_priority;
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -146,6 +152,6 @@ void thread_go_to_sleep(struct thread*);
 void thread_check_awake(int64_t tick);
 bool thread_highest_priority_into_front(struct thread* cur);
 
+void thread_update_priority_from_lock_list(struct thread* t);
 
-
-#endif /* threads/thread.h */
+#endif /* threada/thread.h */
