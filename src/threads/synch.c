@@ -194,20 +194,23 @@ lock_init (struct lock *lock)
 void
 lock_acquire (struct lock *lock)
 {
+  enum intr_level old_level;
+  old_level = intr_disable ();
+
   ASSERT (lock != NULL);
   ASSERT (!intr_context ());
   ASSERT (!lock_held_by_current_thread (lock));
-/*	
-	struct thread* cur_lock_holder = lock->holder;
-	if (cur_lock_holder != NULL){
-		if (cur_lock_holder->priority < thread_current()->priority){
-			cur_lock_holder->priority = thread_current()->priority;
-		}
+
+	if(lock->holder!=NULL){
+		if (thread_current()->priority > lock->holder->priority)
+			lock->holder->priority = thread_current()->priority;	
 	}
-*/
+
   sema_down (&lock->semaphore);
   lock->holder = thread_current ();
-//	lock->holder_priority = thread_current ()->priority;
+	lock->holder_priority = lock->holder->priority;	
+	list_push_back(&lock->holder->lock_own_list, &lock->elem );
+  intr_set_level (old_level);
 }
 
 /* Tries to acquires LOCK and returns true if successful or false
@@ -238,12 +241,18 @@ lock_try_acquire (struct lock *lock)
 void
 lock_release (struct lock *lock) 
 {
+  enum intr_level old_level;
+  old_level = intr_disable ();
   ASSERT (lock != NULL);
   ASSERT (lock_held_by_current_thread (lock));
 
-//	lock->holder->priority = lock->holder_priority;
+
+	list_remove( &lock->elem );
+	thread_update_priority_from_lock_list(lock->holder);
   lock->holder = NULL;
+
   sema_up (&lock->semaphore);
+  intr_set_level (old_level);
 }
 
 /* Returns true if the current thread holds LOCK, false
@@ -359,11 +368,11 @@ void put_highest_front(struct list* list){
   struct thread* highest_t = list_entry(highest_e, struct thread, elem);
   struct thread* t = highest_t;
 
-  for ( e = list_begin(list); e != list_end(list);
-        e = list_next(e))
+  for ( e = list_rbegin(list); e != list_rend(list);
+        e = list_prev(e))
   {
     t = list_entry (e, struct thread, elem);
-    if (t->priority > highest_t->priority){
+    if (t->priority >= highest_t->priority){
       highest_t = t;
       highest_e = e;
     }
