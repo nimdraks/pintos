@@ -361,6 +361,7 @@ void
 thread_set_priority (int new_priority) 
 {
   thread_current ()->priority = thread_current()->original_priority = new_priority;
+	thread_update_priority_from_lock_list(thread_current());
 	thread_yield();
 }
 
@@ -670,12 +671,16 @@ thread_highest_priority_into_front(struct thread* cur){
 }
 
 void
-thread_update_priority_from_lock_list(struct thread* t){	
+thread_update_priority_from_lock_list(struct thread* t){
+	if(t == NULL)
+		return;
+	
 	if(list_empty(&t->lock_own_list)){
 		t->priority = t->original_priority;
 		return;
 	}
 
+	int prev_priority = t->priority;
 	t->priority = t->original_priority;
 	struct list_elem* e=list_begin(&t->lock_own_list);
 	for ( e = list_begin(&t->lock_own_list); e != list_end(&t->lock_own_list);
@@ -695,6 +700,14 @@ thread_update_priority_from_lock_list(struct thread* t){
 			}
 		}		
 	}
+
+	if (t->priority != prev_priority){
+		if(t->wait_lock!=NULL){
+			thread_update_priority_from_lock_list(t->wait_lock->holder);
+		}
+
+	}
+
 }
 
 

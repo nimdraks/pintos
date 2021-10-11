@@ -44,6 +44,8 @@ void cond_signal (struct condition *, struct lock *);
 void cond_broadcast (struct condition *, struct lock *);
 
 void put_highest_front(struct list* list);
+void put_highest_front_waiter(struct list* list);
+
 
 /* Optimization barrier.
 
