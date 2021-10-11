@@ -70,6 +70,8 @@ static void locate_block_devices (void);
 static void locate_block_device (enum block_type, const char *name);
 #endif
 
+void mlfqs_init();
+
 int main (void) NO_RETURN;
 
 /* Pintos main program. */
@@ -130,6 +132,8 @@ main (void)
   
   /* Run actions specified on kernel command line. */
   run_actions (argv);
+	
+	update_load_avg();
 
   /* Finish up. */
   shutdown ();
@@ -426,3 +430,5 @@ locate_block_device (enum block_type role, const char *name)
     }
 }
 #endif
+
+

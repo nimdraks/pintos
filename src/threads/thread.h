@@ -24,6 +24,9 @@ typedef int tid_t;
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
 
+#define BEFORE_DECIMAL 17
+#define AFTER_DECIMAL 14
+
 /* A kernel thread or user process.
 
    Each thread structure is stored in its own 4 kB page.  The
@@ -103,6 +106,11 @@ struct thread
 		struct lock* wait_lock;
 		int original_priority;
 
+		/* mlfqs */
+		int mlfqs_priority;
+		int nice;
+		int recent_cpu;
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -153,5 +161,14 @@ void thread_check_awake(int64_t tick);
 bool thread_highest_priority_into_front(struct thread* cur);
 
 void thread_update_priority_from_lock_list(struct thread* t);
+
+void update_ready_thread(void);
+void update_load_avg(void);
+
+int64_t fraction_into(int64_t num);
+int64_t fraction_add(int64_t num1, int64_t num2);
+int64_t fraction_sub(int64_t num1, int64_t num2);
+int64_t fraction_mul(int64_t num1, int64_t num2);
+int64_t fraction_div(int64_t num, int64_t denom);
 
 #endif /* threada/thread.h */

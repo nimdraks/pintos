@@ -31,6 +31,12 @@ static struct list all_list;
 /* List of block list by timer_sleep */
 static struct list blockS_list;
 
+/* List of precesses in THREAD_READY state at MLFQS */
+static struct list mlfqs_ready_list[64];
+static int64_t load_avg;
+static int ready_threads;
+static int FRACTION = 1 << 14;
+
 /* Idle thread. */
 static struct thread *idle_thread;
 
@@ -96,6 +102,15 @@ thread_init (void)
   list_init (&ready_list);
   list_init (&all_list);
 	list_init (&blockS_list);
+
+//	if(thread_mlfqs){
+		load_avg = 0;
+		ready_threads = 0;
+		int i;
+		for (i=0; i<64; i++){
+			list_init(mlfqs_ready_list+i);
+		}
+//	}
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -711,4 +726,61 @@ thread_update_priority_from_lock_list(struct thread* t){
 }
 
 
+void
+update_ready_thread(){
+	int count=0;
+	int i = 0;
+	for (i = 0; i < 64; i++){
+		struct list* curList = mlfqs_ready_list + i;
+		if(!list_empty(curList))
+			count += list_size(curList); 
+	}
+
+	ready_threads=count;
+}
+
+
+void
+update_load_avg(){
+	update_ready_thread();
+	ready_threads = 10;
+	load_avg = 10;
+	int64_t coeff1 = fraction_div(fraction_into(59), fraction_into(60));
+	int64_t part1 = fraction_mul(coeff1, load_avg);
+	int64_t part2 = fraction_div(fraction_into(ready_threads), fraction_into(60));
+	
+	load_avg = fraction_add(part1, part2);
+
+//	printf("coeff1 : %llu\n", coeff1);
+//	printf("part1 : %llu\n", part1);
+//	printf("part2 : %llu\n", part2);
+//	printf("load_avg : %llu\n", load_avg);
+}
+
+
+int64_t
+fraction_into(int64_t num){
+	return num * (int64_t)FRACTION;
+}
+
+int64_t
+fraction_add(int64_t num1, int64_t num2){
+	return num1 + num2;
+}
+
+int64_t
+fraction_sub(int64_t num1, int64_t num2){
+	return num1 - num2;
+}
+
+int64_t
+fraction_mul(int64_t num1, int64_t num2){
+	return num1 * num2 / (int64_t)FRACTION;
+}
+
+
+int64_t
+fraction_div(int64_t num, int64_t denom){
+	return num * (int64_t)FRACTION / denom; 
+}
 

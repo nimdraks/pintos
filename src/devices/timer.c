@@ -181,8 +181,11 @@ timer_interrupt (struct intr_frame *args UNUSED)
   ticks++;
 	thread_check_awake(ticks);
   thread_tick ();
-}
 
+	if(ticks%TIMER_FREQ==0){
+//		update_load_avg();	
+	}
+}
 /* Returns true if LOOPS iterations waits for more than one timer
    tick, otherwise false. */
 static bool
