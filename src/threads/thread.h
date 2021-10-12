@@ -108,8 +108,8 @@ struct thread
 
 		/* mlfqs */
 		int mlfqs_priority;
-		int nice;
-		int recent_cpu;
+		int64_t nice;
+		int64_t recent_cpu;
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
@@ -162,10 +162,12 @@ bool thread_highest_priority_into_front(struct thread* cur);
 
 void thread_update_priority_from_lock_list(struct thread* t);
 
+void thread_update_recent_cpu(struct thread* t);
 void update_ready_thread(void);
 void update_load_avg(void);
 
 int64_t fraction_into(int64_t num);
+int64_t fraction_out(int64_t num);
 int64_t fraction_add(int64_t num1, int64_t num2);
 int64_t fraction_sub(int64_t num1, int64_t num2);
 int64_t fraction_mul(int64_t num1, int64_t num2);

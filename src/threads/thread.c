@@ -389,33 +389,30 @@ thread_get_priority (void)
 
 /* Sets the current thread's nice value to NICE. */
 void
-thread_set_nice (int nice UNUSED) 
+thread_set_nice (int nice) 
 {
-  /* Not yet implemented. */
+	thread_current()->nice = (int64_t)nice;
 }
 
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void) 
 {
-  /* Not yet implemented. */
-  return 0;
+  return (int)thread_current()->nice;
 }
 
 /* Returns 100 times the system load average. */
 int
 thread_get_load_avg (void) 
 {
-  /* Not yet implemented. */
-  return 0;
+  return (int)fraction_out(100*load_avg);
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
 int
 thread_get_recent_cpu (void) 
 {
-  /* Not yet implemented. */
-  return 0;
+  return (int)fraction_out(100*thread_current()->recent_cpu);
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -725,6 +722,21 @@ thread_update_priority_from_lock_list(struct thread* t){
 
 }
 
+void
+thread_update_recent_cpu(struct thread* t){
+
+	int64_t coeff1_num = fraction_mul(fraction_into(2), load_avg);
+	int64_t coeff1_denom = fraction_add(fraction_mul(fraction_into(2), load_avg), fraction_into(1));
+	int64_t coeff1 = fraction_div(coeff1_num, coeff1_denom);
+	int64_t part1 = fraction_mul(coeff1, t->recent_cpu);
+
+	t->recent_cpu = fraction_add(part1, fraction_into(t->nice));
+
+}
+
+
+
+
 
 void
 update_ready_thread(){
@@ -761,6 +773,11 @@ update_load_avg(){
 int64_t
 fraction_into(int64_t num){
 	return num * (int64_t)FRACTION;
+}
+
+int64_t
+fraction_out(int64_t num){
+	return num / (int64_t)FRACTION;
 }
 
 int64_t
