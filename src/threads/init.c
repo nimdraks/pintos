@@ -133,7 +133,8 @@ main (void)
   /* Run actions specified on kernel command line. */
   run_actions (argv);
 	
-	update_load_avg();
+//	update_load_avg();
+//	thread_update_recent_cpu();
 
   /* Finish up. */
   shutdown ();

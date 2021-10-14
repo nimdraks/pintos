@@ -723,18 +723,54 @@ thread_update_priority_from_lock_list(struct thread* t){
 }
 
 void
+//thread_update_recent_cpu(){
 thread_update_recent_cpu(struct thread* t){
+
+//	load_avg=10;
+//	int64_t recent_cpu = 10;
+//	int64_t nice = 10;
 
 	int64_t coeff1_num = fraction_mul(fraction_into(2), load_avg);
 	int64_t coeff1_denom = fraction_add(fraction_mul(fraction_into(2), load_avg), fraction_into(1));
 	int64_t coeff1 = fraction_div(coeff1_num, coeff1_denom);
 	int64_t part1 = fraction_mul(coeff1, t->recent_cpu);
-
+//	int64_t part1 = fraction_mul(coeff1, recent_cpu);
+/*
+	printf("coeff1_num : %llu\n", coeff1_num);
+	printf("coeff1_denom : %llu\n", coeff1_denom);
+	printf("coeff1 : %llu\n", coeff1);
+	printf("part1 : %llu\n", part1);
+*/
 	t->recent_cpu = fraction_add(part1, fraction_into(t->nice));
+//	recent_cpu = fraction_add(part1, fraction_into(nice));
+//	printf("recent_cpu : %llu\n", recent_cpu);
+
 
 }
 
 
+
+void
+update_current_thread_recent_cpu(void){
+	struct thread* t = thread_current();
+	if(strcmp(t->name, "idle") != 0){
+		t->recent_cpu = fraction_add(t->recent_cpu, fraction_into(1));
+	}
+}
+
+
+void
+update_all_thread_recent_cpu(void){
+	struct list_elem* e=list_begin(&all_list);
+	struct thread* t = list_entry(e, struct thread, elem);
+
+	for ( e = list_begin(&all_list); e != list_end(&all_list);
+				e = list_next(e))
+	{
+		t = list_entry (e, struct thread, elem);
+		thread_update_recent_cpu(t);
+	}
+}
 
 
 
@@ -755,8 +791,8 @@ update_ready_thread(){
 void
 update_load_avg(){
 	update_ready_thread();
-	ready_threads = 10;
-	load_avg = 10;
+//	ready_threads = 10;
+//	load_avg = 10;
 	int64_t coeff1 = fraction_div(fraction_into(59), fraction_into(60));
 	int64_t part1 = fraction_mul(coeff1, load_avg);
 	int64_t part2 = fraction_div(fraction_into(ready_threads), fraction_into(60));
