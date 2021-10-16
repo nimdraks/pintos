@@ -103,14 +103,14 @@ thread_init (void)
   list_init (&all_list);
 	list_init (&blockS_list);
 
-//	if(thread_mlfqs){
+	if(thread_mlfqs){
 		load_avg = 0;
 		ready_threads = 0;
 		int i;
 		for (i=0; i<64; i++){
 			list_init(mlfqs_ready_list+i);
 		}
-//	}
+	}
 
   /* Set up a thread structure for the running thread. */
   initial_thread = running_thread ();
@@ -412,7 +412,11 @@ thread_get_load_avg (void)
 int
 thread_get_recent_cpu (void) 
 {
+//	printf ("%s : %lld\n", thread_current()->name,thread_current()->recent_cpu );
+//	printf ("load avg :%lld\n", load_avg);
+//	printf ("checker :%lld\n ", 100*thread_current()->recent_cpu/FRACTION);
   return (int)fraction_out(100*thread_current()->recent_cpu);
+//	return 0;
 }
 
 /* Idle thread.  Executes when no other thread is ready to run.
@@ -499,6 +503,7 @@ init_thread (struct thread *t, const char *name, int priority)
   strlcpy (t->name, name, sizeof t->name);
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = t->original_priority = priority;
+	t->nice = 0;
 	list_init(&t->lock_own_list);
 	t->wait_lock = (struct lock*) NULL;
   t->magic = THREAD_MAGIC;
@@ -743,7 +748,7 @@ thread_update_recent_cpu(struct thread* t){
 */
 	t->recent_cpu = fraction_add(part1, fraction_into(t->nice));
 //	recent_cpu = fraction_add(part1, fraction_into(nice));
-//	printf("recent_cpu : %llu\n", recent_cpu);
+//	printf("%s thread, recent_cpu : %llu\n", t->name, t->recent_cpu);
 
 
 }
@@ -762,12 +767,12 @@ update_current_thread_recent_cpu(void){
 void
 update_all_thread_recent_cpu(void){
 	struct list_elem* e=list_begin(&all_list);
-	struct thread* t = list_entry(e, struct thread, elem);
+	struct thread* t = list_entry(e, struct thread, allelem);
 
 	for ( e = list_begin(&all_list); e != list_end(&all_list);
 				e = list_next(e))
 	{
-		t = list_entry (e, struct thread, elem);
+		t = list_entry (e, struct thread, allelem);
 		thread_update_recent_cpu(t);
 	}
 }
