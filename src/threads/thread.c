@@ -754,9 +754,20 @@ thread_update_recent_cpu(struct thread* t){
 }
 
 
+void
+thread_update_priority(struct thread* t){
+	int new_priority=PRI_MAX - fraction_out(t->recent_cpu/4) - 2 * t->nice;
+//	printf("%s : new_priority%d\n",t->name, new_priority);
+	if (new_priority > PRI_MAX)
+		new_priority=PRI_MAX;
+	if (new_priority < PRI_MIN)
+		new_priority=PRI_MIN;
+	t->priority=new_priority;
+}
+
 
 void
-update_current_thread_recent_cpu(void){
+thread_current_update_recent_cpu(void){
 	struct thread* t = thread_current();
 	if(strcmp(t->name, "idle") != 0){
 		t->recent_cpu = fraction_add(t->recent_cpu, fraction_into(1));
@@ -777,6 +788,19 @@ update_all_thread_recent_cpu(void){
 	}
 }
 
+void
+update_all_thread_priority(void){
+	struct list_elem* e=list_begin(&all_list);
+	struct thread* t = list_entry(e, struct thread, allelem);
+
+	for ( e = list_begin(&all_list); e != list_end(&all_list);
+				e = list_next(e))
+	{
+		t = list_entry (e, struct thread, allelem);
+		thread_update_priority(t);
+	}
+}
+
 
 
 void
@@ -791,6 +815,7 @@ update_ready_thread(){
 
 	ready_threads=count;
 }
+
 
 
 void
