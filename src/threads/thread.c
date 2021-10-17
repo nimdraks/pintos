@@ -663,12 +663,11 @@ thread_check_awake(int64_t tick){
 	for ( ; e != list_end(&blockS_list);
 				)
 	{
-		struct list_elem* cur=e;
-		struct thread* t = list_entry (cur, struct thread, elemS);
+		struct thread* t = list_entry (e, struct thread, elemS);
 		e = list_next(e);
-		if (t != NULL && t->sleepTime <= tick){
+		if (t->sleepTime <= tick){
 			thread_unblock(t);
-			list_remove(cur);
+			list_remove(&t->elemS);
 		}
 	}
 }
@@ -875,8 +874,7 @@ update_ready_thread(){
 void
 update_load_avg(){
 	update_ready_thread();
-//	ready_threads = 10;
-//	load_avg = 10;
+
 	int64_t coeff1 = fraction_div(59, 60);
 	int64_t part1 = fraction_mul(coeff1, load_avg);
 	int64_t part2 = fraction_div(ready_threads, 60);
