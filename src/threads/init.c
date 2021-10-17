@@ -70,8 +70,6 @@ static void locate_block_devices (void);
 static void locate_block_device (enum block_type, const char *name);
 #endif
 
-void mlfqs_init();
-
 int main (void) NO_RETURN;
 
 /* Pintos main program. */

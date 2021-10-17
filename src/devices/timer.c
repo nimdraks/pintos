@@ -183,15 +183,11 @@ timer_interrupt (struct intr_frame *args UNUSED)
   thread_tick ();
 
 	if(thread_mlfqs){
-//		enum intr_level old_level;
-//		old_level = intr_disable();
 		thread_current_update_recent_cpu();
 		if(ticks%TIMER_FREQ==0){
 			update_load_avg();
 			update_all_thread_recent_cpu();
-			update_all_thread_priority();	
 		}
-//		intr_set_level(old_level);
 	}
 }
 /* Returns true if LOOPS iterations waits for more than one timer

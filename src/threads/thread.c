@@ -271,7 +271,8 @@ thread_unblock (struct thread *t)
 	if(!thread_mlfqs)
 		list_push_back (&ready_list, &t->elem);
 	else{
-		thread_only_update_priority(cur);
+		//thread_update_recent_cpu(cur);
+		//thread_only_update_priority(cur);
 		list_push_back (&mlfqs_ready_list[t->priority], &t->elem);
 	}
 	t->status = THREAD_READY;
@@ -656,14 +657,18 @@ thread_go_to_sleep(struct thread* t){
 
 void
 thread_check_awake(int64_t tick){
-	struct list_elem* e;
-	for ( e = list_begin(&blockS_list); e != list_end(&blockS_list);
-				e = list_next(e))
+	if(list_empty(&blockS_list))
+		return;
+	struct list_elem* e = list_begin(&blockS_list) ;
+	for ( ; e != list_end(&blockS_list);
+				)
 	{
-		struct thread* t = list_entry (e, struct thread, elemS);
+		struct list_elem* cur=e;
+		struct thread* t = list_entry (cur, struct thread, elemS);
+		e = list_next(e);
 		if (t != NULL && t->sleepTime <= tick){
 			thread_unblock(t);
-			list_remove(e);
+			list_remove(cur);
 		}
 	}
 }
@@ -783,7 +788,7 @@ thread_update_priority(struct thread* t){
 
 	if(t->priority!=new_priority){
 		t->priority=new_priority;
-		if(t != thread_current()){
+		if(t->status == THREAD_READY){
 			list_remove(&t->elem);
 			list_push_back(&mlfqs_ready_list[t->priority], &t->elem);
 		}
@@ -808,17 +813,12 @@ thread_only_update_priority(struct thread* t){
 void
 thread_current_update_recent_cpu(void){
 	struct thread* t = thread_current();
-	if(strcmp(t->name, "idle") != 0){
-		t->recent_cpu = fraction_add(t->recent_cpu, fraction_into(1));
-	}
+	t->recent_cpu = fraction_add(t->recent_cpu, fraction_into(1));
 }
 
 
 void
 update_all_thread_recent_cpu(void){
-	if(list_empty(&all_list))
-		return;
-	
 	struct list_elem* e=list_begin(&all_list);
 	struct thread* t = list_entry(e, struct thread, allelem);
 
@@ -826,8 +826,9 @@ update_all_thread_recent_cpu(void){
 				e = list_next(e))
 	{
 		t = list_entry (e, struct thread, allelem);
-		if(strcmp(t->name,"idle")!=0)
-			thread_update_recent_cpu(t);
+		thread_update_recent_cpu(t);
+		thread_update_priority(t);
+
 	}
 }
 
@@ -844,24 +845,13 @@ update_all_thread_priority(void){
 			{
 				t = list_entry (e, struct thread, elem);
 				e = list_next(e);
-				if(strcmp(t->name,"idle")!=0 )
+				if(strcmp(t->name,"idle")!=0 ){
+					//thread_update_recent_cpu(t);
 					thread_update_priority(t);
+				}
 			}
 		}
 	}
-
-	/*struct list_elem* e=list_begin(&all_list);
-	struct thread* t = list_entry(e, struct thread, allelem);
-
-	for ( e = list_begin(&all_list); e != list_end(&all_list);
-				e = list_next(e))
-	{
-		t = list_entry (e, struct thread, allelem);
-		if(strcmp(t->name,"idle")!=0 )
-			thread_update_priority(t);
-	}*/
-
-	
 }
 
 
@@ -887,9 +877,9 @@ update_load_avg(){
 	update_ready_thread();
 //	ready_threads = 10;
 //	load_avg = 10;
-	int64_t coeff1 = fraction_div(fraction_into(59), fraction_into(60));
+	int64_t coeff1 = fraction_div(59, 60);
 	int64_t part1 = fraction_mul(coeff1, load_avg);
-	int64_t part2 = fraction_div(fraction_into(ready_threads), fraction_into(60));
+	int64_t part2 = fraction_div(ready_threads, 60);
 	
 	load_avg = fraction_add(part1, part2);
 
