@@ -117,6 +117,7 @@ thread_init (void)
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
+	ready_threads++;
 }
 
 /* Starts preemptive thread scheduling by enabling interrupts.
@@ -244,7 +245,11 @@ thread_block (void)
   ASSERT (intr_get_level () == INTR_OFF);
 	if(!thread_mlfqs)
 		thread_highest_priority_into_front(thread_current());
+	if(strcmp(thread_current()->name,"idle")!=0)
+//	if(thread_current()!=idle_thread)
+		ready_threads--;
   thread_current ()->status = THREAD_BLOCKED;
+
   schedule ();
 }
 
@@ -274,6 +279,9 @@ thread_unblock (struct thread *t)
 		list_push_back (&mlfqs_ready_list[t->priority], &t->elem);
 	}
 	t->status = THREAD_READY;
+	if(strcmp(t->name,"idle")!=0)
+//	if(t!=idle_thread)
+		ready_threads++;
 
 	if(!thread_mlfqs)
 		if(cur->priority < t->priority && strcmp(cur->name, "idle") != 0 )
@@ -335,6 +343,7 @@ thread_exit (void)
 		thread_highest_priority_into_front(thread_current());
   list_remove (&thread_current()->allelem);
   thread_current ()->status = THREAD_DYING;
+	ready_threads--;
   schedule ();
   NOT_REACHED ();
 }
@@ -812,13 +821,14 @@ update_ready_thread(){
 
 void
 update_load_avg(){
-	update_ready_thread();
-
+//	update_ready_thread();
+//	printf("ready_thread %d\n",ready_threads );
 	int coeff1 = fraction_div(59, 60);
 	int part1 = fraction_mul(coeff1, load_avg);
 	int part2 = fraction_div(ready_threads, 60);
 	
 	load_avg = part1 + part2;
+//	printf("load_avg %d %lld\n",fraction_out(load_avg), load_avg );
 }
 
 
