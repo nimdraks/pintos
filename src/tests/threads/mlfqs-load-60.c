@@ -143,6 +143,7 @@ test_mlfqs_load_60 (void)
 static void
 load_thread (void *aux UNUSED) 
 {
+//	msg("thread %s start", thread_current()->name);
   int64_t sleep_time = 10 * TIMER_FREQ;
   int64_t spin_time = sleep_time + 60 * TIMER_FREQ;
   int64_t exit_time = spin_time + 60 * TIMER_FREQ;
@@ -152,4 +153,6 @@ load_thread (void *aux UNUSED)
   while (timer_elapsed (start_time) < spin_time)
     continue;
   timer_sleep (exit_time - timer_elapsed (start_time));
+//	msg("thread %s end", thread_current()->name);
+
 }

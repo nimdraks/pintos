@@ -170,6 +170,7 @@ void update_all_thread_recent_cpu(void);
 void update_all_thread_priority(void);
 void update_ready_thread(void);
 void thread_update_priority(struct thread* t);
+void thread_only_update_priority(struct thread* t);
 void update_load_avg(void);
 
 int64_t fraction_into(int64_t num);
@@ -179,4 +180,6 @@ int64_t fraction_sub(int64_t num1, int64_t num2);
 int64_t fraction_mul(int64_t num1, int64_t num2);
 int64_t fraction_div(int64_t num, int64_t denom);
 
+bool check_mlfqs_list_empty(void);
+struct thread* return_high_priority_mlfqs_list_entry(void);
 #endif /* threada/thread.h */
