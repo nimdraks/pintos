@@ -35,7 +35,7 @@ static struct list blockS_list;
 static struct list mlfqs_ready_list[64];
 static int64_t load_avg;
 static int ready_threads;
-static int FRACTION = 1 << 14;
+static int FRACTION = 16384;
 
 /* Idle thread. */
 static struct thread *idle_thread;
@@ -271,8 +271,6 @@ thread_unblock (struct thread *t)
 	if(!thread_mlfqs)
 		list_push_back (&ready_list, &t->elem);
 	else{
-		//thread_update_recent_cpu(cur);
-		//thread_only_update_priority(cur);
 		list_push_back (&mlfqs_ready_list[t->priority], &t->elem);
 	}
 	t->status = THREAD_READY;
@@ -745,35 +743,16 @@ thread_update_priority_from_lock_list(struct thread* t){
 		if(t->wait_lock!=NULL){
 			thread_update_priority_from_lock_list(t->wait_lock->holder);
 		}
-
 	}
-
 }
 
 void
-//thread_update_recent_cpu(){
 thread_update_recent_cpu(struct thread* t){
-
-//	load_avg=10;
-//	int64_t recent_cpu = 10;
-//	int64_t nice = 10;
-
-	int64_t coeff1_num = fraction_mul(fraction_into(2), load_avg);
-	int64_t coeff1_denom = fraction_add(fraction_mul(fraction_into(2), load_avg), fraction_into(1));
-	int64_t coeff1 = fraction_div(coeff1_num, coeff1_denom);
-	int64_t part1 = fraction_mul(coeff1, t->recent_cpu);
-//	int64_t part1 = fraction_mul(coeff1, recent_cpu);
-/*
-	printf("coeff1_num : %llu\n", coeff1_num);
-	printf("coeff1_denom : %llu\n", coeff1_denom);
-	printf("coeff1 : %llu\n", coeff1);
-	printf("part1 : %llu\n", part1);
-*/
-	t->recent_cpu = fraction_add(part1, fraction_into(t->nice));
-//	recent_cpu = fraction_add(part1, fraction_into(nice));
-//	printf("%s thread, recent_cpu : %llu\n", t->name, t->recent_cpu);
-
-
+	int coeff1_num = fraction_mul(fraction_into(2), load_avg);
+	int coeff1_denom = fraction_mul(fraction_into(2), load_avg) + fraction_into(1);
+	int coeff1 = fraction_div(coeff1_num, coeff1_denom);
+	int part1 = fraction_mul(coeff1, t->recent_cpu);
+	t->recent_cpu = part1 + fraction_into(t->nice);
 }
 
 
@@ -794,30 +773,15 @@ thread_update_priority(struct thread* t){
 	}
 }
 
-
-void
-thread_only_update_priority(struct thread* t){
-	int new_priority=PRI_MAX - fraction_out(t->recent_cpu/4) - 2 * t->nice;
-	if (new_priority > PRI_MAX)
-		new_priority=PRI_MAX;
-	if (new_priority < PRI_MIN)
-		new_priority=PRI_MIN;
-
-	if(t->priority!=new_priority){
-		t->priority=new_priority;
-	}
-}
-
-
 void
 thread_current_update_recent_cpu(void){
 	struct thread* t = thread_current();
-	t->recent_cpu = fraction_add(t->recent_cpu, fraction_into(1));
+	t->recent_cpu = t->recent_cpu + FRACTION;
 }
 
 
 void
-update_all_thread_recent_cpu(void){
+update_all_thread_recent_cpu_priority(void){
 	struct list_elem* e=list_begin(&all_list);
 	struct thread* t = list_entry(e, struct thread, allelem);
 
@@ -827,43 +791,18 @@ update_all_thread_recent_cpu(void){
 		t = list_entry (e, struct thread, allelem);
 		thread_update_recent_cpu(t);
 		thread_update_priority(t);
-
 	}
 }
-
-void
-update_all_thread_priority(void){
-	int i=0;
-	for (i=0; i<64; i++){
-		struct list* current_list=&mlfqs_ready_list[i];
-		if(!list_empty(current_list)){
-			struct list_elem* e=list_begin(current_list);
-			struct thread* t = list_entry(e, struct thread, elem);
-			for ( ; e != list_end(current_list);
-						)
-			{
-				t = list_entry (e, struct thread, elem);
-				e = list_next(e);
-				if(strcmp(t->name,"idle")!=0 ){
-					//thread_update_recent_cpu(t);
-					thread_update_priority(t);
-				}
-			}
-		}
-	}
-}
-
 
 
 void
 update_ready_thread(){
-	int count=0;
-	int i = 0;
+	int i, count = 0;
 	for (i = 0; i < 64; i++){
 		if(!list_empty(&mlfqs_ready_list[i]))
 			count += list_size(&mlfqs_ready_list[i]); 
 	}
-	if(strcmp(thread_current()->name, "idle") != 0)
+	if(thread_current()!=idle_thread)
 		ready_threads=count+1;
 	else
 		ready_threads=count;
@@ -875,48 +814,34 @@ void
 update_load_avg(){
 	update_ready_thread();
 
-	int64_t coeff1 = fraction_div(59, 60);
-	int64_t part1 = fraction_mul(coeff1, load_avg);
-	int64_t part2 = fraction_div(ready_threads, 60);
+	int coeff1 = fraction_div(59, 60);
+	int part1 = fraction_mul(coeff1, load_avg);
+	int part2 = fraction_div(ready_threads, 60);
 	
-	load_avg = fraction_add(part1, part2);
-
-//	printf("coeff1 : %llu\n", coeff1);
-//	printf("part1 : %llu\n", part1);
-//	printf("part2 : %llu\n", part2);
-//	printf("load_avg : %llu\n", load_avg);
+	load_avg = part1 + part2;
 }
 
 
-int64_t
-fraction_into(int64_t num){
-	return num * (int64_t)FRACTION;
+int
+fraction_into(int num){
+	return num * FRACTION;
 }
 
-int64_t
-fraction_out(int64_t num){
-	return num / (int64_t)FRACTION;
-}
-
-int64_t
-fraction_add(int64_t num1, int64_t num2){
-	return num1 + num2;
-}
-
-int64_t
-fraction_sub(int64_t num1, int64_t num2){
-	return num1 - num2;
-}
-
-int64_t
-fraction_mul(int64_t num1, int64_t num2){
-	return num1 * num2 / (int64_t)FRACTION;
+int
+fraction_out(int num){
+	return num / FRACTION;
 }
 
 
-int64_t
-fraction_div(int64_t num, int64_t denom){
-	return num * (int64_t)FRACTION / denom; 
+int
+fraction_mul(int num1, int num2){
+	return (int64_t)num1 * num2 / FRACTION;
+}
+
+
+int
+fraction_div(int num, int denom){
+	return (int64_t)num * FRACTION / denom; 
 }
 
 

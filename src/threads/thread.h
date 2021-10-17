@@ -166,19 +166,15 @@ void thread_update_recent_cpu(struct thread* t);
 //void thread_update_recent_cpu();
 void thread_update_priority(struct thread* t);
 void thread_current_update_recent_cpu(void);
-void update_all_thread_recent_cpu(void);
-void update_all_thread_priority(void);
+void update_all_thread_recent_cpu_priority(void);
 void update_ready_thread(void);
 void thread_update_priority(struct thread* t);
-void thread_only_update_priority(struct thread* t);
 void update_load_avg(void);
 
-int64_t fraction_into(int64_t num);
-int64_t fraction_out(int64_t num);
-int64_t fraction_add(int64_t num1, int64_t num2);
-int64_t fraction_sub(int64_t num1, int64_t num2);
-int64_t fraction_mul(int64_t num1, int64_t num2);
-int64_t fraction_div(int64_t num, int64_t denom);
+int fraction_into(int num);
+int fraction_out(int num);
+int fraction_mul(int num1, int num2);
+int fraction_div(int num, int denom);
 
 bool check_mlfqs_list_empty(void);
 struct thread* return_high_priority_mlfqs_list_entry(void);
