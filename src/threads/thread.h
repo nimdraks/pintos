@@ -143,6 +143,7 @@ const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
+bool thread_current_high(void);
 
 /* Performs some operation on thread t, given auxiliary data AUX. */
 typedef void thread_action_func (struct thread *t, void *aux);
@@ -166,7 +167,8 @@ void thread_update_recent_cpu(struct thread* t);
 //void thread_update_recent_cpu();
 void thread_update_priority(struct thread* t);
 void thread_current_update_recent_cpu(void);
-void update_all_thread_recent_cpu_priority(int64_t);
+void update_all_thread_priority(void);
+void update_all_thread_recent_cpu_priority(void);
 void update_ready_thread(void);
 void thread_update_priority(struct thread* t);
 void update_load_avg(void);

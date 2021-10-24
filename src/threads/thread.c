@@ -279,11 +279,12 @@ thread_unblock (struct thread *t)
 	if(strcmp(t->name,"idle")!=0)
 		ready_threads++;
 
+	struct thread* cur = thread_current();
 	if(!thread_mlfqs){
-		struct thread* cur = thread_current();
 		if(cur->priority < t->priority && strcmp(cur->name, "idle") != 0 )
 			thread_yield();
 	}
+	
 
   intr_set_level (old_level);
 }
@@ -356,12 +357,12 @@ thread_yield (void)
   ASSERT (!intr_context ());
   old_level = intr_disable ();
 
-	if (!thread_mlfqs)
-		if (!thread_highest_priority_into_front(cur))
+	if (!thread_mlfqs){
+		if (!thread_highest_priority_into_front(cur)){
 			return;
-	else{
-
+		}
 	}
+
 	if(strcmp(cur->name,"idle")!=0){
 		if(!thread_mlfqs)
 	    list_push_back (&ready_list, &cur->elem);
@@ -372,6 +373,20 @@ thread_yield (void)
   schedule ();
   intr_set_level (old_level);
 }
+
+bool
+thread_current_high(void){
+	struct thread* cur = thread_current();
+	int i = 63;
+	for ( i = 63; i > cur->priority; i--){
+		if(!list_empty(&mlfqs_ready_list[i]))
+			return false;
+	}	
+
+	return true;
+}
+
+
 
 /* Invoke function 'func' on all threads, passing along 'aux'.
    This function must be called with interrupts off. */
@@ -410,7 +425,11 @@ thread_get_priority (void)
 void
 thread_set_nice (int nice) 
 {
-	thread_current()->nice = nice;
+	struct thread* cur = thread_current();
+	cur->nice = nice;
+	thread_update_priority(cur);
+	if(thread_current_high())
+		thread_yield();
 }
 
 /* Returns the current thread's nice value. */
@@ -785,8 +804,24 @@ thread_current_update_recent_cpu(void){
 }
 
 
+
 void
-update_all_thread_recent_cpu_priority(int64_t ticks){
+update_all_thread_priority(){
+	struct list_elem* e=list_begin(&all_list);
+	struct thread* t = list_entry(e, struct thread, allelem);
+
+	for ( e = list_begin(&all_list); e != list_end(&all_list);
+				e = list_next(e))
+	{
+		t = list_entry (e, struct thread, allelem);
+		thread_update_priority(t);
+	}
+
+}
+
+
+void
+update_all_thread_recent_cpu_priority(){
 	struct list_elem* e=list_begin(&all_list);
 	struct thread* t = list_entry(e, struct thread, allelem);
 
@@ -796,15 +831,10 @@ update_all_thread_recent_cpu_priority(int64_t ticks){
 		t = list_entry (e, struct thread, allelem);
 		thread_update_recent_cpu(t);
 		thread_update_priority(t);
-
-		if(t->status == THREAD_BLOCKED){
-			if (t->sleepTime!=0 && t->sleepTime <= ticks){
-				t->sleepTime=0;
-				thread_unblock(t);
-				list_remove(&t->elemS);
-			}
-		}
 	}
+
+
+
 }
 
 
