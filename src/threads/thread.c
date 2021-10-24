@@ -280,16 +280,22 @@ thread_unblock (struct thread *t)
 		ready_threads++;
 
 	struct thread* cur = thread_current();
-	if(!thread_mlfqs){
-		if(cur->priority < t->priority && strcmp(cur->name, "idle") != 0 )
-			thread_yield();
-	}else{
 
-		if(!intr_context () && !thread_current_high()){
-			thread_yield();
-		}
-	
-	}	
+	if(strcmp(cur->name, "idle") != 0 ){
+		if(!thread_mlfqs){
+			if(cur->priority < t->priority){
+  			if(!intr_context()) 
+					thread_yield();
+				else
+					intr_yield_on_priority();
+			}
+		}else{
+ 			if(!intr_context()) 
+				thread_yield();
+			else
+				intr_yield_on_priority();
+		}	
+	}
 
   intr_set_level (old_level);
 }
@@ -687,12 +693,11 @@ void
 thread_check_awake(int64_t tick){
 	if(list_empty(&blockS_list))
 		return;
+
 	struct list_elem* e = list_begin(&blockS_list) ;
-	for ( ; e != list_end(&blockS_list);
-				)
+	for (; e != list_end(&blockS_list) ; e = list_next(e))
 	{
 		struct thread* t = list_entry (e, struct thread, elemS);
-		e = list_next(e);
 		if (t->sleepTime <= tick){
 			thread_unblock(t);
 			list_remove(&t->elemS);
@@ -824,7 +829,7 @@ update_all_thread_priority(){
 
 
 void
-update_all_thread_recent_cpu_priority(){
+update_all_thread_recent_cpu(){
 	struct list_elem* e=list_begin(&all_list);
 	struct thread* t = list_entry(e, struct thread, allelem);
 
@@ -833,7 +838,6 @@ update_all_thread_recent_cpu_priority(){
 	{
 		t = list_entry (e, struct thread, allelem);
 		thread_update_recent_cpu(t);
-		thread_update_priority(t);
 	}
 
 

@@ -395,7 +395,6 @@ intr_handler (struct intr_frame *frame)
 
       if (yield_on_return || yield_on_priority) 
         thread_yield ();
-
     }
 }
 
