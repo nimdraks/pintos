@@ -283,8 +283,13 @@ thread_unblock (struct thread *t)
 	if(!thread_mlfqs){
 		if(cur->priority < t->priority && strcmp(cur->name, "idle") != 0 )
 			thread_yield();
-	}
+	}else{
+
+		if(!intr_context () && !thread_current_high()){
+			thread_yield();
+		}
 	
+	}	
 
   intr_set_level (old_level);
 }
