@@ -118,8 +118,14 @@ test_mlfqs_recent_1 (void)
     {
       msg ("Sleeping 10 seconds to allow recent_cpu to decay, please wait...");
       start_time = timer_ticks ();
+//			msg ("curT recent cpu%d", thread_get_recent_cpu() );
+//			msg ("starttime%lld", start_time);
       timer_sleep (DIV_ROUND_UP (start_time, TIMER_FREQ) - start_time
                    + 10 * TIMER_FREQ);
+//			msg ("sleep tick : %lld", DIV_ROUND_UP (start_time, TIMER_FREQ) - start_time + 10 * TIMER_FREQ);
+//			msg ("curT recent cpu%d", thread_get_recent_cpu() );
+//			msg ("curT nice%lld", thread_current()->nice );
+
     }
   while (thread_get_recent_cpu () > 700);
 

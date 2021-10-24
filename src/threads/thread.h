@@ -24,6 +24,9 @@ typedef int tid_t;
 #define PRI_DEFAULT 31                  /* Default priority. */
 #define PRI_MAX 63                      /* Highest priority. */
 
+#define BEFORE_DECIMAL 17
+#define AFTER_DECIMAL 14
+
 /* A kernel thread or user process.
 
    Each thread structure is stored in its own 4 kB page.  The
@@ -103,6 +106,11 @@ struct thread
 		struct lock* wait_lock;
 		int original_priority;
 
+		/* mlfqs */
+		int mlfqs_priority;
+		int nice;
+		int64_t recent_cpu;
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -135,6 +143,7 @@ const char *thread_name (void);
 
 void thread_exit (void) NO_RETURN;
 void thread_yield (void);
+bool thread_current_high(void);
 
 /* Performs some operation on thread t, given auxiliary data AUX. */
 typedef void thread_action_func (struct thread *t, void *aux);
@@ -154,4 +163,21 @@ bool thread_highest_priority_into_front(struct thread* cur);
 
 void thread_update_priority_from_lock_list(struct thread* t);
 
+void thread_update_recent_cpu(struct thread* t);
+//void thread_update_recent_cpu();
+void thread_update_priority(struct thread* t);
+void thread_current_update_recent_cpu(void);
+void update_all_thread_priority(void);
+void update_all_thread_recent_cpu_priority(void);
+void update_ready_thread(void);
+void thread_update_priority(struct thread* t);
+void update_load_avg(void);
+
+int fraction_into(int num);
+int fraction_out(int num);
+int fraction_mul(int num1, int num2);
+int fraction_div(int num, int denom);
+
+bool check_mlfqs_list_empty(void);
+struct thread* return_high_priority_mlfqs_list_entry(void);
 #endif /* threada/thread.h */

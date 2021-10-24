@@ -130,6 +130,9 @@ main (void)
   
   /* Run actions specified on kernel command line. */
   run_actions (argv);
+	
+//	update_load_avg();
+//	thread_update_recent_cpu();
 
   /* Finish up. */
   shutdown ();
@@ -426,3 +429,5 @@ locate_block_device (enum block_type role, const char *name)
     }
 }
 #endif
+
+
