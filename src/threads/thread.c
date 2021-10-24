@@ -759,7 +759,7 @@ thread_update_priority_from_lock_list(struct thread* t){
 				e = list_next(e))
 	{
 		struct lock* l = list_entry (e, struct lock, elem);
-		if(l == NULL || list_empty(&l->semaphore.waiters)){
+		if(list_empty(&l->semaphore.waiters)){
 			continue;			
 		}
 		struct list_elem* le=list_begin(&l->semaphore.waiters);
@@ -839,9 +839,6 @@ update_all_thread_recent_cpu(){
 		t = list_entry (e, struct thread, allelem);
 		thread_update_recent_cpu(t);
 	}
-
-
-
 }
 
 
