@@ -280,16 +280,22 @@ thread_unblock (struct thread *t)
 		ready_threads++;
 
 	struct thread* cur = thread_current();
-	if(!thread_mlfqs){
-		if(cur->priority < t->priority && strcmp(cur->name, "idle") != 0 )
-			thread_yield();
-	}else{
 
-		if(!intr_context () && !thread_current_high()){
-			thread_yield();
-		}
-	
-	}	
+	if(strcmp(cur->name, "idle") != 0 ){
+		if(!thread_mlfqs){
+			if(cur->priority < t->priority){
+  			if(!intr_context()) 
+					thread_yield();
+				else
+					intr_yield_on_priority();
+			}
+		}else{
+ 			if(!intr_context()) 
+				thread_yield();
+			else
+				intr_yield_on_priority();
+		}	
+	}
 
   intr_set_level (old_level);
 }
@@ -687,12 +693,11 @@ void
 thread_check_awake(int64_t tick){
 	if(list_empty(&blockS_list))
 		return;
+
 	struct list_elem* e = list_begin(&blockS_list) ;
-	for ( ; e != list_end(&blockS_list);
-				)
+	for (; e != list_end(&blockS_list) ; e = list_next(e))
 	{
 		struct thread* t = list_entry (e, struct thread, elemS);
-		e = list_next(e);
 		if (t->sleepTime <= tick){
 			thread_unblock(t);
 			list_remove(&t->elemS);
@@ -754,7 +759,7 @@ thread_update_priority_from_lock_list(struct thread* t){
 				e = list_next(e))
 	{
 		struct lock* l = list_entry (e, struct lock, elem);
-		if(l == NULL || list_empty(&l->semaphore.waiters)){
+		if(list_empty(&l->semaphore.waiters)){
 			continue;			
 		}
 		struct list_elem* le=list_begin(&l->semaphore.waiters);
@@ -809,7 +814,6 @@ thread_current_update_recent_cpu(void){
 }
 
 
-
 void
 update_all_thread_priority(){
 	struct list_elem* e=list_begin(&all_list);
@@ -821,12 +825,11 @@ update_all_thread_priority(){
 		t = list_entry (e, struct thread, allelem);
 		thread_update_priority(t);
 	}
-
 }
 
 
 void
-update_all_thread_recent_cpu_priority(){
+update_all_thread_recent_cpu(){
 	struct list_elem* e=list_begin(&all_list);
 	struct thread* t = list_entry(e, struct thread, allelem);
 
@@ -835,39 +838,16 @@ update_all_thread_recent_cpu_priority(){
 	{
 		t = list_entry (e, struct thread, allelem);
 		thread_update_recent_cpu(t);
-		thread_update_priority(t);
 	}
-
-
-
 }
-
-
-void
-update_ready_thread(){
-	int i, count = 0;
-	for (i = 0; i < 64; i++){
-		if(!list_empty(&mlfqs_ready_list[i]))
-			count += list_size(&mlfqs_ready_list[i]); 
-	}
-	if(thread_current()!=idle_thread)
-		ready_threads=count+1;
-	else
-		ready_threads=count;
-}
-
 
 
 void
 update_load_avg(){
-//	update_ready_thread();
-//	printf("ready_thread %d\n",ready_threads );
 	int coeff1 = fraction_div(59, 60);
 	int part1 = fraction_mul(coeff1, load_avg);
 	int part2 = fraction_div(ready_threads, 60);
-	
 	load_avg = part1 + part2;
-//	printf("load_avg %d %lld\n",fraction_out(load_avg), load_avg );
 }
 
 
