@@ -108,7 +108,7 @@ struct thread
 
 		/* mlfqs */
 		int mlfqs_priority;
-		int64_t nice;
+		int nice;
 		int64_t recent_cpu;
 
 #ifdef USERPROG

@@ -246,7 +246,6 @@ thread_block (void)
 	if(!thread_mlfqs)
 		thread_highest_priority_into_front(thread_current());
 	if(strcmp(thread_current()->name,"idle")!=0)
-//	if(thread_current()!=idle_thread)
 		ready_threads--;
   thread_current ()->status = THREAD_BLOCKED;
 
@@ -270,7 +269,6 @@ thread_unblock (struct thread *t)
   old_level = intr_disable ();
 	struct thread* cur = thread_current();
 
-
   ASSERT (t->status == THREAD_BLOCKED);
 
 	if(!thread_mlfqs)
@@ -287,7 +285,6 @@ thread_unblock (struct thread *t)
 			thread_yield();
 
   intr_set_level (old_level);
-
 }
 
 /* Returns the name of the running thread. */
@@ -410,21 +407,21 @@ thread_get_priority (void)
 void
 thread_set_nice (int nice) 
 {
-	thread_current()->nice = (int64_t)nice;
+	thread_current()->nice = nice;
 }
 
 /* Returns the current thread's nice value. */
 int
 thread_get_nice (void) 
 {
-  return (int)thread_current()->nice;
+  return thread_current()->nice;
 }
 
 /* Returns 100 times the system load average. */
 int
 thread_get_load_avg (void) 
 {
-  return (int)fraction_out(100*load_avg);
+  return fraction_out(100*load_avg);
 }
 
 /* Returns 100 times the current thread's recent_cpu value. */
@@ -682,7 +679,6 @@ thread_highest_priority_into_front(struct thread* cur){
 	if (list_empty(&ready_list)){
 		return false;
 	}
-
 
 	struct list_elem* highest_e=list_begin(&ready_list);
 	struct list_elem* e=highest_e;
