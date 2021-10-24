@@ -265,24 +265,25 @@ thread_unblock (struct thread *t)
 {
   enum intr_level old_level;
   ASSERT (is_thread (t));
-
-  old_level = intr_disable ();
-	struct thread* cur = thread_current();
-
   ASSERT (t->status == THREAD_BLOCKED);
 
+  old_level = intr_disable ();
+
+	t->status = THREAD_READY;
 	if(!thread_mlfqs)
 		list_push_back (&ready_list, &t->elem);
 	else{
 		list_push_back (&mlfqs_ready_list[t->priority], &t->elem);
 	}
-	t->status = THREAD_READY;
+
 	if(strcmp(t->name,"idle")!=0)
 		ready_threads++;
 
-	if(!thread_mlfqs)
+	if(!thread_mlfqs){
+		struct thread* cur = thread_current();
 		if(cur->priority < t->priority && strcmp(cur->name, "idle") != 0 )
 			thread_yield();
+	}
 
   intr_set_level (old_level);
 }
@@ -358,8 +359,10 @@ thread_yield (void)
 	if (!thread_mlfqs)
 		if (!thread_highest_priority_into_front(cur))
 			return;
+	else{
 
- if (cur != idle_thread){ 
+	}
+	if(strcmp(cur->name,"idle")!=0){
 		if(!thread_mlfqs)
 	    list_push_back (&ready_list, &cur->elem);
 		else
