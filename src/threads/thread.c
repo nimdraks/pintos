@@ -809,7 +809,6 @@ thread_current_update_recent_cpu(void){
 }
 
 
-
 void
 update_all_thread_priority(){
 	struct list_elem* e=list_begin(&all_list);
@@ -821,7 +820,6 @@ update_all_thread_priority(){
 		t = list_entry (e, struct thread, allelem);
 		thread_update_priority(t);
 	}
-
 }
 
 
@@ -844,30 +842,11 @@ update_all_thread_recent_cpu_priority(){
 
 
 void
-update_ready_thread(){
-	int i, count = 0;
-	for (i = 0; i < 64; i++){
-		if(!list_empty(&mlfqs_ready_list[i]))
-			count += list_size(&mlfqs_ready_list[i]); 
-	}
-	if(thread_current()!=idle_thread)
-		ready_threads=count+1;
-	else
-		ready_threads=count;
-}
-
-
-
-void
 update_load_avg(){
-//	update_ready_thread();
-//	printf("ready_thread %d\n",ready_threads );
 	int coeff1 = fraction_div(59, 60);
 	int part1 = fraction_mul(coeff1, load_avg);
 	int part2 = fraction_div(ready_threads, 60);
-	
 	load_avg = part1 + part2;
-//	printf("load_avg %d %lld\n",fraction_out(load_avg), load_avg );
 }
 
 
