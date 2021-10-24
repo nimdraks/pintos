@@ -166,7 +166,7 @@ void thread_update_recent_cpu(struct thread* t);
 //void thread_update_recent_cpu();
 void thread_update_priority(struct thread* t);
 void thread_current_update_recent_cpu(void);
-void update_all_thread_recent_cpu_priority(void);
+void update_all_thread_recent_cpu_priority(int64_t);
 void update_ready_thread(void);
 void thread_update_priority(struct thread* t);
 void update_load_avg(void);

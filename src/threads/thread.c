@@ -280,7 +280,6 @@ thread_unblock (struct thread *t)
 	}
 	t->status = THREAD_READY;
 	if(strcmp(t->name,"idle")!=0)
-//	if(t!=idle_thread)
 		ready_threads++;
 
 	if(!thread_mlfqs)
@@ -524,6 +523,7 @@ init_thread (struct thread *t, const char *name, int priority)
   t->stack = (uint8_t *) t + PGSIZE;
   t->priority = t->original_priority = priority;
 	t->nice = 0;
+	t->sleepTime = 0;
 	list_init(&t->lock_own_list);
 	t->wait_lock = (struct lock*) NULL;
   t->magic = THREAD_MAGIC;
@@ -557,9 +557,6 @@ next_thread_to_run (void)
   	else
     	return list_entry (list_pop_front (&ready_list), struct thread, elem);
 	}
-
-	if (check_mlfqs_list_empty())
-		return idle_thread;
 
 	return return_high_priority_mlfqs_list_entry();	
 }
@@ -790,7 +787,7 @@ thread_current_update_recent_cpu(void){
 
 
 void
-update_all_thread_recent_cpu_priority(void){
+update_all_thread_recent_cpu_priority(int64_t ticks){
 	struct list_elem* e=list_begin(&all_list);
 	struct thread* t = list_entry(e, struct thread, allelem);
 
@@ -800,6 +797,14 @@ update_all_thread_recent_cpu_priority(void){
 		t = list_entry (e, struct thread, allelem);
 		thread_update_recent_cpu(t);
 		thread_update_priority(t);
+
+		if(t->status == THREAD_BLOCKED){
+			if (t->sleepTime!=0 && t->sleepTime <= ticks){
+				t->sleepTime=0;
+				thread_unblock(t);
+				list_remove(&t->elemS);
+			}
+		}
 	}
 }
 
@@ -873,6 +878,9 @@ return_high_priority_mlfqs_list_entry(void){
 		if(!list_empty(&mlfqs_ready_list[i]))
 			break;
 	}
+
+	if(i<0)
+		return idle_thread;
 
 	return list_entry (list_pop_front (&mlfqs_ready_list[i]), struct thread, elem);
 }
