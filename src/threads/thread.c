@@ -203,6 +203,7 @@ thread_create (const char *name, int priority,
   /* Initialize thread. */
   init_thread (t, name, priority);
   tid = t->tid = allocate_tid ();
+	t->p_tid = thread_current()->tid;
 
   /* Prepare thread for first run by initializing its stack.
      Do this atomically so intermediate values for the 'stack' 
@@ -231,6 +232,8 @@ thread_create (const char *name, int priority,
 
   return tid;
 }
+
+
 
 /* Puts the current thread to sleep.  It will not be scheduled
    again until awoken by thread_unblock().
@@ -345,8 +348,12 @@ thread_exit (void)
 	if(!thread_mlfqs)	
 		thread_highest_priority_into_front(thread_current());
   list_remove (&thread_current()->allelem);
+
   thread_current ()->status = THREAD_DYING;
 	ready_threads--;
+
+
+
   schedule ();
   NOT_REACHED ();
 }
@@ -918,6 +925,27 @@ return_high_priority_mlfqs_list_entry(void){
 
 	return list_entry (list_pop_front (&mlfqs_ready_list[i]), struct thread, elem);
 }
+
+
+
+struct thread *
+tid_thread (tid_t tid) 
+{
+	struct list_elem* e=list_begin(&all_list);
+	struct thread* t = list_entry(e, struct thread, allelem);
+
+	for ( e = list_begin(&all_list); e != list_end(&all_list);
+				e = list_next(e))
+	{
+		t = list_entry (e, struct thread, allelem);
+		if (t->tid == tid)
+			return t;
+	}
+
+  
+ 	return NULL;
+}
+
 
 
 

@@ -111,6 +111,8 @@ struct thread
 		int nice;
 		int64_t recent_cpu;
 
+		tid_t p_tid;
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
@@ -180,4 +182,11 @@ int fraction_div(int num, int denom);
 
 bool check_mlfqs_list_empty(void);
 struct thread* return_high_priority_mlfqs_list_entry(void);
+
+struct thread* tid_thread(tid_t tid);
+
+
+
+
+
 #endif /* threada/thread.h */

@@ -86,8 +86,17 @@ start_process (void *file_name_)
    This function will be implemented in problem 2-2.  For now, it
    does nothing. */
 int
-process_wait (tid_t child_tid UNUSED) 
+process_wait (tid_t child_tid) 
 {
+//	struct thread* child_thread = tid_thread(child_tid);
+//	while (tid_thread(child_tid)!=NULL){
+//		;
+//	}
+
+
+	intr_disable();
+	thread_block();
+
   return -1;
 }
 
