@@ -93,11 +93,12 @@ process_wait (tid_t child_tid)
 //		;
 //	}
 
+	timer_msleep(1);
 
-	intr_disable();
-	thread_block();
+//	intr_disable();
+//	thread_block();
 
-  return -1;
+  return 0;
 }
 
 /* Free the current process's resources. */
@@ -445,8 +446,10 @@ setup_stack (void **esp)
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
-      if (success)
-        *esp = PHYS_BASE;
+      if (success){
+//  			strlcpy (kpage, "abc", 4);
+        *esp = PHYS_BASE-12;
+			}
       else
         palloc_free_page (kpage);
     }
