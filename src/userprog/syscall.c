@@ -25,6 +25,7 @@ syscall_handler (struct intr_frame *f)
 			printf("%s", (char*)*(espP+2));
 			break;
 		case SYS_EXIT:
+			printf("%s: exit(%d)\n",thread_current()->name, *(espP+1));
 			thread_exit();
 			break; 
 		default:
