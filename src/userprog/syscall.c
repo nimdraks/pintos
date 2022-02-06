@@ -18,13 +18,15 @@ syscall_init (void)
 static void
 syscall_handler (struct intr_frame *f) 
 {
-	struct thread* t=thread_current();
 	int* espP=f->esp;
   int syscallNum = *espP;
 	switch(syscallNum){
 		case SYS_WRITE:
-				printf("%s", (char*)*(espP+2));
+			printf("%s", (char*)*(espP+2));
 			break;
+		case SYS_EXIT:
+			thread_exit();
+			break; 
 		default:
 			break;
 	}
@@ -34,7 +36,7 @@ syscall_handler (struct intr_frame *f)
 
 //  halt();
 //  syscall1(2, "args-none");
-//	printf("%c", esp);
+
 //	printf("%c", esp++);
 //  printf ("system call!\n");
 //  thread_exit ();
