@@ -352,8 +352,6 @@ thread_exit (void)
   thread_current ()->status = THREAD_DYING;
 	ready_threads--;
 
-
-
   schedule ();
   NOT_REACHED ();
 }
@@ -931,6 +929,8 @@ return_high_priority_mlfqs_list_entry(void){
 struct thread *
 tid_thread (tid_t tid) 
 {
+
+  enum intr_level old_level = intr_disable ();
 	struct list_elem* e=list_begin(&all_list);
 	struct thread* t = list_entry(e, struct thread, allelem);
 
@@ -941,13 +941,9 @@ tid_thread (tid_t tid)
 		if (t->tid == tid)
 			return t;
 	}
-
+  intr_set_level (old_level);
   
  	return NULL;
 }
-
-
-
-
 
 
