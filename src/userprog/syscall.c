@@ -1,21 +1,46 @@
 #include "userprog/syscall.h"
 #include "userprog/pagedir.h"
+#include "filesys/filesys.h"
 #include <stdio.h>
 #include <syscall-nr.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "lib/user/syscall.h"
-
-
+#include "lib/string.h"
 
 static void syscall_handler (struct intr_frame *);
+
 
 void
 syscall_init (void) 
 {
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
 }
+
+
+bool
+check_ptr_validity(struct thread* t, void* ptr){
+	if (!is_user_vaddr(ptr) || pagedir_get_page(t->pagedir, ptr) == NULL ){
+			return true;
+	}
+	return false;
+}
+
+void
+exit_unexpectedly(struct thread* t){
+			printf("%s: exit(%d)\n",t->name, -1);
+			thread_unblock(tid_thread(t->p_tid));
+			thread_exit();
+}
+
+void
+exit_expectedly(struct thread* t){
+			thread_unblock(tid_thread(t->p_tid));
+			thread_exit();
+}
+
+
 
 static void
 syscall_handler (struct intr_frame *f) 
@@ -24,13 +49,10 @@ syscall_handler (struct intr_frame *f)
 	char* fileName=NULL;
 	int fileInitSize=0;
 	struct thread* t = thread_current();
-	if (!is_user_vaddr(f->esp) || pagedir_get_page(t->pagedir, f->esp) == NULL ){
-			printf("%s: exit(%d)\n",thread_current()->name, -1);
-			thread_unblock(tid_thread(thread_current()->p_tid));
-			thread_exit();
-			return;
+	if (check_ptr_validity(t, f->esp)){
+		exit_unexpectedly(t);
+		return;
 	}
-
   int syscallNum = *espP;
 	switch(syscallNum){
 		case SYS_WRITE:
@@ -42,29 +64,30 @@ syscall_handler (struct intr_frame *f)
 				printf("%s: exit(%d)\n",thread_current()->name,-1);
 			else
 				printf("%s: exit(%d)\n",thread_current()->name, *(espP+1));
-			thread_unblock(tid_thread(thread_current()->p_tid));
-			thread_exit();
+			exit_expectedly(t);
 			break;
 
 		case SYS_CREATE:
 			fileName = (char*)*(espP+1);
 			fileInitSize = *(espP+2);
+			if(check_ptr_validity(t, (void*)fileName) || fileName==NULL ){
+				exit_unexpectedly(t);
+				return;
+			}
+
+			if (strlen(fileName) > 500){
+				f->eax=0;
+			}
+			else
+				f->eax=filesys_create(fileName, fileInitSize);
+			break;
+
+		case SYS_OPEN:
 			break; 
 
 		default:
 			break;
 	}
-
-
-
-
-//  halt();
-//  syscall1(2, "args-none");
-
-//	printf("%c", esp++);
-//  printf ("system call!\n");
-//  thread_exit ();
-	return;
 }
 
 
