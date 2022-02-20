@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "threads/malloc.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -554,6 +555,7 @@ init_thread (struct thread *t, const char *name, int priority)
 	t->nice = 0;
 	t->sleepTime = 0;
 	list_init(&t->lock_own_list);
+	list_init(&t->fdList);
 	t->wait_lock = (struct lock*) NULL;
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
@@ -947,3 +949,71 @@ tid_thread (tid_t tid)
 }
 
 
+int
+thread_make_fd (struct file* file) 
+{
+	struct thread* t = thread_current();
+	int defaultfd = 2;
+	struct list_elem* e=list_begin(&(t->fdList));
+	struct fileDesc* fdStruct;
+
+	for ( e = list_begin(&(t->fdList)); e != list_end(&(t->fdList));
+				e = list_next(e))
+	{
+		fdStruct = list_entry (e, struct fileDesc, elem);
+		if (fdStruct->fd != defaultfd){
+			break;	
+		}else
+			defaultfd++;
+	}
+ 
+	fdStruct = malloc(sizeof(fdStruct));
+	if (fdStruct == NULL){
+		return -1;
+	}
+	fdStruct->fd = defaultfd;
+	fdStruct->file = file;
+
+	list_push_back(&(t->fdList),&(fdStruct->elem));
+ 
+ 	return fdStruct->fd;
+}
+
+struct file*
+thread_open_fd (int fd){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->fdList));
+	struct fileDesc* fdStruct;
+
+	for ( e = list_begin(&(t->fdList)); e != list_end(&(t->fdList));
+				e = list_next(e))
+	{
+		fdStruct = list_entry (e, struct fileDesc, elem);
+		if (fdStruct->fd == fd){
+			return fdStruct->file;
+		}
+	}
+
+	return NULL;
+}
+
+
+bool
+thread_close_fd (int fd){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->fdList));
+	struct fileDesc* fdStruct;
+
+	for ( e = list_begin(&(t->fdList)); e != list_end(&(t->fdList));
+				e = list_next(e))
+	{
+		fdStruct = list_entry (e, struct fileDesc, elem);
+		if (fdStruct->fd == fd){
+			list_remove(e);
+			free(fdStruct);
+			return true;	
+		}
+	}
+
+	return false;
+}

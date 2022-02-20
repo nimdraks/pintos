@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "filesys/file.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -106,6 +107,9 @@ struct thread
 		struct lock* wait_lock;
 		int original_priority;
 
+		/* for file descriptor */
+		struct list fdList;
+
 		/* mlfqs */
 		int mlfqs_priority;
 		int nice;
@@ -185,8 +189,9 @@ struct thread* return_high_priority_mlfqs_list_entry(void);
 
 struct thread* tid_thread(tid_t tid);
 
-
-
+int thread_make_fd(struct file* file);
+struct file* thread_open_fd (int fd);
+bool thread_close_fd (int fd);
 
 
 #endif /* threada/thread.h */

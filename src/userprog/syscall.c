@@ -1,6 +1,7 @@
 #include "userprog/syscall.h"
 #include "userprog/pagedir.h"
 #include "filesys/filesys.h"
+#include "filesys/file.h"
 #include <stdio.h>
 #include <syscall-nr.h>
 #include "threads/interrupt.h"
@@ -20,7 +21,7 @@ syscall_init (void)
 
 
 bool
-check_ptr_validity(struct thread* t, void* ptr){
+check_ptr_invalidity(struct thread* t, void* ptr){
 	if (!is_user_vaddr(ptr) || pagedir_get_page(t->pagedir, ptr) == NULL ){
 			return true;
 	}
@@ -49,11 +50,14 @@ syscall_handler (struct intr_frame *f)
 	char* fileName=NULL;
 	int fileInitSize=0;
 	struct thread* t = thread_current();
-	if (check_ptr_validity(t, f->esp)){
+	if (check_ptr_invalidity(t, f->esp)){
 		exit_unexpectedly(t);
 		return;
 	}
   int syscallNum = *espP;
+	struct file* file=NULL;	
+	int fd=0;
+
 	switch(syscallNum){
 		case SYS_WRITE:
 			printf("%s", (char*)*(espP+2));
@@ -70,7 +74,7 @@ syscall_handler (struct intr_frame *f)
 		case SYS_CREATE:
 			fileName = (char*)*(espP+1);
 			fileInitSize = *(espP+2);
-			if(check_ptr_validity(t, (void*)fileName) || fileName==NULL ){
+			if(check_ptr_invalidity(t, (void*)fileName) || fileName==NULL ){
 				exit_unexpectedly(t);
 				return;
 			}
@@ -83,7 +87,27 @@ syscall_handler (struct intr_frame *f)
 			break;
 
 		case SYS_OPEN:
+			fileName = (char*)*(espP+1);
+			if(check_ptr_invalidity(t, (void*)fileName) || fileName==NULL ){
+				exit_unexpectedly(t);
+				return;
+			}
+			if(strcmp(fileName, "")==0){
+				f->eax=-1;
+				break;
+			}
+			file = filesys_open(fileName);
+			if (file == NULL){
+				f->eax=-1;
+				break;
+			}	
+			fd = thread_make_fd(file);
+			f->eax=fd;
 			break; 
+
+		case SYS_CLOSE:
+			fd = *(int*)*(espP+1);
+
 
 		default:
 			break;
