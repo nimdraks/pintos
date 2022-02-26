@@ -9,6 +9,7 @@
 #include "threads/vaddr.h"
 #include "lib/user/syscall.h"
 #include "lib/string.h"
+#include "devices/input.h"
 
 static void syscall_handler (struct intr_frame *);
 
@@ -57,11 +58,11 @@ syscall_handler (struct intr_frame *f)
   int syscallNum = *espP;
 	struct file* file=NULL;	
 	int fd=0;
+	char* fileBuffer=NULL;
+	int fileSize=0;
+
 
 	switch(syscallNum){
-		case SYS_WRITE:
-			printf("%s", (char*)*(espP+2));
-			break;
 
 		case SYS_EXIT:
       if (!is_user_vaddr(espP+1))
@@ -106,8 +107,67 @@ syscall_handler (struct intr_frame *f)
 			break; 
 
 		case SYS_CLOSE:
-			fd = *(int*)*(espP+1);
+			fd = *(espP+1);
+			thread_close_fd(fd);
+			break;
 
+		case SYS_READ:
+			fd = *(espP+1);
+			fileBuffer = (char*)*(espP+2);
+			fileSize = *(espP+3);
+
+			if(check_ptr_invalidity(t,fileBuffer)){
+				exit_unexpectedly(t);
+				return;
+			}
+
+			if (fd == 1){
+				break;
+			}
+
+			file = thread_open_fd(fd);
+			if (file==NULL){
+				exit_unexpectedly(t);
+				return;
+			}
+
+			f->eax = file_read(file, (void*)fileBuffer, fileSize);	
+
+		  break;	
+
+		case SYS_FILESIZE:
+			fd = *(espP+1);
+			file = thread_open_fd(fd);
+			f->eax = file_length(file);	
+			break;
+
+		case SYS_WRITE:
+			fd = *(espP+1);
+			if (fd == 1){
+				printf("%s", (char*)*(espP+2));
+				break;
+			}
+
+			fileBuffer = (char*)*(espP+2);
+			fileSize = *(espP+3);
+
+			if(check_ptr_invalidity(t,fileBuffer)){
+				exit_unexpectedly(t);
+				return;
+			}
+
+			if (fd == 0){
+				break;
+			}
+
+			file = thread_open_fd(fd);
+			if (file==NULL){
+				exit_unexpectedly(t);
+				return;
+			}
+
+			f->eax = file_write(file, fileBuffer, fileSize);
+			break;
 
 		default:
 			break;

@@ -341,7 +341,7 @@ thread_exit (void)
 #ifdef USERPROG
   process_exit ();
 #endif
-
+	thread_close_all_fd();
   /* Remove thread from all threads list, set our status to dying,
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
@@ -1017,3 +1017,18 @@ thread_close_fd (int fd){
 
 	return false;
 }
+
+
+void
+thread_close_all_fd (void){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->fdList));
+	struct fileDesc* fdStruct;
+
+	while(!list_empty(&(t->fdList))){
+      e = list_pop_front ( &(t->fdList) );
+			fdStruct = list_entry (e, struct fileDesc, elem);
+			free(fdStruct);
+	}
+}
+

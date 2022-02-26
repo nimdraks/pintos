@@ -192,6 +192,6 @@ struct thread* tid_thread(tid_t tid);
 int thread_make_fd(struct file* file);
 struct file* thread_open_fd (int fd);
 bool thread_close_fd (int fd);
-
+void thread_close_all_fd (void);
 
 #endif /* threada/thread.h */
