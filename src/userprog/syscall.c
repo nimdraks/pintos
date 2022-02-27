@@ -35,13 +35,17 @@ check_ptr_invalidity(struct thread* t, void* ptr){
 void
 exit_unexpectedly(struct thread* t){
 			printf("%s: exit(%d)\n",t->name, -1);
+			struct thread* pThread = tid_thread(t->p_tid);
+			pThread->c_ret=-1;
 			thread_unblock(tid_thread(t->p_tid));
 			thread_exit();
 }
 
 void
-exit_expectedly(struct thread* t){
-			thread_unblock(tid_thread(t->p_tid));
+exit_expectedly(struct thread* t, int cRet){
+			struct thread* pThread = tid_thread(t->p_tid);
+			pThread->c_ret=cRet;
+			thread_unblock(pThread);
 			thread_exit();
 }
 
@@ -72,7 +76,7 @@ syscall_handler (struct intr_frame *f)
 
 	switch(syscallNum){
 		case SYS_HALT:
-			exit_expectedly(t);
+			exit_expectedly(t, 0);
 			break;
 
 		case SYS_EXIT:
@@ -80,7 +84,8 @@ syscall_handler (struct intr_frame *f)
 				printf("%s: exit(%d)\n",thread_current()->name,-1);
 			else
 				printf("%s: exit(%d)\n",thread_current()->name, *(espP+1));
-			exit_expectedly(t);
+			
+			exit_expectedly(t, *(espP+1));
 			break;
 
 		case SYS_CREATE:
@@ -194,9 +199,15 @@ syscall_handler (struct intr_frame *f)
 			f->eax=execPid;
 			break;
 
+		case SYS_WAIT:
+			waitPid = *(espP+1);
+			f->eax=process_wait(waitPid);
+			break;
+
 		default:
 			waitPid = *(espP+1);
-			process_wait(waitPid);
+			f->eax=process_wait(waitPid);
+
 			break;
 	}
 }

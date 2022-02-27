@@ -98,11 +98,16 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid) 
 {
+	struct thread* thread = tid_thread(child_tid);
+	if (thread==NULL){
+		return -1;
+	}
+
 	enum intr_level old_level = intr_disable();
 	thread_block();
 	intr_set_level(old_level);
 
-  return 0;
+  return thread_current()->c_ret;
 }
 
 /* Free the current process's resources. */

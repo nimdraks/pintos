@@ -116,6 +116,7 @@ struct thread
 		int64_t recent_cpu;
 
 		tid_t p_tid;
+		int c_ret;
 
 #ifdef USERPROG
     /* Owned by userprog/process.c. */

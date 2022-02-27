@@ -973,7 +973,6 @@ thread_make_fd (struct file* file)
 	}
 	fdStruct->fd = defaultfd;
 	fdStruct->file = file;
-
 	list_push_back(&(t->fdList),&(fdStruct->elem));
  
  	return fdStruct->fd;
