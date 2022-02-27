@@ -1,12 +1,15 @@
 #include "userprog/syscall.h"
 #include "userprog/pagedir.h"
+#include "userprog/process.h"
 #include "filesys/filesys.h"
 #include "filesys/file.h"
 #include <stdio.h>
+#include <string.h>
 #include <syscall-nr.h>
 #include "threads/interrupt.h"
 #include "threads/thread.h"
 #include "threads/vaddr.h"
+#include "threads/malloc.h"
 #include "lib/user/syscall.h"
 #include "lib/string.h"
 #include "devices/input.h"
@@ -61,8 +64,16 @@ syscall_handler (struct intr_frame *f)
 	char* fileBuffer=NULL;
 	int fileSize=0;
 
+	char* execFile=NULL;
+	char* copyExecFile=NULL;
+	int execPid=0;
+
+	int waitPid=0;
 
 	switch(syscallNum){
+		case SYS_HALT:
+			exit_expectedly(t);
+			break;
 
 		case SYS_EXIT:
       if (!is_user_vaddr(espP+1))
@@ -169,7 +180,23 @@ syscall_handler (struct intr_frame *f)
 			f->eax = file_write(file, fileBuffer, fileSize);
 			break;
 
+
+		case SYS_EXEC:
+			execFile = *(char**)(espP+1);
+			if(check_ptr_invalidity(t,execFile)){
+				exit_unexpectedly(t);
+				return;
+			}
+			copyExecFile = (char*)malloc(strlen(execFile)+1);
+			strlcpy(copyExecFile, execFile, strlen(execFile)+1);
+			execPid=process_execute(copyExecFile);
+			free(copyExecFile);
+			f->eax=execPid;
+			break;
+
 		default:
+			waitPid = *(espP+1);
+			process_wait(waitPid);
 			break;
 	}
 }

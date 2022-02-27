@@ -30,6 +30,7 @@ tid_t
 process_execute (const char *file_name) 
 {
   char *fn_copy;
+	struct file *file;
   tid_t tid;
 
   /* Make a copy of FILE_NAME.
@@ -43,6 +44,11 @@ process_execute (const char *file_name)
 	token = strtok_r(file_name, " ", &save_ptr);
 
   /* Create a new thread to execute FILE_NAME. */
+	file = filesys_open(file_name);
+	if (file == NULL){
+		return -1;
+	}	
+
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy); 
