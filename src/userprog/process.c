@@ -116,6 +116,10 @@ process_exit (void)
 {
   struct thread *cur = thread_current ();
   uint32_t *pd;
+	if(cur->tFile != NULL){
+		file_allow_write(cur->tFile);
+		file_close(cur->tFile);
+	}
 
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
@@ -333,10 +337,12 @@ load (char *file_name, void (**eip) (void), void **esp)
   *eip = (void (*) (void)) ehdr.e_entry;
 
   success = true;
+	t->tFile=file;
+	file_deny_write(t->tFile);
 
  done:
   /* We arrive here whether the load is successful or not. */
-  file_close (file);
+//  file_close (file);
   return success;
 }
 

@@ -117,7 +117,11 @@ syscall_handler (struct intr_frame *f)
 			if (file == NULL){
 				f->eax=-1;
 				break;
-			}	
+			}
+		//	if(strcmp(fileName, thread_current()->name)==0){
+	//			file_deny_write(file);
+//			}
+	
 			fd = thread_make_fd(file);
 			f->eax=fd;
 			break; 
@@ -149,7 +153,11 @@ syscall_handler (struct intr_frame *f)
 
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);	
 
-		  break;	
+		  break;
+		case SYS_SEEK:
+			fd = *(espP+1);		
+			file = thread_open_fd(fd);
+			file_seek(file, *(espP+2));	
 
 		case SYS_FILESIZE:
 			fd = *(espP+1);
