@@ -343,6 +343,7 @@ thread_exit (void)
   process_exit ();
 #endif
 	thread_close_all_fd();
+	thread_remove_all_childSema();
   /* Remove thread from all threads list, set our status to dying,
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
@@ -557,6 +558,7 @@ init_thread (struct thread *t, const char *name, int priority)
 	t->sleepTime = 0;
 	list_init(&t->lock_own_list);
 	list_init(&t->fdList);
+	list_init(&t->childList);
 	t->wait_lock = (struct lock*) NULL;
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
@@ -1032,3 +1034,66 @@ thread_close_all_fd (void){
 	}
 }
 
+
+
+void
+thread_make_childSema (int childtid) 
+{
+	struct thread* t=thread_current(); 
+	struct childSema* childSema= malloc(sizeof(struct childSema));
+
+	childSema->tid=childtid;
+	sema_init( &(childSema->sema), 0 );
+
+	list_push_back(&(t->childList),&(childSema->elem));
+ 
+}
+
+struct childSema*
+thread_get_childSema (struct thread* t, int childtid){
+	struct list_elem* e=list_begin(&(t->childList));
+	struct childSema* childSema=NULL;
+
+	for ( e = list_begin(&(t->childList)); e != list_end(&(t->childList));
+				e = list_next(e))
+	{
+		childSema = list_entry (e, struct childSema, elem);
+		if (childSema->tid == childtid){
+			return childSema;
+		}
+	}
+
+	return NULL;
+}
+
+bool
+thread_remove_childSema (struct thread* t, int childtid){
+	struct list_elem* e=list_begin(&(t->childList));
+	struct childSema* childSema=NULL;
+
+	for ( e = list_begin(&(t->childList)); e != list_end(&(t->childList));
+				e = list_next(e))
+	{
+		childSema = list_entry (e, struct childSema, elem);
+		if (childSema->tid == childtid){
+			list_remove(e);
+			free(childSema);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void
+thread_remove_all_childSema (void){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->childList));
+	struct childSema* childSema=NULL;
+
+	while(!list_empty(&(t->childList))){
+      e = list_pop_front ( &(t->childList) );
+			childSema = list_entry (e, struct childSema, elem);
+			free(childSema);
+	}
+}

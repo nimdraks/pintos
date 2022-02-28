@@ -18,6 +18,7 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/malloc.h"
+#include "threads/synch.h"
 
 static thread_func start_process NO_RETURN;
 static bool load (char *cmdline, void (**eip) (void), void **esp);
@@ -51,7 +52,8 @@ process_execute (const char *file_name)
 
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
-    palloc_free_page (fn_copy); 
+    palloc_free_page (fn_copy);
+	thread_make_childSema(tid); 
   return tid;
 }
 
@@ -98,16 +100,24 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid) 
 {
+
 	struct thread* thread = tid_thread(child_tid);
+	int ret=-1;
 	if (thread==NULL){
-		return -1;
+		return ret;
 	}
 
+	struct childSema* childSema = thread_get_childSema(thread_current(), child_tid);
+	sema_down(&childSema->sema);
+	ret = childSema->ret;
+	thread_remove_childSema(thread_current(), child_tid);
+
+/*
 	enum intr_level old_level = intr_disable();
 	thread_block();
 	intr_set_level(old_level);
-
-  return thread_current()->c_ret;
+*/
+  return ret;
 }
 
 /* Free the current process's resources. */

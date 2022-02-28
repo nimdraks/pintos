@@ -4,6 +4,7 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "threads/synch.h"
 #include "filesys/file.h"
 
 /* States in a thread's life cycle. */
@@ -109,6 +110,7 @@ struct thread
 
 		/* for file descriptor */
 		struct list fdList;
+		struct list childList;
 
 		/* mlfqs */
 		int mlfqs_priority;
@@ -127,6 +129,17 @@ struct thread
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
   };
+
+
+
+struct childSema{
+		int tid;
+		int ret;
+		struct semaphore sema;	
+		struct list_elem elem;	
+	};
+
+
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -195,5 +208,10 @@ int thread_make_fd(struct file* file);
 struct file* thread_open_fd (int fd);
 bool thread_close_fd (int fd);
 void thread_close_all_fd (void);
+
+void thread_make_childSema (int);
+struct childSema* thread_get_childSema (struct thread*, int);
+bool thread_remove_childSema (struct thread* t, int childtid);
+void thread_remove_all_childSema (void);
 
 #endif /* threada/thread.h */

@@ -37,7 +37,10 @@ exit_unexpectedly(struct thread* t){
 			printf("%s: exit(%d)\n",t->name, -1);
 			struct thread* pThread = tid_thread(t->p_tid);
 			pThread->c_ret=-1;
-			thread_unblock(tid_thread(t->p_tid));
+//			thread_unblock(tid_thread(t->p_tid));
+			struct childSema* childSema=thread_get_childSema(pThread, t->tid);
+			childSema->ret=-1;
+			sema_up(&childSema->sema);	
 			thread_exit();
 }
 
@@ -45,7 +48,10 @@ void
 exit_expectedly(struct thread* t, int cRet){
 			struct thread* pThread = tid_thread(t->p_tid);
 			pThread->c_ret=cRet;
-			thread_unblock(pThread);
+//			thread_unblock(pThread);
+			struct childSema* childSema=thread_get_childSema(pThread, t->tid);
+			childSema->ret=cRet;
+			sema_up(&childSema->sema);
 			thread_exit();
 }
 
