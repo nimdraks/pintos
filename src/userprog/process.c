@@ -43,19 +43,22 @@ process_execute (const char *file_name)
   strlcpy (fn_copy, file_name, PGSIZE);
 
 	char *token, *save_ptr;
-	token = strtok_r(file_name, " ", &save_ptr);
+	token = strtok_r((char*)file_name, " ", &save_ptr);
 
-  /* Create a new thread to execute FILE_NAME. */
+  /* Check File existence */
 	file = filesys_open(file_name);
 	if (file == NULL){
 		return -1;
-	}	
+	}
+	file_close(file);	
 
+  /* Create a new thread to execute FILE_NAME. */
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy);
 	thread_make_childSema(tid);
 
+	/* Wait the process load proeperly */
 	sema_down( &(thread_current()->execSema));
 	if(! (thread_current()->success )){
 		return -1;
@@ -72,6 +75,7 @@ start_process (void *file_name_)
 {
   char *file_name = file_name_;
   struct intr_frame if_;
+	struct thread* p_t = tid_thread(thread_current()->p_tid);
   bool success;
 
   /* Initialize interrupt frame and load executable. */
@@ -83,13 +87,12 @@ start_process (void *file_name_)
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
-	tid_thread(thread_current()->p_tid)->success=success;
+	p_t->success=success;
   if (!success){
-			sema_up( & (tid_thread(thread_current()->p_tid)->execSema)  );
+			sema_up(&(p_t->execSema));
 			exit_unexpectedly(thread_current()); 
 	}
-
-	sema_up( & (tid_thread(thread_current()->p_tid)->execSema)  );
+	sema_up(&(p_t->execSema));
 
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
@@ -520,8 +523,7 @@ setup_argument (void **esp, char* file_name, char* argvs){
 	for (e = list_rbegin(&argument_list); e != list_rend(&argument_list);
 			 e = list_prev(e)){
 		struct argument* arg = list_entry (e, struct argument, elem);
-//		printf("%s %d\n", arg->argu, strlen(arg->argu));
-    *esp = (char*)*esp - ( strlen(arg->argu) + 1);	
+    *esp = *esp - ( strlen(arg->argu) + 1);	
 		arg->esp_addr = *esp;
 		memcpy(arg->esp_addr, arg->argu, strlen(arg->argu)+1); 
 	}
@@ -538,14 +540,13 @@ setup_argument (void **esp, char* file_name, char* argvs){
 	for (e = list_rbegin(&argument_list); e != list_rend(&argument_list);
 			 e = list_prev(e)){
 		struct argument* arg = list_entry (e, struct argument, elem);
-//		printf("%s %d %p\n", arg->argu, strlen(arg->argu), arg->esp_addr );
     *esp = *esp - 4;
-		*(uint32_t*)*esp= (uint32_t)arg->esp_addr;
+		*(uint32_t**)*esp= (uint32_t*)arg->esp_addr;
 
 	}
 
 	*esp = *esp - 4;	
-  *(uint32_t*)*esp = (uint32_t*)(*esp + 4);
+  *(uint32_t**)*esp = (uint32_t*)(*esp + 4);
 	*esp = *esp - 4;
 	*(int*)*esp = num_args; 
 	*esp = *esp - 4;

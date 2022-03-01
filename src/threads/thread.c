@@ -945,8 +945,10 @@ tid_thread (tid_t tid)
 				e = list_next(e))
 	{
 		t = list_entry (e, struct thread, allelem);
-		if (t->tid == tid)
+		if (t->tid == tid){
+  		intr_set_level (old_level);
 			return t;
+		}
 	}
   intr_set_level (old_level);
   

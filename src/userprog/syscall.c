@@ -38,8 +38,8 @@ void
 exit_unexpectedly(struct thread* t){
 			sema_down(&sysSema);
 			printf("%s: exit(%d)\n",t->name, -1);
-			struct thread* pThread = tid_thread(t->p_tid);
-			struct childSema* childSema=thread_get_childSema(pThread, t->tid);
+			struct thread* p_t = tid_thread(t->p_tid);
+			struct childSema* childSema=thread_get_childSema(p_t, t->tid);
 			childSema->ret=-1;
 			sema_up(&sysSema);
 			sema_up(&childSema->sema);	
@@ -49,8 +49,8 @@ exit_unexpectedly(struct thread* t){
 void
 exit_expectedly(struct thread* t, int cRet){
 			sema_down(&sysSema);
-			struct thread* pThread = tid_thread(t->p_tid);
-			struct childSema* childSema=thread_get_childSema(pThread, t->tid);
+			struct thread* p_t = tid_thread(t->p_tid);
+			struct childSema* childSema=thread_get_childSema(p_t, t->tid);
 			childSema->ret=cRet;
 			sema_up(&sysSema);
 			sema_up(&childSema->sema);
@@ -64,24 +64,24 @@ static void
 syscall_handler (struct intr_frame *f) 
 {
 	int* espP=f->esp;
-	char* fileName=NULL;
-	int fileInitSize=0;
 	struct thread* t = thread_current();
 	if (check_ptr_invalidity(t, f->esp)){
 		exit_unexpectedly(t);
 		return;
 	}
   int syscallNum = *espP;
-	struct file* file=NULL;	
-	int fd=0;
-	char* fileBuffer=NULL;
-	int fileSize=0;
 
+	char* fileName=NULL;
+	int fileInitSize=0;
+	int fileSize=0;
+	int fd=0;
+	struct file* file=NULL;	
+	char* fileBuffer=NULL;
 	char* execFile=NULL;
 	char* copyExecFile=NULL;
 	int execPid=0;
-
 	int waitPid=0;
+
 
 	switch(syscallNum){
 		case SYS_HALT:
@@ -105,9 +105,8 @@ syscall_handler (struct intr_frame *f)
 				return;
 			}
 
-			if (strlen(fileName) > 500){
+			if (strlen(fileName) > 500)
 				f->eax=0;
-			}
 			else
 				f->eax=filesys_create(fileName, fileInitSize);
 			break;
@@ -175,6 +174,8 @@ syscall_handler (struct intr_frame *f)
 			if (fd == 1){
 				printf("%s", (char*)*(espP+2));
 				break;
+			}else if (fd == 0){
+				break;
 			}
 
 			fileBuffer = (char*)*(espP+2);
@@ -185,10 +186,6 @@ syscall_handler (struct intr_frame *f)
 				return;
 			}
 
-			if (fd == 0){
-				break;
-			}
-
 			file = thread_open_fd(fd);
 			if (file==NULL){
 				exit_unexpectedly(t);
@@ -197,7 +194,6 @@ syscall_handler (struct intr_frame *f)
 
 			f->eax = file_write(file, fileBuffer, fileSize);
 			break;
-
 
 		case SYS_EXEC:
 			execFile = *(char**)(espP+1);
@@ -218,9 +214,6 @@ syscall_handler (struct intr_frame *f)
 			break;
 
 		default:
-			waitPid = *(espP+1);
-			f->eax=process_wait(waitPid);
-
 			break;
 	}
 }
