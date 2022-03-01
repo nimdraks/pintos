@@ -4,6 +4,8 @@
 #include <debug.h>
 #include <list.h>
 #include <stdint.h>
+#include "threads/synch.h"
+#include "filesys/file.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -106,19 +108,41 @@ struct thread
 		struct lock* wait_lock;
 		int original_priority;
 
+		/* for file descriptor */
+		struct list fdList;
+		struct list childList;
+
+		struct semaphore execSema;
+		bool success;
+
 		/* mlfqs */
 		int mlfqs_priority;
 		int nice;
 		int64_t recent_cpu;
 
+		tid_t p_tid;
+
+
 #ifdef USERPROG
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
+		struct file* tFile;
 #endif
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
   };
+
+
+
+struct childSema{
+		int tid;
+		int ret;
+		struct semaphore sema;	
+		struct list_elem elem;	
+	};
+
+
 
 /* If false (default), use round-robin scheduler.
    If true, use multi-level feedback queue scheduler.
@@ -178,4 +202,17 @@ int fraction_div(int num, int denom);
 
 bool check_mlfqs_list_empty(void);
 struct thread* return_high_priority_mlfqs_list_entry(void);
+
+struct thread* tid_thread(tid_t tid);
+
+int thread_make_fd(struct file* file);
+struct file* thread_open_fd (int fd);
+bool thread_close_fd (int fd);
+void thread_close_all_fd (void);
+
+void thread_make_childSema (int);
+struct childSema* thread_get_childSema (struct thread*, int);
+bool thread_remove_childSema (struct thread* t, int childtid);
+void thread_remove_all_childSema (void);
+
 #endif /* threada/thread.h */

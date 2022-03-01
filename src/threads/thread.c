@@ -11,6 +11,7 @@
 #include "threads/switch.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "threads/malloc.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -203,6 +204,8 @@ thread_create (const char *name, int priority,
   /* Initialize thread. */
   init_thread (t, name, priority);
   tid = t->tid = allocate_tid ();
+	t->p_tid = thread_current()->tid;
+	t->tFile = NULL;
 
   /* Prepare thread for first run by initializing its stack.
      Do this atomically so intermediate values for the 'stack' 
@@ -231,6 +234,8 @@ thread_create (const char *name, int priority,
 
   return tid;
 }
+
+
 
 /* Puts the current thread to sleep.  It will not be scheduled
    again until awoken by thread_unblock().
@@ -343,7 +348,8 @@ thread_exit (void)
 #ifdef USERPROG
   process_exit ();
 #endif
-
+	thread_close_all_fd();
+	thread_remove_all_childSema();
   /* Remove thread from all threads list, set our status to dying,
      and schedule another process.  That process will destroy us
      when it calls thread_schedule_tail(). */
@@ -351,8 +357,10 @@ thread_exit (void)
 	if(!thread_mlfqs)	
 		thread_highest_priority_into_front(thread_current());
   list_remove (&thread_current()->allelem);
+
   thread_current ()->status = THREAD_DYING;
 	ready_threads--;
+
   schedule ();
   NOT_REACHED ();
 }
@@ -555,6 +563,10 @@ init_thread (struct thread *t, const char *name, int priority)
 	t->nice = 0;
 	t->sleepTime = 0;
 	list_init(&t->lock_own_list);
+	list_init(&t->fdList);
+	list_init(&t->childList);
+	sema_init(&t->execSema, 0);
+	t->success=false;
 	t->wait_lock = (struct lock*) NULL;
   t->magic = THREAD_MAGIC;
   list_push_back (&all_list, &t->allelem);
@@ -901,5 +913,173 @@ return_high_priority_mlfqs_list_entry(void){
 
 
 
+struct thread *
+tid_thread (tid_t tid) 
+{
+
+  enum intr_level old_level = intr_disable ();
+	struct list_elem* e=list_begin(&all_list);
+	struct thread* t = list_entry(e, struct thread, allelem);
+
+	for ( e = list_begin(&all_list); e != list_end(&all_list);
+				e = list_next(e))
+	{
+		t = list_entry (e, struct thread, allelem);
+		if (t->tid == tid){
+  		intr_set_level (old_level);
+			return t;
+		}
+	}
+  intr_set_level (old_level);
+  
+ 	return NULL;
+}
 
 
+int
+thread_make_fd (struct file* file) 
+{
+	struct thread* t = thread_current();
+	int defaultfd = 2;
+	struct list_elem* e=list_begin(&(t->fdList));
+	struct fileDesc* fdStruct;
+
+	for ( e = list_begin(&(t->fdList)); e != list_end(&(t->fdList));
+				e = list_next(e))
+	{
+		fdStruct = list_entry (e, struct fileDesc, elem);
+		if (fdStruct->fd != defaultfd){
+			break;	
+		}else
+			defaultfd++;
+	}
+ 
+	fdStruct = malloc(sizeof(fdStruct));
+	if (fdStruct == NULL){
+		return -1;
+	}
+	fdStruct->fd = defaultfd;
+	fdStruct->file = file;
+	list_push_back(&(t->fdList),&(fdStruct->elem));
+ 
+ 	return fdStruct->fd;
+}
+
+struct file*
+thread_open_fd (int fd){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->fdList));
+	struct fileDesc* fdStruct;
+
+	for ( e = list_begin(&(t->fdList)); e != list_end(&(t->fdList));
+				e = list_next(e))
+	{
+		fdStruct = list_entry (e, struct fileDesc, elem);
+		if (fdStruct->fd == fd){
+			return fdStruct->file;
+		}
+	}
+
+	return NULL;
+}
+
+
+bool
+thread_close_fd (int fd){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->fdList));
+	struct fileDesc* fdStruct;
+
+	for ( e = list_begin(&(t->fdList)); e != list_end(&(t->fdList));
+				e = list_next(e))
+	{
+		fdStruct = list_entry (e, struct fileDesc, elem);
+		if (fdStruct->fd == fd){
+			list_remove(e);
+			file_close(fdStruct->file);
+			free(fdStruct);
+			return true;	
+		}
+	}
+
+	return false;
+}
+
+
+void
+thread_close_all_fd (void){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->fdList));
+	struct fileDesc* fdStruct;
+
+	while(!list_empty(&(t->fdList))){
+      e = list_pop_front ( &(t->fdList) );
+			fdStruct = list_entry (e, struct fileDesc, elem);
+			file_close(fdStruct->file);
+			free(fdStruct);
+	}
+}
+
+
+
+void
+thread_make_childSema (int childtid) 
+{
+	struct thread* t=thread_current(); 
+	struct childSema* childSema= malloc(sizeof(struct childSema));
+
+	childSema->tid=childtid;
+	sema_init( &(childSema->sema), 0 );
+
+	list_push_back(&(t->childList),&(childSema->elem));
+ 
+}
+
+struct childSema*
+thread_get_childSema (struct thread* t, int childtid){
+	struct list_elem* e=list_begin(&(t->childList));
+	struct childSema* childSema=NULL;
+
+	for ( e = list_begin(&(t->childList)); e != list_end(&(t->childList));
+				e = list_next(e))
+	{
+		childSema = list_entry (e, struct childSema, elem);
+		if (childSema->tid == childtid){
+			return childSema;
+		}
+	}
+
+	return NULL;
+}
+
+bool
+thread_remove_childSema (struct thread* t, int childtid){
+	struct list_elem* e=list_begin(&(t->childList));
+	struct childSema* childSema=NULL;
+
+	for ( e = list_begin(&(t->childList)); e != list_end(&(t->childList));
+				e = list_next(e))
+	{
+		childSema = list_entry (e, struct childSema, elem);
+		if (childSema->tid == childtid){
+			list_remove(e);
+			free(childSema);
+			return true;
+		}
+	}
+
+	return false;
+}
+
+void
+thread_remove_all_childSema (void){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->childList));
+	struct childSema* childSema=NULL;
+
+	while(!list_empty(&(t->childList))){
+      e = list_pop_front ( &(t->childList) );
+			childSema = list_entry (e, struct childSema, elem);
+			free(childSema);
+	}
+}

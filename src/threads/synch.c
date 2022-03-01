@@ -183,6 +183,15 @@ lock_init (struct lock *lock)
   sema_init (&lock->semaphore, 1);
 }
 
+void
+lock_init_zero (struct lock *lock)
+{
+  ASSERT (lock != NULL);
+
+  lock->holder = NULL;
+  sema_init (&lock->semaphore, 0);
+}
+
 /* Acquires LOCK, sleeping until it becomes available if
    necessary.  The lock must not already be held by the current
    thread.
