@@ -156,12 +156,13 @@ main (int argc, char *argv[])
       /* Record the depth reached during the first run; on subsequent
          runs, fail if those runs do not match the depth achieved on the
          first run. */
+
       if (i == 0)
         expected_depth = reached_depth;
       else if (expected_depth != reached_depth)
         fail ("after run %d/%d, expected depth %d, actual depth %d.",
               i, howmany, expected_depth, reached_depth);
-      ASSERT (expected_depth == reached_depth);
+      ASSERT (expected_depth == reached_depth); 
     }
 
   consume_some_resources ();

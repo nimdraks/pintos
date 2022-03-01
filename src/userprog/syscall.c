@@ -40,10 +40,6 @@ exit_unexpectedly(struct thread* t){
 			printf("%s: exit(%d)\n",t->name, -1);
 			struct thread* pThread = tid_thread(t->p_tid);
 			struct childSema* childSema=thread_get_childSema(pThread, t->tid);
-			if (childSema== NULL){
-				sema_up(&sysSema);
-				thread_exit();
-			}
 			childSema->ret=-1;
 			sema_up(&sysSema);
 			sema_up(&childSema->sema);	

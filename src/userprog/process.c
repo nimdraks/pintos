@@ -52,15 +52,16 @@ process_execute (const char *file_name)
 	}	
 
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
-	sema_down( &(thread_current()->execSema));
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy);
+	thread_make_childSema(tid);
 
+	sema_down( &(thread_current()->execSema));
 	if(! (thread_current()->success )){
 		return -1;
 	}
 	thread_current()->success=false;
-	thread_make_childSema(tid);
+
   return tid;
 }
 
@@ -86,10 +87,10 @@ start_process (void *file_name_)
   if (!success){
 			sema_up( & (tid_thread(thread_current()->p_tid)->execSema)  );
 			exit_unexpectedly(thread_current()); 
-//    thread_exit ();
 	}
 
-			sema_up( & (tid_thread(thread_current()->p_tid)->execSema)  );
+	sema_up( & (tid_thread(thread_current()->p_tid)->execSema)  );
+
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
      threads/intr-stubs.S).  Because intr_exit takes all of its
