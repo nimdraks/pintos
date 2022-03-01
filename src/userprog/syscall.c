@@ -10,17 +10,19 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/malloc.h"
+#include "threads/synch.h"
 #include "lib/user/syscall.h"
 #include "lib/string.h"
 #include "devices/input.h"
 
 static void syscall_handler (struct intr_frame *);
-
+static struct semaphore sysSema;
 
 void
 syscall_init (void) 
 {
   intr_register_int (0x30, 3, INTR_ON, syscall_handler, "syscall");
+	sema_init(&sysSema, 1);
 }
 
 
@@ -34,24 +36,29 @@ check_ptr_invalidity(struct thread* t, void* ptr){
 
 void
 exit_unexpectedly(struct thread* t){
+			sema_down(&sysSema);
 			printf("%s: exit(%d)\n",t->name, -1);
 			struct thread* pThread = tid_thread(t->p_tid);
-			pThread->c_ret=-1;
-//			thread_unblock(tid_thread(t->p_tid));
 			struct childSema* childSema=thread_get_childSema(pThread, t->tid);
+			if (childSema== NULL){
+				sema_up(&sysSema);
+				thread_exit();
+			}
 			childSema->ret=-1;
+			sema_up(&sysSema);
 			sema_up(&childSema->sema);	
 			thread_exit();
 }
 
 void
 exit_expectedly(struct thread* t, int cRet){
+			sema_down(&sysSema);
 			struct thread* pThread = tid_thread(t->p_tid);
-			pThread->c_ret=cRet;
-//			thread_unblock(pThread);
 			struct childSema* childSema=thread_get_childSema(pThread, t->tid);
 			childSema->ret=cRet;
+			sema_up(&sysSema);
 			sema_up(&childSema->sema);
+
 			thread_exit();
 }
 
@@ -124,10 +131,6 @@ syscall_handler (struct intr_frame *f)
 				f->eax=-1;
 				break;
 			}
-		//	if(strcmp(fileName, thread_current()->name)==0){
-	//			file_deny_write(file);
-//			}
-	
 			fd = thread_make_fd(file);
 			f->eax=fd;
 			break; 

@@ -1,4 +1,5 @@
 #include "userprog/process.h"
+#include "userprog/syscall.h"
 #include <debug.h>
 #include <inttypes.h>
 #include <round.h>
@@ -51,9 +52,15 @@ process_execute (const char *file_name)
 	}	
 
   tid = thread_create (file_name, PRI_DEFAULT, start_process, fn_copy);
+	sema_down( &(thread_current()->execSema));
   if (tid == TID_ERROR)
     palloc_free_page (fn_copy);
-	thread_make_childSema(tid); 
+
+	if(! (thread_current()->success )){
+		return -1;
+	}
+	thread_current()->success=false;
+	thread_make_childSema(tid);
   return tid;
 }
 
@@ -75,9 +82,14 @@ start_process (void *file_name_)
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
-  if (!success) 
-    thread_exit ();
+	tid_thread(thread_current()->p_tid)->success=success;
+  if (!success){
+			sema_up( & (tid_thread(thread_current()->p_tid)->execSema)  );
+			exit_unexpectedly(thread_current()); 
+//    thread_exit ();
+	}
 
+			sema_up( & (tid_thread(thread_current()->p_tid)->execSema)  );
   /* Start the user process by simulating a return from an
      interrupt, implemented by intr_exit (in
      threads/intr-stubs.S).  Because intr_exit takes all of its
@@ -100,23 +112,16 @@ start_process (void *file_name_)
 int
 process_wait (tid_t child_tid) 
 {
-
-	struct thread* thread = tid_thread(child_tid);
 	int ret=-1;
-	if (thread==NULL){
+
+	struct childSema* childSema = thread_get_childSema(thread_current(), child_tid);
+	if (childSema == NULL){
 		return ret;
 	}
 
-	struct childSema* childSema = thread_get_childSema(thread_current(), child_tid);
 	sema_down(&childSema->sema);
 	ret = childSema->ret;
 	thread_remove_childSema(thread_current(), child_tid);
-
-/*
-	enum intr_level old_level = intr_disable();
-	thread_block();
-	intr_set_level(old_level);
-*/
   return ret;
 }
 

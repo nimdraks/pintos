@@ -6,6 +6,10 @@
 #include "filesys/free-map.h"
 #include "filesys/inode.h"
 #include "filesys/directory.h"
+#include "threads/synch.h"
+
+
+static struct semaphore fileSema;
 
 /* Partition that contains the file system. */
 struct block *fs_device;
@@ -28,6 +32,8 @@ filesys_init (bool format)
     do_format ();
 
   free_map_open ();
+
+	sema_init(&fileSema, 1);
 }
 
 /* Shuts down the file system module, writing any unwritten data
@@ -66,6 +72,7 @@ filesys_create (const char *name, off_t initial_size)
 struct file *
 filesys_open (const char *name)
 {
+	sema_down(&fileSema);
   struct dir *dir = dir_open_root ();
   struct inode *inode = NULL;
 
@@ -73,6 +80,7 @@ filesys_open (const char *name)
     dir_lookup (dir, name, &inode);
   dir_close (dir);
 
+	sema_up(&fileSema);
   return file_open (inode);
 }
 
