@@ -156,7 +156,7 @@ process_exit (void)
          that's been freed (and cleared). */
       cur->pagedir = NULL;
       pagedir_activate (NULL);
-			unset_frame_table_entries_of_thread(cur);
+//			unset_frame_table_entries_of_thread(cur);
       pagedir_destroy (pd);
     }
 }
@@ -584,7 +584,7 @@ install_page (void *upage, void *kpage, bool writable)
   struct thread *t = thread_current ();
 
 	if (pagedir_get_page (t->pagedir, upage) == NULL && pagedir_set_page (t->pagedir, upage, kpage, writable)){
-		set_frame_table_entry(upage, kpage, t);
+		set_frame_table_entry_with_va(upage, kpage);
 		return true;
 	} 
 

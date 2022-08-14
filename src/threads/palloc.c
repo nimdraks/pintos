@@ -1,4 +1,5 @@
 #include "threads/palloc.h"
+#include "threads/thread.h"
 #include <bitmap.h>
 #include <debug.h>
 #include <inttypes.h>
@@ -10,6 +11,7 @@
 #include "threads/loader.h"
 #include "threads/synch.h"
 #include "threads/vaddr.h"
+#include "vm/frame.h"
 
 /* Page allocator.  Hands out memory in page-size (or
    page-multiple) chunks.  See malloc.h for an allocator that
@@ -79,6 +81,9 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
 
   lock_acquire (&pool->lock);
   page_idx = bitmap_scan_and_flip (pool->used_map, 0, page_cnt, false);
+	if (page_idx != BITMAP_ERROR && flags & PAL_USER){
+		set_frame_table_entry_with_idx_cnt(page_idx, page_cnt, thread_current());
+	}
   lock_release (&pool->lock);
 
   if (page_idx != BITMAP_ERROR)
@@ -137,8 +142,13 @@ palloc_free_multiple (void *pages, size_t page_cnt)
   memset (pages, 0xcc, PGSIZE * page_cnt);
 #endif
 
+  lock_acquire (&pool->lock);
   ASSERT (bitmap_all (pool->used_map, page_idx, page_cnt));
   bitmap_set_multiple (pool->used_map, page_idx, page_cnt, false);
+	if (pool == &user_pool){
+		unset_frame_table_entry_with_idx_cnt(page_idx, page_cnt);
+	}
+	lock_release (&pool->lock);
 }
 
 /* Frees the page at PAGE. */
