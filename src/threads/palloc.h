@@ -1,11 +1,9 @@
 #ifndef THREADS_PALLOC_H
 #define THREADS_PALLOC_H
 
-#define USERPOOL 0
-#define KERNELPOOL 1
-
 #include <stddef.h>
 #include <stdint.h>
+#include <stdbool.h>
 
 /* How to allocate pages. */
 enum palloc_flags
@@ -22,7 +20,7 @@ void *palloc_get_multiple (enum palloc_flags, size_t page_cnt);
 void palloc_free_page (void *);
 void palloc_free_multiple (void *, size_t page_cnt);
 
-size_t get_pool_size (int kernel);
-uint8_t* get_pool_base (int kernel);
+size_t get_pool_size (bool kernel);
+uint8_t* get_pool_base (bool kernel);
 
 #endif /* threads/palloc.h */
