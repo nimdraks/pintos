@@ -180,3 +180,23 @@ page_from_pool (const struct pool *pool, void *page)
 
   return page_no >= start_page && page_no < end_page;
 }
+
+
+
+size_t get_pool_size (int kernel)
+{
+	if (kernel == 1){
+		return bitmap_size(kernel_pool.used_map);
+	}
+	return bitmap_size(user_pool.used_map);
+}
+
+uint8_t* get_pool_base (int kernel) 
+{
+	if (kernel == 1){
+		return kernel_pool.base;
+	}
+	return user_pool.base;
+}
+
+
