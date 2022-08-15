@@ -29,13 +29,9 @@ lookup_sup_page_table_entry (uint32_t *spd, const void* vaddr) {
 		*spde = spt;
 	}else{
 		spt = (struct frame_sup_page_table_entry*)(*spde);
-//		printf("%x, %x test\n", spde, spt);
 	}
 
-	uintptr_t pt_nos = pt_no(vaddr);
 	spte = spt + pt_no(vaddr);
-//	printf("%x, %x, %x, %x\n", vaddr, spt, spte, pt_nos);
-
 
 	return spte;
 }
@@ -66,10 +62,14 @@ set_sup_page_table_entry(uint32_t *spd, const void* uaddr){
 
 void
 sup_pagedir_destroy (uint32_t * spd){
+	if (spd == NULL){
+		return;
+	}
+
 	uint32_t *spde;
 	for (spde = spd; spde < spd + pd_no(PHYS_BASE); spde++) {
-		if (*spde) {
-			palloc_free_multiple(spde, needed_page_numbers);
+		if (*spde != 0) {
+			palloc_free_multiple((void*)*spde, needed_page_numbers);
 		}
 	}
 	palloc_free_page(spd);

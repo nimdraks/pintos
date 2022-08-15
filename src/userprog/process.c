@@ -137,7 +137,7 @@ void
 process_exit (void)
 {
   struct thread *cur = thread_current ();
-  uint32_t *pd;
+  uint32_t *pd, *spd;
 	if(cur->tFile != NULL){
 		file_allow_write(cur->tFile);
 		file_close(cur->tFile);
@@ -146,6 +146,7 @@ process_exit (void)
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;
+	spd = cur->s_pagedir;
   if (pd != NULL) 
     {
       /* Correct ordering here is crucial.  We must set
@@ -157,7 +158,6 @@ process_exit (void)
          that's been freed (and cleared). */
       cur->pagedir = NULL;
       pagedir_activate (NULL);
-//			unset_frame_table_entries_of_thread(cur);
       pagedir_destroy (pd);
     }
 }
