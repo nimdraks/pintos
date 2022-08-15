@@ -1,10 +1,15 @@
 #include "userprog/exception.h"
 #include <inttypes.h>
 #include <stdio.h>
+#include <stdint.h>
+#include <stdbool.h>
 #include "userprog/gdt.h"
 #include "userprog/syscall.h"
+#include "userprog/process.h"
 #include "threads/interrupt.h"
 #include "threads/thread.h"
+#include "threads/pte.h"
+#include "threads/palloc.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -150,6 +155,16 @@ page_fault (struct intr_frame *f)
   user = (f->error_code & PF_U) != 0;
 
 	if(user){
+		if (not_present) {
+			uint8_t* kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+			if (kpage != NULL) {
+				uint8_t* page_addr= (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
+				bool success = install_page ( page_addr ,kpage, true );			
+				if  (success){
+					return;
+				}	
+			}
+		} 
 		exit_unexpectedly(thread_current());
 		return;
 	}	
