@@ -9,7 +9,7 @@ struct frame_entry{
 	bool used;
 	tid_t tid;
 	uint8_t* vaddr;
-
+	int age;
 };
 
 

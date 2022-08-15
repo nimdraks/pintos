@@ -10,6 +10,7 @@ static uint8_t* frame_base_vaddr;
 static size_t frame_number;
 struct frame_entry* frame_table;
 struct lock frame_table_lock;
+int global_age;
 
 void
 frame_table_init (){
@@ -17,6 +18,7 @@ frame_table_init (){
 	frame_base_vaddr = get_pool_base(false);	
 	int frame_pages = DIV_ROUND_UP(get_frame_table_size(), PGSIZE);
 	frame_table = (struct frame_entry*)palloc_get_multiple (PAL_ASSERT|PAL_ZERO, frame_pages);
+	global_age=0;
 
 	lock_init(&frame_table_lock);	
 
@@ -60,6 +62,7 @@ void set_frame_table_entry_with_va(void* uva, void* kva){
 	int page_idx = pg_no (kva) - pg_no(frame_base_vaddr);
 
 	lock_acquire (&frame_table_lock);
+	global_age++;
 
 	if (frame_table[page_idx].used == false){
 		printf("tid:%d, vaddr:%p\n", frame_table[page_idx].tid, frame_table[page_idx].vaddr);
@@ -67,6 +70,7 @@ void set_frame_table_entry_with_va(void* uva, void* kva){
 	}
 
 	frame_table[page_idx].vaddr=uva;
+	frame_table[page_idx].age=global_age;
 
 	lock_release(&frame_table_lock);
 }
