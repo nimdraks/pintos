@@ -5,6 +5,8 @@
 #include "threads/init.h"
 #include "threads/pte.h"
 #include "threads/palloc.h"
+#include "threads/vaddr.h"
+#include "threads/thread.h"
 
 static uint32_t *active_pd (void);
 static void invalidate_pagedir (uint32_t *);
@@ -261,3 +263,23 @@ invalidate_pagedir (uint32_t *pd)
       pagedir_activate (pd);
     } 
 }
+
+
+bool
+is_grown_stack (void* fault_addr){
+	void* pg_up = pg_round_up(fault_addr);
+	void* pg_down = pg_round_down(fault_addr);
+	struct thread* t = thread_current();
+
+	void* k_pg_up = pagedir_get_page(t->pagedir, pg_up);
+	void* k_pg_down = pagedir_get_page(t->pagedir, pg_down);
+
+	if (k_pg_up != NULL && k_pg_down == NULL){
+		return true;
+	}
+
+	return false;
+}
+
+
+

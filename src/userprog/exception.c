@@ -158,24 +158,19 @@ page_fault (struct intr_frame *f)
 
 	if(user){
 		bool is_uva = is_user_vaddr(fault_addr);
-		if (is_uva) {
-			void* pg_up = pg_round_up (fault_addr);
-			void* pg_down = pg_round_down (fault_addr);
-			struct thread* t = thread_current();
-			void* exist_pg_up = pagedir_get_page(t->pagedir, pg_up);
-			void* exist_pg_down = pagedir_get_page(t->pagedir, pg_down);
-
-			if ( not_present && exist_pg_up != 0  ) {
-				uint8_t* kpage = palloc_get_page (PAL_USER | PAL_ZERO);
-				if (kpage != NULL) {
-					uint8_t* page_addr= (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
-					bool success = install_page ( page_addr ,kpage, true );			
-					if  (success){
-						return;
-					}	
-				}
-			} 
+		if (!is_uva){
+			exit_unexpectedly(thread_current());
+			return;
 		}
+
+		bool is_grown = not_present && is_grown_stack(fault_addr);
+		if (is_grown) {
+			bool success = add_new_page (fault_addr);
+			if  (success){
+				return;
+			}
+		}
+
 		exit_unexpectedly(thread_current());
 		return;
 	}	

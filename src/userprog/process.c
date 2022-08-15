@@ -20,6 +20,7 @@
 #include "threads/vaddr.h"
 #include "threads/malloc.h"
 #include "threads/synch.h"
+#include "threads/pte.h"
 #include "vm/frame.h"
 #include "vm/page.h"
 
@@ -595,4 +596,18 @@ install_page (void *upage, void *kpage, bool writable)
   /* Verify that there's not already a page at that virtual
      address, then map our page there. */
   return false;
+}
+
+bool
+add_new_page (void* fault_addr){
+	uint8_t* kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+	if (kpage != NULL){
+		uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
+		bool success = install_page (page_addr, kpage, true);
+		if (success){
+			return true;
+		}
+	}
+
+	return false;
 }
