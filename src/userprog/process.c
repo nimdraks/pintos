@@ -21,6 +21,7 @@
 #include "threads/malloc.h"
 #include "threads/synch.h"
 #include "vm/frame.h"
+#include "vm/page.h"
 
 
 static thread_func start_process NO_RETURN;
@@ -269,6 +270,9 @@ load (char *file_name, void (**eip) (void), void **esp)
   t->pagedir = pagedir_create ();
   if (t->pagedir == NULL) 
     goto done;
+	t->s_pagedir = sup_pagedir_create();
+	if (t->s_pagedir == NULL)
+		goto done;
   process_activate ();
 
   /* Open executable file. */
@@ -584,6 +588,7 @@ install_page (void *upage, void *kpage, bool writable)
   struct thread *t = thread_current ();
 
 	if (pagedir_get_page (t->pagedir, upage) == NULL && pagedir_set_page (t->pagedir, upage, kpage, writable)){
+		set_sup_page_table_entry(t->s_pagedir, upage);
 		set_frame_table_entry_with_va(upage, kpage);
 		return true;
 	} 

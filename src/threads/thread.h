@@ -127,6 +127,8 @@ struct thread
     /* Owned by userprog/process.c. */
     uint32_t *pagedir;                  /* Page directory. */
 		struct file* tFile;
+
+		uint32_t *s_pagedir;
 #endif
 
     /* Owned by thread.c. */
