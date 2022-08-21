@@ -156,6 +156,16 @@ page_fault (struct intr_frame *f)
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
 
+
+
+/*
+  printf ("Esp at %p, Page fault at %p: %s error %s page in %s context.\n",
+					f->esp,
+          fault_addr,
+          not_present ? "not present" : "rights violation",
+          write ? "writing" : "reading",
+          user ? "user" : "kernel");
+*/
 	if(user){
 		bool is_uva = is_user_vaddr(fault_addr);
 		if (!is_uva){
@@ -163,7 +173,7 @@ page_fault (struct intr_frame *f)
 			return;
 		}
 
-		bool is_grown = not_present && is_grown_stack(fault_addr);
+		bool is_grown = not_present && is_grown_stack(f->esp, fault_addr);
 		if (is_grown) {
 			bool success = add_new_page (fault_addr);
 			if  (success){

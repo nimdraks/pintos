@@ -266,17 +266,17 @@ invalidate_pagedir (uint32_t *pd)
 
 
 bool
-is_grown_stack (void* fault_addr){
-	void* pg_up = pg_round_up(fault_addr);
-	void* pg_down = pg_round_down(fault_addr);
-	struct thread* t = thread_current();
-
-	void* k_pg_up = pagedir_get_page(t->pagedir, pg_up);
-	void* k_pg_down = pagedir_get_page(t->pagedir, pg_down);
-
-	if (k_pg_up != NULL && k_pg_down == NULL){
+is_grown_stack (void* esp, void* fault_addr){
+//	printf("%p %p\n", esp, fault_addr);
+	if (esp <= fault_addr) {
 		return true;
+	}	else {
+//		printf("%p \n", esp - fault_addr);
+		return (uintptr_t)(esp - fault_addr) < PGSIZE;
 	}
+//	uint32_t diff = esp > fault_addr ? (uint32_t) esp - (uint32_t) fault_addr : (uint32_t)fault_addr - (uint32_t)esp;
+//	if (diff < PGSIZE)
+//		return true;
 
 	return false;
 }
