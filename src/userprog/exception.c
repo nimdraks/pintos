@@ -166,6 +166,12 @@ page_fault (struct intr_frame *f)
           write ? "writing" : "reading",
           user ? "user" : "kernel");
 */
+	if(!not_present){
+		exit_unexpectedly(thread_current());
+		return;
+	}
+
+
 	if(user){
 		bool is_uva = is_user_vaddr(fault_addr);
 		if (!is_uva){

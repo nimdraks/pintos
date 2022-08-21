@@ -271,8 +271,7 @@ is_grown_stack (void* esp, void* fault_addr){
 	if (esp <= fault_addr) {
 		return true;
 	}	else {
-//		printf("%p \n", esp - fault_addr);
-		return (uintptr_t)(esp - fault_addr) <= PGSIZE;
+		return (uintptr_t)(esp - fault_addr) < PGSIZE;
 	}
 //	uint32_t diff = esp > fault_addr ? (uint32_t) esp - (uint32_t) fault_addr : (uint32_t)fault_addr - (uint32_t)esp;
 //	if (diff < PGSIZE)
