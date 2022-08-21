@@ -266,16 +266,23 @@ invalidate_pagedir (uint32_t *pd)
 
 
 bool
-is_grown_stack (void* esp, void* fault_addr){
-//	printf("%p %p\n", esp, fault_addr);
+is_grown_stack_kernel (void* esp, void* fault_addr){
+	if (esp <= fault_addr) {
+		return true;
+	}	else {
+		return false;
+	}
+
+	return false;
+}
+
+
+bool
+is_grown_stack_user (void* esp, void* fault_addr){
 	if (esp <= fault_addr) {
 		return true;
 	}	else {
 		return (uintptr_t)(esp - fault_addr) < PGSIZE;
-	}
-//	uint32_t diff = esp > fault_addr ? (uint32_t) esp - (uint32_t) fault_addr : (uint32_t)fault_addr - (uint32_t)esp;
-//	if (diff < PGSIZE)
-//		return true;
 
 	return false;
 }

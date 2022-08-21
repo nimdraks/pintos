@@ -179,7 +179,7 @@ page_fault (struct intr_frame *f)
 			return;
 		}
 
-		bool is_grown = not_present && is_grown_stack(f->esp, fault_addr);
+		bool is_grown = is_grown_stack_user(f->esp, fault_addr);
 		if (is_grown) {
 			bool success = add_new_page (fault_addr);
 			if  (success){
@@ -189,7 +189,16 @@ page_fault (struct intr_frame *f)
 
 		exit_unexpectedly(thread_current());
 		return;
+	} else{
+		bool is_grown = is_grown_stack_kernel(fault_addr, fault_addr);
+		if (is_grown) {
+			bool success = add_new_page (fault_addr);
+			if  (success){
+				return;
+			}
+		}
 	}	
+
 
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to

@@ -27,10 +27,26 @@ syscall_init (void)
 
 
 bool
-check_ptr_invalidity(struct thread* t, void* ptr){
-	if (!is_user_vaddr(ptr) || pagedir_get_page(t->pagedir, ptr) == NULL ){
+check_esp_invalidity(struct thread* t, void* esp){
+	if (!is_user_vaddr(esp) || pagedir_get_page(t->pagedir, esp) == NULL ){
 			return true;
 	}
+	return false;
+}
+
+bool
+check_ptr_invalidity(struct thread* t, void* ptr, void* esp){
+	if (!is_user_vaddr(ptr) ){
+		return true;
+	}
+
+ 	if (pagedir_get_page(t->pagedir, ptr) == NULL) {
+		if ( is_grown_stack_kernel(esp, ptr)){
+			return false;
+		} else
+			return true;
+	}
+
 	return false;
 }
 
@@ -65,7 +81,7 @@ syscall_handler (struct intr_frame *f)
 {
 	int* espP=f->esp;
 	struct thread* t = thread_current();
-	if (check_ptr_invalidity(t, f->esp)){
+	if (check_esp_invalidity(t, f->esp)){
 		exit_unexpectedly(t);
 		return;
 	}
@@ -100,20 +116,26 @@ syscall_handler (struct intr_frame *f)
 		case SYS_CREATE:
 			fileName = (char*)*(espP+1);
 			fileInitSize = *(espP+2);
-			if(check_ptr_invalidity(t, (void*)fileName) || fileName==NULL ){
+			if(check_ptr_invalidity(t, (void*)fileName, espP) || fileName==NULL ){
 				exit_unexpectedly(t);
 				return;
 			}
 
-			if (strlen(fileName) > 500)
+			if (strlen(fileName) > 500){
 				f->eax=0;
+			}
 			else
 				f->eax=filesys_create(fileName, fileInitSize);
+
+			if (f->eax == 0){
+//				exit_unexpectedly(t);
+				return;
+			}
 			break;
 
 		case SYS_OPEN:
 			fileName = (char*)*(espP+1);
-			if(check_ptr_invalidity(t, (void*)fileName) || fileName==NULL ){
+			if(check_ptr_invalidity(t, (void*)fileName, espP) || fileName==NULL ){
 				exit_unexpectedly(t);
 				return;
 			}
@@ -140,7 +162,7 @@ syscall_handler (struct intr_frame *f)
 			fileBuffer = (char*)*(espP+2);
 			fileSize = *(espP+3);
 
-			if(check_ptr_invalidity(t,fileBuffer)){
+			if(check_ptr_invalidity(t,fileBuffer, espP)){
 				exit_unexpectedly(t);
 				return;
 			}
@@ -155,8 +177,7 @@ syscall_handler (struct intr_frame *f)
 				return;
 			}
 
-			f->eax = file_read(file, (void*)fileBuffer, fileSize);	
-
+			f->eax = file_read(file, (void*)fileBuffer, fileSize);
 		  break;
 		case SYS_SEEK:
 			fd = *(espP+1);		
@@ -181,7 +202,7 @@ syscall_handler (struct intr_frame *f)
 			fileBuffer = (char*)*(espP+2);
 			fileSize = *(espP+3);
 
-			if(check_ptr_invalidity(t,fileBuffer)){
+			if(check_ptr_invalidity(t,fileBuffer, espP)){
 				exit_unexpectedly(t);
 				return;
 			}
@@ -197,7 +218,7 @@ syscall_handler (struct intr_frame *f)
 
 		case SYS_EXEC:
 			execFile = *(char**)(espP+1);
-			if(check_ptr_invalidity(t,execFile)){
+			if(check_ptr_invalidity(t,execFile, espP)){
 				exit_unexpectedly(t);
 				return;
 			}
