@@ -565,6 +565,7 @@ init_thread (struct thread *t, const char *name, int priority)
 	list_init(&t->lock_own_list);
 	list_init(&t->fdList);
 	list_init(&t->childList);
+	list_init(&t->mmid_list);
 	sema_init(&t->execSema, 0);
 	t->success=false;
 	t->wait_lock = (struct lock*) NULL;
@@ -1081,5 +1082,92 @@ thread_remove_all_childSema (void){
       e = list_pop_front ( &(t->childList) );
 			childSema = list_entry (e, struct childSema, elem);
 			free(childSema);
+	}
+}
+
+
+struct mmapDesc*
+thread_make_mmid (int fd) 
+{
+	struct thread* t = thread_current();
+	int default_mmid = 0;
+	struct list_elem* e=list_begin(&(t->mmid_list));
+	struct mmapDesc* mmapStruct;
+
+	for ( e = list_begin(&(t->mmid_list)); e != list_end(&(t->mmid_list));
+				e = list_next(e))
+	{
+		mmapStruct = list_entry (e, struct mmapDesc, elem);
+		if (mmapStruct->mmid != default_mmid){
+			break;	
+		}else
+			default_mmid++;
+	}
+ 
+	mmapStruct = malloc(sizeof(mmapStruct));
+	if (mmapStruct == NULL){
+		return NULL;
+	}
+
+	mmapStruct->mmid = default_mmid;
+	mmapStruct->fd = fd;
+	list_push_back(&(t->mmid_list),&(mmapStruct->elem));
+ 
+ 	return mmapStruct;
+}
+
+
+struct mmapDesc*
+thread_get_mmapDesc (int mmid){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->mmid_list));
+	struct mmapDesc* mmapStruct;
+
+	for ( e = list_begin(&(t->mmid_list)); e != list_end(&(t->mmid_list));
+				e = list_next(e))
+	{
+		mmapStruct = list_entry (e, struct mmapDesc, elem);
+		if (mmapStruct->mmid == mmid){
+			return mmapStruct;
+		}
+	}
+
+	return NULL;
+}
+
+
+bool
+thread_close_mmapDesc (int mmid){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->mmid_list));
+	struct mmapDesc* mmapStruct;
+
+	for ( e = list_begin(&(t->mmid_list)); e != list_end(&(t->mmid_list));
+				e = list_next(e))
+	{
+		mmapStruct = list_entry (e, struct mmapDesc, elem);
+		if (mmapStruct->mmid == mmid){
+			list_remove(e);
+//			file_close(fdStruct->file);
+			free(mmapStruct);
+			return true;	
+		}
+	}
+
+	return false;
+}
+
+
+void
+thread_close_all_mmapDesc (void){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->mmid_list));
+	struct mmapDesc* mmapStruct;
+
+	while(!list_empty(&(t->mmid_list))){
+      e = list_pop_front ( &(t->mmid_list) );
+			mmapStruct = list_entry (e, struct mmapDesc, elem);
+//			file_close(fdStruct->file);
+			free(mmapStruct);
 	}
 }

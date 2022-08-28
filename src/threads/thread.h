@@ -131,6 +131,8 @@ struct thread
 		uint32_t *s_pagedir;
 #endif
 
+		struct list mmid_list;
+
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
   };
@@ -216,5 +218,11 @@ void thread_make_childSema (int);
 struct childSema* thread_get_childSema (struct thread*, int);
 bool thread_remove_childSema (struct thread* t, int childtid);
 void thread_remove_all_childSema (void);
+
+
+struct mmapDesc* thread_make_mmid(int fd);
+struct mmapDesc* thread_get_mmapDesc (int mmid);
+bool thread_close_mmapDesc(int mmid);
+void thread_close_all_mmapDesc (void);
 
 #endif /* threada/thread.h */

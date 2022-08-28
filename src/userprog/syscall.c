@@ -118,6 +118,8 @@ syscall_handler (struct intr_frame *f)
 	int execPid=0;
 	int waitPid=0;
 
+	struct mmapDesc* mmap_desc=NULL;
+
 
 	switch(syscallNum){
 		case SYS_HALT:
@@ -261,6 +263,23 @@ syscall_handler (struct intr_frame *f)
 				f->eax=-1;
 				break;
 			}
+
+			file = thread_open_fd(fd);
+			fileSize = file_length(file);	
+			if (fileSize == 0){
+				f->eax=-1;
+				break;
+			}
+
+			mmap_desc = thread_make_mmid(fd);
+			if (mmap_desc == NULL){
+				f->eax=-1;
+				break;
+			}
+
+			file_read(file, addr, fileSize);
+			f->eax = mmap_desc->mmid;
+
 
 			break;
 

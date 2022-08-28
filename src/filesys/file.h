@@ -12,6 +12,15 @@ struct fileDesc
 		struct list_elem elem;
 	};
 
+struct mmapDesc
+	{
+		int mmid;
+		int fd;
+		int offset;
+		char* filename;
+		struct list_elem elem;
+	};
+
 /* Opening and closing files. */
 struct file *file_open (struct inode *);
 struct file *file_reopen (struct file *);
