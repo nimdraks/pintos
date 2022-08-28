@@ -50,6 +50,25 @@ check_ptr_invalidity(struct thread* t, void* ptr, void* esp){
 	return false;
 }
 
+bool
+check_mmap_argument_invalidty(int fd, void* addr){
+	if(fd==0 || fd==1){
+		return true;
+	}
+	if (is_kernel_vaddr(addr) || addr == NULL){
+		return true;
+	}
+
+	if (pg_ofs(addr) != 0x0){
+		return true;
+	}
+	if (pagedir_get_page(thread_current()->pagedir, addr) != NULL ){
+		return true;
+	}
+	return false;
+}
+
+
 void
 exit_unexpectedly(struct thread* t){
 			sema_down(&sysSema);
@@ -91,6 +110,7 @@ syscall_handler (struct intr_frame *f)
 	int fileInitSize=0;
 	int fileSize=0;
 	int fd=0;
+	void* addr=0;
 	struct file* file=NULL;	
 	char* fileBuffer=NULL;
 	char* execFile=NULL;
@@ -233,6 +253,20 @@ syscall_handler (struct intr_frame *f)
 			waitPid = *(espP+1);
 			f->eax=process_wait(waitPid);
 			break;
+
+		case SYS_MMAP:
+			fd = *(espP+1);
+			addr = (void*)*(espP+2);
+			if (check_mmap_argument_invalidty(fd, addr)){
+				f->eax=-1;
+				break;
+			}
+
+			break;
+
+		case SYS_MUNMAP:
+			break;
+
 
 		default:
 			break;

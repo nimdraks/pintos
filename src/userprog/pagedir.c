@@ -283,7 +283,7 @@ is_grown_stack_user (void* esp, void* fault_addr){
 		return true;
 	}	else {
 		return (uintptr_t)(esp - fault_addr) < PGSIZE;
-
+  }
 	return false;
 }
 
