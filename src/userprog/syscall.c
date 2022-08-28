@@ -55,6 +55,11 @@ check_mmap_argument_invalidty(int fd, void* addr){
 	if(fd==0 || fd==1){
 		return true;
 	}
+
+	if(thread_open_fd(fd)==NULL){
+		return true;
+	}
+
 	if (is_kernel_vaddr(addr) || addr == NULL){
 		return true;
 	}
@@ -292,6 +297,20 @@ syscall_handler (struct intr_frame *f)
 			thread_close_mmapDesc(mmid);
 			break;
 
+		case SYS_REMOVE:
+			fileName = (char*)*(espP+1);
+			if(check_ptr_invalidity(t, (void*)fileName, espP) || fileName==NULL ){
+				exit_unexpectedly(t);
+				return;
+			}
+			if(strcmp(fileName, "")==0){
+				f->eax=-1;
+				break;
+			}
+			filesys_remove(fileName);
+
+
+			break;
 
 		default:
 			break;
