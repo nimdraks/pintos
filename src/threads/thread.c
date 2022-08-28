@@ -12,6 +12,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "threads/malloc.h"
+#include "userprog/pagedir.h"
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
@@ -1141,6 +1142,7 @@ thread_close_mmapDesc (int mmid){
 	struct thread* t = thread_current();
 	struct list_elem* e=list_begin(&(t->mmid_list));
 	struct mmapDesc* mmapStruct;
+	int i=0;
 
 	for ( e = list_begin(&(t->mmid_list)); e != list_end(&(t->mmid_list));
 				e = list_next(e))
@@ -1148,6 +1150,13 @@ thread_close_mmapDesc (int mmid){
 		mmapStruct = list_entry (e, struct mmapDesc, elem);
 		if (mmapStruct->mmid == mmid){
 			list_remove(e);
+			int page_number = mmapStruct->offset / PGSIZE;
+			for (i=0; i<page_number+1; i++){
+				void* page_addr = mmapStruct->addr + PGSIZE * i;
+//				printf("%p\n", page_addr);
+				palloc_free_page(pagedir_get_page(t->pagedir ,page_addr));
+				pagedir_clear_page(t->pagedir, page_addr);
+			}
 //			file_close(fdStruct->file);
 			free(mmapStruct);
 			return true;	

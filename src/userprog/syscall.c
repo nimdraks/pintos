@@ -119,6 +119,7 @@ syscall_handler (struct intr_frame *f)
 	int waitPid=0;
 
 	struct mmapDesc* mmap_desc=NULL;
+	int mmid=-1;
 
 
 	switch(syscallNum){
@@ -278,12 +279,17 @@ syscall_handler (struct intr_frame *f)
 			}
 
 			file_read(file, addr, fileSize);
+			mmap_desc->addr = addr;
+			mmap_desc->offset = fileSize;
+
 			f->eax = mmap_desc->mmid;
 
 
 			break;
 
 		case SYS_MUNMAP:
+			mmid = *(espP+1);
+			thread_close_mmapDesc(mmid);
 			break;
 
 
