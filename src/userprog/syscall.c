@@ -284,6 +284,7 @@ syscall_handler (struct intr_frame *f)
 			}
 
 			file_read(file, addr, fileSize);
+			file_seek(file, 0);
 			mmap_desc->addr = addr;
 			mmap_desc->offset = fileSize;
 
