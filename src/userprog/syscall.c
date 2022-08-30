@@ -10,6 +10,7 @@
 #include "threads/thread.h"
 #include "threads/vaddr.h"
 #include "threads/malloc.h"
+#include "threads/palloc.h"
 #include "threads/synch.h"
 #include "lib/user/syscall.h"
 #include "lib/string.h"
@@ -250,10 +251,14 @@ syscall_handler (struct intr_frame *f)
 				exit_unexpectedly(t);
 				return;
 			}
-			copyExecFile = (char*)malloc(strlen(execFile)+1);
+//			copyExecFile = (char*)malloc(strlen(execFile)+1);
+			copyExecFile = palloc_get_page(0);
 			strlcpy(copyExecFile, execFile, strlen(execFile)+1);
+//			printf("%s %d\n", copyExecFile, strlen(copyExecFile));
+//			printf("%s %d\n", execFile, strlen(execFile));
 			execPid=process_execute(copyExecFile);
-			free(copyExecFile);
+//			free(copyExecFile);
+			palloc_free_page (copyExecFile);
 			f->eax=execPid;
 			break;
 

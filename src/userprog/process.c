@@ -49,6 +49,7 @@ process_execute (const char *file_name)
 	char *token, *save_ptr;
 	token = strtok_r((char*)file_name, " ", &save_ptr);
 
+//	printf("name : %s\n", file_name);
   /* Check File existence */
 	file = filesys_open(file_name);
 	if (file == NULL){

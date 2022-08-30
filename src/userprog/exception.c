@@ -156,6 +156,7 @@ page_fault (struct intr_frame *f)
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
 
+
 /*
   printf ("Esp at %p, Page fault at %p: %s error %s page in %s context.\n",
 					f->esp,
