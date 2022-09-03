@@ -224,5 +224,8 @@ struct mmapDesc* thread_make_mmid(int fd);
 struct mmapDesc* thread_get_mmapDesc (int mmid);
 bool thread_close_mmapDesc(int mmid);
 void thread_close_all_mmapDesc (void);
+void thread_mmapDesc_page_dirty_init(int mmid);
+
+
 
 #endif /* threada/thread.h */

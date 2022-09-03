@@ -243,6 +243,7 @@ syscall_handler (struct intr_frame *f)
 			}
 
 			f->eax = file_write(file, fileBuffer, fileSize);
+//			printf("%d written f->eax\n", f->eax);
 			break;
 
 		case SYS_EXEC:
@@ -290,8 +291,12 @@ syscall_handler (struct intr_frame *f)
 
 			file_read(file, addr, fileSize);
 			file_seek(file, 0);
+
+			mmap_desc->file = file;
 			mmap_desc->addr = addr;
 			mmap_desc->offset = fileSize;
+
+//			thread_mmapDesc_page_dirty_init(mmap_desc->mmid);
 
 			f->eax = mmap_desc->mmid;
 

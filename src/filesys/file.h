@@ -18,6 +18,7 @@ struct mmapDesc
 		int fd;
 		int offset;
 		void* addr;
+		struct file* file;
 		char* filename;
 		struct list_elem elem;
 	};

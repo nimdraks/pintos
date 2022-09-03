@@ -30,13 +30,18 @@ test_main (void)
   /* Close mapping.  Data should not be written back, because we
      didn't modify it via the mapping. */
   msg ("munmap \"sample.txt\"");
+//	printf("%s \n", actual);
   munmap (map);
 
+//	printf("%s \n", buffer);
   /* Read file back. */
   msg ("seek \"sample.txt\"");
   seek (handle, 0);
   CHECK (read (handle, buffer, sizeof buffer) == sizeof buffer,
          "read \"sample.txt\"");
+//	printf("%s \n", buffer);
+
+//	printf("%s \n", overwrite);
 
   /* Verify that file overwrite worked. */
   if (memcmp (buffer, overwrite, strlen (overwrite))

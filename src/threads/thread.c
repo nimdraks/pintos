@@ -1136,6 +1136,30 @@ thread_get_mmapDesc (int mmid){
 	return NULL;
 }
 
+void
+thread_mmapDesc_page_dirty_init(int mmid){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->mmid_list));
+	struct mmapDesc* mmapStruct;
+	int i=0;
+
+	for ( e = list_begin(&(t->mmid_list)); e != list_end(&(t->mmid_list));
+				e = list_next(e))
+	{
+		mmapStruct = list_entry (e, struct mmapDesc, elem);
+		if (mmapStruct->mmid == mmid){
+			int page_number = mmapStruct->offset / PGSIZE;
+			for (i=0; i<page_number+1; i++){
+				void* page_addr = mmapStruct->addr + PGSIZE * i;
+				pagedir_set_dirty (t->pagedir, page_addr, false);
+			}
+		}
+	}
+
+	return false;
+
+}
+
 
 bool
 thread_close_mmapDesc (int mmid){
@@ -1150,9 +1174,16 @@ thread_close_mmapDesc (int mmid){
 		mmapStruct = list_entry (e, struct mmapDesc, elem);
 		if (mmapStruct->mmid == mmid){
 			list_remove(e);
+
 			int page_number = mmapStruct->offset / PGSIZE;
 			for (i=0; i<page_number+1; i++){
 				void* page_addr = mmapStruct->addr + PGSIZE * i;
+				int size = i == page_number ? mmapStruct->offset - PGSIZE*i : PGSIZE;
+				if (pagedir_is_dirty (t->pagedir, page_addr) ){
+//					printf("%x size\n", page_addr);
+//					file_write_at(mmapStruct->file, mmapStruct->addr, size ,i * PGSIZE );
+				}
+
 //				printf("%p\n", page_addr);
 				palloc_free_page(pagedir_get_page(t->pagedir ,page_addr));
 				pagedir_clear_page(t->pagedir, page_addr);
