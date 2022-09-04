@@ -157,7 +157,6 @@ syscall_handler (struct intr_frame *f)
 				f->eax=filesys_create(fileName, fileInitSize);
 
 			if (f->eax == 0){
-//				exit_unexpectedly(t);
 				return;
 			}
 			break;
@@ -243,7 +242,6 @@ syscall_handler (struct intr_frame *f)
 			}
 
 			f->eax = file_write(file, fileBuffer, fileSize);
-//			printf("%d written f->eax\n", f->eax);
 			break;
 
 		case SYS_EXEC:
@@ -252,13 +250,9 @@ syscall_handler (struct intr_frame *f)
 				exit_unexpectedly(t);
 				return;
 			}
-//			copyExecFile = (char*)malloc(strlen(execFile)+1);
 			copyExecFile = palloc_get_page(0);
 			strlcpy(copyExecFile, execFile, strlen(execFile)+1);
-//			printf("%s %d\n", copyExecFile, strlen(copyExecFile));
-//			printf("%s %d\n", execFile, strlen(execFile));
 			execPid=process_execute(copyExecFile);
-//			free(copyExecFile);
 			palloc_free_page (copyExecFile);
 			f->eax=execPid;
 			break;
@@ -295,8 +289,7 @@ syscall_handler (struct intr_frame *f)
 			mmap_desc->file = file;
 			mmap_desc->addr = addr;
 			mmap_desc->offset = fileSize;
-
-//			thread_mmapDesc_page_dirty_init(mmap_desc->mmid);
+			thread_mmapDesc_page_dirty_init(mmap_desc->mmid);
 
 			f->eax = mmap_desc->mmid;
 

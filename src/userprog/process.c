@@ -145,6 +145,8 @@ process_exit (void)
 		file_close(cur->tFile);
 	}
 
+	thread_close_all_mmapDesc();
+
   /* Destroy the current process's page directory and switch back
      to the kernel-only page directory. */
   pd = cur->pagedir;
