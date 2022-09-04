@@ -1,11 +1,12 @@
 #include <stdbool.h>
 #include <stdint.h>
+#include <devices/block.h>
 
 
 struct frame_sup_page_table_entry{
 	bool in_memory;
-	int slot_id;
-	char* file_name;
+	block_sector_t sector;
+	size_t cnt;
 };
 
 

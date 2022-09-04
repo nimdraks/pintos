@@ -104,7 +104,13 @@ void unset_frame_table_entries_of_thread(struct thread* t){
 }
 
 
-void find_evicted_entry () {
+void find_evicted_entry (int clock) {
+	struct thread* t;	
+	int i = clock % frame_number;
+	if (frame_table[i].used==true){
+		t = tid_thread(frame_table[i].tid);
+		pagedir_set_accessed(t->pagedir, frame_table[i].vaddr, false);
+	}	
 
 
 }

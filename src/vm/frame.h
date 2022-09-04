@@ -21,3 +21,4 @@ void set_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt, struct
 void set_frame_table_entry_with_va(void* uva, void* kva);
 void unset_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt);
 void unset_frame_table_entries_of_thread(struct thread* t);
+void find_evicted_entry(int clock);
