@@ -6,6 +6,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <limits.h>
 #include "userprog/gdt.h"
 #include "userprog/pagedir.h"
 #include "userprog/tss.h"
@@ -89,7 +90,6 @@ start_process (void *file_name_)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
   success = load (file_name, &if_.eip, &if_.esp);
-
   /* If load failed, quit. */
   palloc_free_page (file_name);
 	p_t->success=success;
@@ -277,7 +277,9 @@ load (char *file_name, void (**eip) (void), void **esp)
 	t->s_pagedir = sup_pagedir_create();
 	if (t->s_pagedir == NULL)
 		goto done;
-  process_activate ();
+	t->valid_seg_max = 0;
+	t->seg_zero_bytes = 0;
+	process_activate ();
 
   /* Open executable file. */
   file = filesys_open (file_name);
@@ -332,6 +334,13 @@ load (char *file_name, void (**eip) (void), void **esp)
               bool writable = (phdr.p_flags & PF_W) != 0;
               uint32_t file_page = phdr.p_offset & ~PGMASK;
               uint32_t mem_page = phdr.p_vaddr & ~PGMASK;
+//							printf("mempage %x\n", mem_page);
+/*							if (t->valid_seg_max < mem_page){
+								t->valid_seg_max = mem_page;
+							}
+							
+							printf("%x \n", t->valid_seg_max);
+*/		
               uint32_t page_offset = phdr.p_vaddr & PGMASK;
               uint32_t read_bytes, zero_bytes;
               if (phdr.p_filesz > 0)
@@ -452,11 +461,18 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       /* Calculate how to fill this page.
          We will read PAGE_READ_BYTES bytes from FILE
          and zero the final PAGE_ZERO_BYTES bytes. */
+			if (read_bytes == 0 && zero_bytes != 0){
+				thread_current()->seg_zero_bytes=zero_bytes;
+				thread_current()->valid_seg_max = upage;
+//				printf("upage %d\n", thread_current()->seg_zero_bytes);
+				break;
+			}
+
       size_t page_read_bytes = read_bytes < PGSIZE ? read_bytes : PGSIZE;
       size_t page_zero_bytes = PGSIZE - page_read_bytes;
 
       /* Get a page of memory. */
-      uint8_t *kpage = palloc_get_page (PAL_USER);
+      uint8_t *kpage = palloc_get_page (PAL_ZERO|PAL_USER);
       if (kpage == NULL)
         return false;
 
@@ -610,6 +626,8 @@ add_new_page (void* fault_addr){
 		if (success){
 			return true;
 		}
+	}else{
+		printf("page is full\n");
 	}
 
 	return false;

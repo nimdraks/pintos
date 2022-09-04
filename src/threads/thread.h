@@ -129,6 +129,9 @@ struct thread
 		struct file* tFile;
 
 		uint32_t *s_pagedir;
+
+		uint32_t valid_seg_max;
+		uint32_t seg_zero_bytes;
 #endif
 
 		struct list mmid_list;

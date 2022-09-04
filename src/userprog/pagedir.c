@@ -282,6 +282,13 @@ is_grown_stack_user (void* esp, void* fault_addr){
 	if (esp <= fault_addr) {
 		return true;
 	}	else {
+		if (fault_addr == NULL)
+			return false;
+	
+		struct thread* t = thread_current();	
+		if ( (void*)t->valid_seg_max <= fault_addr && fault_addr <= (void*)(t->valid_seg_max + t->seg_zero_bytes) )
+			return true;
+	
 		return (uintptr_t)(esp - fault_addr) < PGSIZE;
   }
 	return false;
