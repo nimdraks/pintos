@@ -102,3 +102,9 @@ void unset_frame_table_entries_of_thread(struct thread* t){
 	}
 	lock_release(&frame_table_lock);
 }
+
+
+void find_evicted_entry () {
+
+
+}

@@ -16,6 +16,7 @@
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
+#include "vm/frame.h"
 
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
@@ -347,6 +348,7 @@ thread_exit (void)
   ASSERT (!intr_context ());
 
 #ifdef USERPROG
+	unset_frame_table_entries_of_thread(thread_current());
   process_exit ();
 #endif
 	thread_close_all_fd();

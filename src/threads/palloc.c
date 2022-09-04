@@ -81,9 +81,7 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
 
   lock_acquire (&pool->lock);
   page_idx = bitmap_scan_and_flip (pool->used_map, 0, page_cnt, false);
-	if (page_idx != BITMAP_ERROR && flags & PAL_USER){
-		set_frame_table_entry_with_idx_cnt(page_idx, page_cnt, thread_current());
-	}
+
   lock_release (&pool->lock);
 
   if (page_idx != BITMAP_ERROR)
@@ -101,6 +99,10 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
       if (flags & PAL_ASSERT)
         PANIC ("palloc_get: out of pages");
     }
+
+	if (flags & PAL_USER){
+		set_frame_table_entry_with_idx_cnt(page_idx, page_cnt, thread_current());
+	}
 
   return pages;
 }
