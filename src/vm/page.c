@@ -41,7 +41,7 @@ lookup_sup_page_table_entry (uint32_t *spd, const void* vaddr) {
 uint32_t*
 set_sup_page_table () {
 	size_sup_page_table_entry = sizeof(struct frame_sup_page_table_entry);
-	size_sup_page_table = size_sup_page_table_entry * (1 << PTBITS);
+	size_sup_page_table = size_sup_page_table_entry * (1<<PTBITS);
 	needed_page_numbers = DIV_ROUND_UP(size_sup_page_table, PGSIZE);
 
 	uint32_t* spde = palloc_get_multiple(PAL_ASSERT|PAL_ZERO, needed_page_numbers);
@@ -71,6 +71,12 @@ sup_pagedir_destroy (uint32_t * spd){
 	uint32_t *spde;
 	for (spde = spd; spde < spd + pd_no(PHYS_BASE); spde++) {
 		if (*spde != 0) {
+			int i=0;
+			for(i=0; i< (1<<PTBITS); i++){
+				void* spte=*spde + sizeof(struct frame_sup_page_table_entry)*i;
+				struct frame_sup_page_table_entry* f = (struct frame_sup_page_table_entry*)(spte);
+				swap_remove_block(f->sector, f->cnt);
+			} 
 			palloc_free_multiple((void*)*spde, needed_page_numbers);
 		}
 	}

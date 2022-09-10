@@ -163,8 +163,8 @@ process_exit (void)
       cur->pagedir = NULL;
       pagedir_activate (NULL);
       pagedir_destroy (pd);
-//			sup_pagedir_destroy(spd);
-//			unset_frame_table_entries_of_thread(thread_current());
+			sup_pagedir_destroy(spd);
+			unset_frame_table_entries_of_thread(thread_current());
     }
 }
 

@@ -347,6 +347,7 @@ thread_exit (void)
 {
   ASSERT (!intr_context ());
 
+
 #ifdef USERPROG
 	unset_frame_table_entries_of_thread(thread_current());
   process_exit ();

@@ -24,7 +24,7 @@ frame_table_init (){
 	size_t i =0;
 	for (i = 0; i < frame_number; i++){
 		frame_table[i].used=false;
-		frame_table[i].tid=-1;
+		frame_table[i].tid=0;
 		frame_table[i].vaddr=0;
 	}
 
@@ -61,14 +61,15 @@ void set_frame_table_entry_with_va(void* uva, void* kva){
 	int page_idx = pg_no (kva) - pg_no(frame_base_vaddr);
 
 	lock_acquire (&frame_table_lock);
-	if (frame_table[page_idx].used == false){
-		printf("tid:%d, vaddr:%p\n", frame_table[page_idx].tid, frame_table[page_idx].vaddr);
+
+	if (frame_table[page_idx].used == true){
+		printf("tid:%d, vaddr:%p %x %x %d\n", frame_table[page_idx].tid, frame_table[page_idx].vaddr, uva, kva, page_idx);
 		PANIC ("it should be allocated");
 	}
 
 	frame_table[page_idx].used=true;
 	frame_table[page_idx].vaddr=uva;
-	frame_table[page_idx].tid=thread_current();
+	frame_table[page_idx].tid=thread_current()->tid;
 
 	lock_release(&frame_table_lock);
 }
@@ -80,7 +81,7 @@ void unset_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt){
 	for (offset=0; offset < page_cnt; offset++){
 		size_t page_no = page_idx + offset;
 		frame_table[page_no].used=false;
-		frame_table[page_no].tid=-1;
+		frame_table[page_no].tid=0;
 		frame_table[page_no].vaddr=0;
 	}
 
@@ -94,7 +95,7 @@ void unset_frame_table_entries_of_thread(struct thread* t){
 	for (i = 0; i < frame_number; i++){
 		if (frame_table[i].tid == t->tid){
 			frame_table[i].used=false;
-			frame_table[i].tid=-1;
+			frame_table[i].tid=0;
 			frame_table[i].vaddr=0;
 		}
 	}
@@ -103,12 +104,11 @@ void unset_frame_table_entries_of_thread(struct thread* t){
 
 
 void second_chance_entry (int clock) {
-	struct thread* t;	
 	int i = clock % frame_number;
-	if (frame_table[i].used==true){
-		t = tid_thread(frame_table[i].tid);
-		pagedir_set_accessed(t->pagedir, frame_table[i].vaddr, false);
-	}	
+	struct thread* t = tid_thread(frame_table[i].tid);
+	void* addr=(void*)frame_table[i].vaddr;
+	if (t!=NULL && t->pagedir!=NULL)
+		pagedir_set_accessed(t->pagedir, addr, false);
 }
 
 

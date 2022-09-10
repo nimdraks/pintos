@@ -101,7 +101,7 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
     }
 
 	if (flags & PAL_USER){
-		set_frame_table_entry_with_idx_cnt(page_idx, page_cnt, thread_current());
+//		set_frame_table_entry_with_idx_cnt(page_idx, page_cnt, thread_current());
 	}
 
   return pages;
@@ -148,7 +148,7 @@ palloc_free_multiple (void *pages, size_t page_cnt)
   ASSERT (bitmap_all (pool->used_map, page_idx, page_cnt));
   bitmap_set_multiple (pool->used_map, page_idx, page_cnt, false);
 	if (pool == &user_pool){
-		unset_frame_table_entry_with_idx_cnt(page_idx, page_cnt);
+//		unset_frame_table_entry_with_idx_cnt(page_idx, page_cnt);
 	}
 	lock_release (&pool->lock);
 }

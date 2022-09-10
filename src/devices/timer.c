@@ -180,7 +180,7 @@ timer_interrupt (struct intr_frame *args UNUSED)
   ticks++;
   thread_tick ();
 	thread_check_awake(ticks);
-//	second_chance_entry(ticks);
+	second_chance_entry(ticks);
 	if(thread_mlfqs){
 		thread_current_update_recent_cpu();
 		if(ticks%TIMER_FREQ==0){
