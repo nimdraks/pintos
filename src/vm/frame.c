@@ -116,7 +116,7 @@ size_t choose_evicted_entry (void){
 	size_t i = 0;
 
 	for (i = 0; i < frame_number; i++){
-			if (frame_table[i].used==true && pagedir_is_accessed(tid_thread(frame_table[i].tid),frame_table[i].vaddr)){
+			if (frame_table[i].used==true && pagedir_is_accessed(tid_thread(frame_table[i].tid)->pagedir,frame_table[i].vaddr)){
 				break;
 			}
 	}
