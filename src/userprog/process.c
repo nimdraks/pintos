@@ -279,7 +279,7 @@ load (char *file_name, void (**eip) (void), void **esp)
 	t->s_pagedir = sup_pagedir_create();
 	if (t->s_pagedir == NULL)
 		goto done;
-	t->valid_seg_max = 0;
+	t->valid_seg_max = UINT_MAX;
 	t->seg_zero_bytes = 0;
 	process_activate ();
 
@@ -337,12 +337,12 @@ load (char *file_name, void (**eip) (void), void **esp)
               uint32_t file_page = phdr.p_offset & ~PGMASK;
               uint32_t mem_page = phdr.p_vaddr & ~PGMASK;
 //							printf("mempage %x\n", mem_page);
-/*							if (t->valid_seg_max < mem_page){
+							if (t->valid_seg_max > mem_page){
 								t->valid_seg_max = mem_page;
 							}
 							
-							printf("%x \n", t->valid_seg_max);
-*/		
+//							printf("%x \n", t->valid_seg_max);
+		
               uint32_t page_offset = phdr.p_vaddr & PGMASK;
               uint32_t read_bytes, zero_bytes;
               if (phdr.p_filesz > 0)
@@ -458,14 +458,18 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
   ASSERT (ofs % PGSIZE == 0);
 
   file_seek (file, ofs);
+
+	thread_current()->seg_zero_bytes=upage+zero_bytes+read_bytes;
+//	thread_current()->valid_seg_max = upage;
+
   while (read_bytes > 0 || zero_bytes > 0) 
     {
       /* Calculate how to fill this page.
          We will read PAGE_READ_BYTES bytes from FILE
          and zero the final PAGE_ZERO_BYTES bytes. */
 			if (read_bytes == 0 && zero_bytes != 0){
-				thread_current()->seg_zero_bytes=zero_bytes;
-				thread_current()->valid_seg_max = upage;
+//				thread_current()->seg_zero_bytes=zero_bytes;
+//				thread_current()->valid_seg_max = upage;
 //				printf("upage %d\n", thread_current()->seg_zero_bytes);
 				break;
 			}

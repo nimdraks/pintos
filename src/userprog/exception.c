@@ -208,8 +208,10 @@ page_fault (struct intr_frame *f)
 				size_t e_frame_idx = choose_evicted_entry();
 				bool success = replace_frame_entry(fault_addr, e_frame_idx);
 				if (success){
+//				printf("case333\n");
 					return;
 				}
+//				printf("case33\n");
 			} else{
 //				printf("case4\n");
 				bool success = add_new_page (fault_addr);
@@ -220,16 +222,8 @@ page_fault (struct intr_frame *f)
 		}
 
 
-
-
-
-
 		exit_unexpectedly(thread_current());
 		return;
-/*
-
-
-*/
 	} else{
 		bool is_grown = is_grown_stack_kernel(fault_addr, fault_addr);
 		if (is_grown) {

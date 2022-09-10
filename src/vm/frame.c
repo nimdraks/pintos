@@ -157,7 +157,7 @@ bool replace_frame_entry (void* fault_addr, size_t i){
 
 	void* kva =	i * (1 << PGBITS) + frame_base_vaddr;
 
-//	printf("check1 %x, %x, %x, %x %x\n", page_addr, kva, offset, PGSIZE, i);
+//	printf("%x %x %x %x\n", page_addr, kva, i, frame_base_vaddr);
 	bool success = install_page(page_addr, kva, true);
 //	printf("check2 %d\n", success);
 

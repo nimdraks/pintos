@@ -107,6 +107,9 @@ read_from_swap(void* fault_addr){
 	bool success=swap_read_block(spte->sector, spte->cnt, page_addr);
 	if (success){
 		swap_remove_block(spte->sector, spte->cnt);
+		spte->in_memory = true;
+		spte->sector = 0;
+		spte->cnt = 0;	
 	}
 
 //	printf("check33\n");
