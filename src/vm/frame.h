@@ -30,5 +30,6 @@ void unset_frame_table_entries_of_thread(struct thread* t);
 void second_chance_entry(int clock);
 size_t choose_evicted_entry(void);
 bool replace_frame_entry(void* fault_addr, size_t i);
+bool is_full_frame_table(void);
 
 #endif

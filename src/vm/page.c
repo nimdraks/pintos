@@ -89,7 +89,7 @@ is_at_swap(void* fault_addr){
 	uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
 
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(t->s_pagedir, page_addr);
-	if (spte->in_memory == false){
+	if (spte->in_memory == false && spte->sector!= 0){
 		return true;
 	}
 

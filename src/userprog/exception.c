@@ -184,6 +184,15 @@ page_fault (struct intr_frame *f)
 		}
 
 		bool is_swap = is_at_swap(fault_addr);
+		if (is_swap){
+
+		}
+
+		bool is_full_frame = is_full_frame_table();
+		if (is_full_frame){
+			printf("testet\n");
+		}
+
 
 		bool success = add_new_page (fault_addr);
 		if  (success){

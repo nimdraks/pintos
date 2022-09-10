@@ -133,7 +133,7 @@ bool replace_frame_entry (void* fault_addr, size_t i){
 	lock_acquire(&frame_table_lock);
 	frame_table[i].used=false;
 	lock_release(&frame_table_lock);
-	pagedir_clear_page( tid_thread(frame_table[i].tid), frame_table[i].vaddr  );
+	pagedir_clear_page( tid_thread(frame_table[i].tid)->pagedir, frame_table[i].vaddr  );
 
 	struct swap_block* sw_bl=swap_write_page(frame_table[i].vaddr, 1);
 	struct thread* t=tid_thread(frame_table[i].tid);
@@ -162,7 +162,19 @@ bool replace_frame_entry (void* fault_addr, size_t i){
 
 
 
-
+bool is_full_frame_table(){
+	bool full=true;
+	size_t i=0;
+	lock_acquire(&frame_table_lock);
+	for (i = 0; i < frame_number; i++){
+		if(frame_table[i].used==false){
+			full=false;
+			break;
+		}
+	}
+	lock_release(&frame_table_lock);
+	return full;
+}
 
 
 
