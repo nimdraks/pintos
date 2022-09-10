@@ -3,6 +3,7 @@
 #include "threads/palloc.h"
 #include "threads/vaddr.h"
 #include "threads/synch.h"
+#include "userprog/process.h"
 #include "vm/frame.h"
 
 
@@ -10,7 +11,6 @@ static uint8_t* frame_base_vaddr;
 static size_t frame_number;
 struct frame_entry* frame_table;
 struct lock frame_table_lock;
-int global_age;
 
 void
 frame_table_init (){
@@ -18,7 +18,6 @@ frame_table_init (){
 	frame_base_vaddr = get_pool_base(false);	
 	int frame_pages = DIV_ROUND_UP(get_frame_table_size(), PGSIZE);
 	frame_table = (struct frame_entry*)palloc_get_multiple (PAL_ASSERT|PAL_ZERO, frame_pages);
-	global_age=0;
 
 	lock_init(&frame_table_lock);	
 
@@ -62,15 +61,14 @@ void set_frame_table_entry_with_va(void* uva, void* kva){
 	int page_idx = pg_no (kva) - pg_no(frame_base_vaddr);
 
 	lock_acquire (&frame_table_lock);
-	global_age++;
-
 	if (frame_table[page_idx].used == false){
 		printf("tid:%d, vaddr:%p\n", frame_table[page_idx].tid, frame_table[page_idx].vaddr);
 		PANIC ("it should be allocated");
 	}
 
+	frame_table[page_idx].used=true;
 	frame_table[page_idx].vaddr=uva;
-	frame_table[page_idx].age=global_age;
+	frame_table[page_idx].tid=thread_current();
 
 	lock_release(&frame_table_lock);
 }
@@ -104,13 +102,53 @@ void unset_frame_table_entries_of_thread(struct thread* t){
 }
 
 
-void find_evicted_entry (int clock) {
+void second_chance_entry (int clock) {
 	struct thread* t;	
 	int i = clock % frame_number;
 	if (frame_table[i].used==true){
 		t = tid_thread(frame_table[i].tid);
 		pagedir_set_accessed(t->pagedir, frame_table[i].vaddr, false);
 	}	
-
-
 }
+
+
+size_t choose_evicted_entry (void){
+	size_t i = 0;
+
+	for (i = 0; i < frame_number; i++){
+			if (frame_table[i].used==true && pagedir_is_accessed(tid_thread(frame_table[i].tid),frame_table[i].vaddr)){
+				break;
+			}
+	}
+
+	return i;
+}
+
+bool replace_frame_entry (void* fault_addr, size_t i){
+	struct swap_block* sw_bl=swap_write_page(frame_table[i].vaddr, 1);
+	struct thread* t=tid_thread(frame_table[i].tid);
+	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(t->s_pagedir, frame_table[i].vaddr);
+	spte->in_memory = false;
+	spte->sector = sw_bl->sector;
+	spte->cnt = sw_bl->sector_size;	
+
+
+	uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
+
+	lock_acquire(&frame_table_lock);
+	frame_table[i].tid=thread_current()->tid;
+	frame_table[i].vaddr=page_addr;
+	lock_release(&frame_table_lock);
+
+	void* kva =	(void*)((i + pg_no(frame_base_vaddr)) << PGBITS);
+	bool success = install_page(page_addr, kva, true);
+
+	return success;
+}
+
+
+
+
+
+
+

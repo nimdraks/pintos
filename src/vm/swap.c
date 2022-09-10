@@ -43,12 +43,12 @@ swap_write_page(void* pages, size_t page_number){
 		return NULL;
 
 	block_write(swap_device, sector, pages);
+	lock_release(&swap_lock);
 	
 	sb = malloc(sizeof(struct swap_block));
 	sb->sector = sector;
 	sb->sector_size = cnt;
 
-	lock_release(&swap_lock);
 	return sb;
 }
 
@@ -70,7 +70,12 @@ swap_read_block(block_sector_t sector, size_t cnt, void* pages){
 }
 
 
-
+void
+swap_remove_block(block_sector_t sector, size_t cnt){
+	lock_acquire(&swap_lock);
+  bitmap_set_multiple (swap_free_map, sector, cnt, false);
+	lock_release(&swap_lock);
+}
 
 
 

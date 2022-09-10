@@ -1,4 +1,11 @@
+#ifndef FRAME_H
+#define FRAME_H
+
 #include "threads/thread.h"
+#include "threads/pte.h"
+#include "userprog/pagedir.h"
+#include "vm/swap.h"
+#include "vm/page.h"
 #include "stdint.h"
 
 
@@ -9,7 +16,6 @@ struct frame_entry{
 	bool used;
 	tid_t tid;
 	uint8_t* vaddr;
-	int age;
 };
 
 
@@ -21,4 +27,8 @@ void set_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt, struct
 void set_frame_table_entry_with_va(void* uva, void* kva);
 void unset_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt);
 void unset_frame_table_entries_of_thread(struct thread* t);
-void find_evicted_entry(int clock);
+void second_chance_entry(int clock);
+size_t choose_evicted_entry(void);
+bool replace_frame_entry(void* fault_addr, size_t i);
+
+#endif
