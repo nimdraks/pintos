@@ -183,14 +183,27 @@ page_fault (struct intr_frame *f)
 			return;
 		}
 
-		bool is_swap = is_at_swap(fault_addr);
+		struct frame_sup_page_table_entry* spte = at_swap(fault_addr);
 		bool is_full_frame = is_full_frame_table();
 
-		if (is_swap){
-
+		if (spte!=NULL){
+			if (is_full_frame){/*
+				printf("case1\n");
+				size_t e_frame_idx = choose_evicted_entry();
+				bool success = replace_frame_entry(fault_addr, e_frame_idx);
+				bool success2 = read_from_swap(fault_addr);*/
+				if (success && success2)
+					return;
+			} else{
+				printf("case2\n");
+			}
 		} else{
 			if (is_full_frame){
-				printf("testet\n");
+				size_t e_frame_idx = choose_evicted_entry();
+				bool success = replace_frame_entry(fault_addr, e_frame_idx);
+				if (success){
+					return;
+				}
 			} else{
 				bool success = add_new_page (fault_addr);
 				if  (success){
@@ -207,11 +220,8 @@ page_fault (struct intr_frame *f)
 		exit_unexpectedly(thread_current());
 		return;
 /*
-		size_t e_frame_idx = choose_evicted_entry();
-		success = replace_frame_entry(fault_addr, e_frame_idx);
-		if (success){
-			return;
-		}
+
+
 */
 	} else{
 		bool is_grown = is_grown_stack_kernel(fault_addr, fault_addr);

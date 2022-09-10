@@ -118,7 +118,7 @@ size_t choose_evicted_entry (void){
 	size_t i = 0;
 
 	for (i = 0; i < frame_number; i++){
-			if (frame_table[i].used==true && pagedir_is_accessed(tid_thread(frame_table[i].tid)->pagedir,frame_table[i].vaddr)){
+			if (frame_table[i].used==true && pagedir_is_accessed(tid_thread(frame_table[i].tid)->pagedir,frame_table[i].vaddr)==false){
 				break;
 			}
 	}
@@ -127,24 +127,29 @@ size_t choose_evicted_entry (void){
 }
 
 bool replace_frame_entry (void* fault_addr, size_t i){
-	uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
 
-//	printf("check1 %x, %x %x\n", frame_table[i].used, frame_table[i].vaddr, frame_base_vaddr);
+	void* evicted_addr;
+	size_t evicted_tid;
+	struct thread* evicted_t;
+
+	printf("check1 %x %x, %x %x\n", i, frame_table[i].used, frame_table[i].vaddr, frame_base_vaddr);
 	lock_acquire(&frame_table_lock);
 	frame_table[i].used=false;
+	evicted_addr=frame_table[i].vaddr;
+	evicted_tid=frame_table[i].tid;
 	lock_release(&frame_table_lock);
-	pagedir_clear_page( tid_thread(frame_table[i].tid)->pagedir, frame_table[i].vaddr  );
 
-	struct swap_block* sw_bl=swap_write_page(frame_table[i].vaddr, 1);
-	struct thread* t=tid_thread(frame_table[i].tid);
-	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(t->s_pagedir, frame_table[i].vaddr);
+	evicted_t = tid_thread(evicted_tid);
+	struct swap_block* sw_bl=swap_write_page(evicted_addr, 1);
+	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_addr);
 	spte->in_memory = false;
 	spte->sector = sw_bl->sector;
 	spte->cnt = sw_bl->sector_size;	
 
+	pagedir_clear_page( evicted_t->pagedir, evicted_addr);
 
 
-
+	uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
 	lock_acquire(&frame_table_lock);
 	frame_table[i].tid=thread_current()->tid;
 	frame_table[i].vaddr=page_addr;
@@ -156,6 +161,43 @@ bool replace_frame_entry (void* fault_addr, size_t i){
 	bool success = install_page(page_addr, kva, true);
 //	printf("check2 %d\n", success);
 
+	return success;
+}
+
+bool replace_frame_entry_with_swap (void* fault_addr, size_t i){
+
+	void* evicted_addr;
+	size_t evicted_tid;
+	struct thread* evicted_t;
+
+	printf("check1 %x %x, %x %x\n", i, frame_table[i].used, frame_table[i].vaddr, frame_base_vaddr);
+	lock_acquire(&frame_table_lock);
+	frame_table[i].used=false;
+	evicted_addr=frame_table[i].vaddr;
+	evicted_tid=frame_table[i].tid;
+	lock_release(&frame_table_lock);
+
+	evicted_t = tid_thread(evicted_tid);
+	struct swap_block* sw_bl=swap_write_page(evicted_addr, 1);
+	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_addr);
+	spte->in_memory = false;
+	spte->sector = sw_bl->sector;
+	spte->cnt = sw_bl->sector_size;	
+
+	pagedir_clear_page( evicted_t->pagedir, evicted_addr);
+
+
+	uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
+	lock_acquire(&frame_table_lock);
+	frame_table[i].tid=thread_current()->tid;
+	frame_table[i].vaddr=page_addr;
+	lock_release(&frame_table_lock);
+
+	void* kva =	i * (1 << PGBITS) + frame_base_vaddr;
+
+//	printf("check1 %x, %x, %x, %x %x\n", page_addr, kva, offset, PGSIZE, i);
+	bool success = install_page(page_addr, kva, true);
+//	printf("check2 %d\n", success);
 
 	return success;
 }

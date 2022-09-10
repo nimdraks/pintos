@@ -18,7 +18,7 @@ struct frame_sup_page_table_entry* lookup_sup_page_table_entry (uint32_t *spd, c
 uint32_t* set_sup_page_table(void);
 bool set_sup_page_table_entry(uint32_t* spd, const void* uaddr);
 void sup_pagedir_destroy(uint32_t *spd);
-bool is_at_swap(void* fault_addr);
+struct frame_sup_page_table_entry* at_swap(void* fault_addr);
 bool read_from_swap(void* fault_addr);
 
 #endif

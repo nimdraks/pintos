@@ -83,17 +83,18 @@ sup_pagedir_destroy (uint32_t * spd){
 	palloc_free_page(spd);
 }
 
-bool
-is_at_swap(void* fault_addr){
+
+struct frame_sup_page_table_entry*
+at_swap(void* fault_addr){
 	struct thread* t=thread_current();
 	uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
 
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(t->s_pagedir, page_addr);
 	if (spte->in_memory == false && spte->sector!= 0){
-		return true;
+		return spte;
 	}
 
-	return false;
+	return NULL;
 }
 
 bool
