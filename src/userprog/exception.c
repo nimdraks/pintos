@@ -12,6 +12,7 @@
 #include "threads/pte.h"
 #include "threads/palloc.h"
 #include "threads/vaddr.h"
+#include "vm/frame.h"
 
 /* Number of page faults processed. */
 static long long page_fault_cnt;
@@ -155,8 +156,6 @@ page_fault (struct intr_frame *f)
   not_present = (f->error_code & PF_P) == 0;
   write = (f->error_code & PF_W) != 0;
   user = (f->error_code & PF_U) != 0;
-
-
 /*
   printf ("Esp at %p, Page fault at %p: %s error %s page in %s context.\n",
 					f->esp,
@@ -179,24 +178,37 @@ page_fault (struct intr_frame *f)
 		}
 
 		bool is_grown = is_grown_stack_user(f->esp, fault_addr);
-		if (is_grown) {
-			bool success = add_new_page (fault_addr);
-			if  (success){
-				return;
-			} else{
-
-
-			}
+		if (!is_grown) {
+			exit_unexpectedly(thread_current());
+			return;
 		}
 
+		bool is_swap = is_at_swap(fault_addr);
+
+		bool success = add_new_page (fault_addr);
+		if  (success){
+			return;
+		}
 		exit_unexpectedly(thread_current());
 		return;
+
+		size_t e_frame_idx = choose_evicted_entry();
+		success = replace_frame_entry(fault_addr, e_frame_idx);
+		if (success){
+			return;
+		}
 	} else{
 		bool is_grown = is_grown_stack_kernel(fault_addr, fault_addr);
 		if (is_grown) {
 			bool success = add_new_page (fault_addr);
 			if  (success){
 				return;
+			} else{
+				size_t e_frame_idx = choose_evicted_entry();
+				bool success = replace_frame_entry(fault_addr, e_frame_idx);
+				if (success){
+					return;
+				}
 			}
 		}
 	}	
