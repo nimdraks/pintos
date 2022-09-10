@@ -60,7 +60,7 @@ swap_read_block(block_sector_t sector, size_t cnt, void* pages){
 	void* addr = pages;
 
 	for (i=0; i<cnt; i++){
-		addr = pages + (BLOCK_SECTOR_SIZE * cnt);
+		addr = pages + (BLOCK_SECTOR_SIZE * i);
 		block_read(swap_device, sector+cnt, addr);
 	}
 

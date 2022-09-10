@@ -102,14 +102,14 @@ read_from_swap(void* fault_addr){
 	struct thread* t=thread_current();
 	uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(t->s_pagedir, page_addr);
-	if (spte->in_memory == true){
-		return false;
-	}
 
+//	printf("check3 %d %d %x\n", spte->sector, spte->cnt, page_addr);
 	bool success=swap_read_block(spte->sector, spte->cnt, page_addr);
 	if (success){
 		swap_remove_block(spte->sector, spte->cnt);
 	}
+
+//	printf("check33\n");
 
 	return success;
 }
