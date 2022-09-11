@@ -24,7 +24,7 @@ frame_table_init (){
 	size_t i =0;
 	for (i = 0; i < frame_number; i++){
 		frame_table[i].used=false;
-		frame_table[i].tid=0;
+		frame_table[i].tid=-1;
 		frame_table[i].vaddr=0;
 	}
 
@@ -118,9 +118,9 @@ size_t choose_evicted_entry (void){
 	size_t i = 0;
 
 	for (i = 0; i < frame_number; i++){
-			if (frame_table[i].used==true && pagedir_is_accessed(tid_thread(frame_table[i].tid)->pagedir,frame_table[i].vaddr)==false){
-				break;
-			}
+			if (frame_table[i].tid != -1 && frame_table[i].vaddr!=0)
+				if (frame_table[i].used==true && pagedir_is_accessed(tid_thread(frame_table[i].tid)->pagedir,frame_table[i].vaddr)==false)
+					break;	
 	}
 
 	return i;
@@ -145,6 +145,7 @@ bool replace_frame_entry (void* fault_addr, size_t i){
 	spte->in_memory = false;
 	spte->sector = sw_bl->sector;
 	spte->cnt = sw_bl->sector_size;	
+//	printf("write sector %d cnt %d\n", spte->sector, spte->cnt);
 
 	pagedir_clear_page( evicted_t->pagedir, evicted_addr);
 

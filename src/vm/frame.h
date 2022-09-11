@@ -14,7 +14,7 @@ extern struct frame_entry* frame_table;
 
 struct frame_entry{
 	bool used;
-	tid_t tid;
+	int tid;
 	uint8_t* vaddr;
 };
 
