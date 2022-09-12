@@ -250,7 +250,7 @@ syscall_handler (struct intr_frame *f)
 				exit_unexpectedly(t);
 				return;
 			}
-			copyExecFile = palloc_get_page(0);
+			copyExecFile = palloc_get_page(PAL_ASSERT|PAL_ZERO);
 			strlcpy(copyExecFile, execFile, strlen(execFile)+1);
 			execPid=process_execute(copyExecFile);
 			palloc_free_page (copyExecFile);

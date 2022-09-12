@@ -34,6 +34,7 @@ frame_table_init (){
 	printf("User frame vaddr(kernel vaddr) starts at %p\n", frame_base_vaddr);
 	printf("Frame_entry size %d\n", sizeof(struct frame_entry));
 	printf("The number of pages for the frame table, %d\n", frame_pages);
+	printf("The frame table is %x\n", frame_table);
 
 }
 
