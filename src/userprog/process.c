@@ -531,6 +531,9 @@ setup_stack (void **esp, char* file_name, char* argvs)
 			size_t e_frame_idx = choose_evicted_entry();
       success = replace_frame_entry(((uint8_t *) PHYS_BASE) - PGSIZE, e_frame_idx);
 			lock_release(&global_frame_table_lock);
+      if (success){
+				setup_argument(esp, file_name, argvs);
+			}
 		}
 
   return success;
