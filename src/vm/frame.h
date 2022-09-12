@@ -17,6 +17,7 @@ struct frame_entry{
 	bool used;
 	int tid;
 	uint8_t* vaddr;
+	uint8_t* kvaddr;
 };
 
 
