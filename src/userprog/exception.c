@@ -191,23 +191,16 @@ page_fault (struct intr_frame *f)
 
 		if (spte!=NULL){
 			if (kpage==NULL){
-//				printf("case1\n");
 				size_t e_frame_idx = choose_evicted_entry();
 				bool success = replace_frame_entry(fault_addr, e_frame_idx);
 				bool success2 = read_from_swap(fault_addr);
-//				printf("%d %d\n", success, success2);
 				lock_release(&global_frame_table_lock);
 				if (success && success2){
-//					printf("check1\n");
 					return;
 				}
-//					printf("check2\n");
 			} else{
-//				printf("case2\n");
 				bool success = add_new_page_with_kpage (fault_addr, kpage);
-//				printf("success %d\n", success);
 				bool success2 = read_from_swap(fault_addr);
-//				printf("success %d\n", success2);
 				lock_release(&global_frame_table_lock);
 				if (success && success2){
 					return;
@@ -215,17 +208,13 @@ page_fault (struct intr_frame *f)
 			}
 		} else{
 			if (kpage==NULL){
-//				printf("case3\n");
 				size_t e_frame_idx = choose_evicted_entry();
 				bool success = replace_frame_entry(fault_addr, e_frame_idx);
 				lock_release(&global_frame_table_lock);
 				if (success){
-//				printf("case333\n");
 					return;
 				}
-//				printf("case33\n");
 			} else{
-//				printf("case4\n");
 				bool success = add_new_page_with_kpage (fault_addr, kpage);
 				lock_release(&global_frame_table_lock);
 				if  (success){
@@ -234,25 +223,51 @@ page_fault (struct intr_frame *f)
 			}
 		}
 
-
 		exit_unexpectedly(thread_current());
 		return;
 	} else{
 		bool is_grown = is_grown_stack_kernel(fault_addr, fault_addr);
 		if (is_grown) {
-			bool success = add_new_page (fault_addr);
-			if  (success){
-				return;
+
+			lock_acquire(&global_frame_table_lock);
+			struct frame_sup_page_table_entry* spte = at_swap(fault_addr);
+			void* kpage = palloc_get_page(PAL_USER|PAL_ZERO);
+
+			if (spte!=NULL){
+				if (kpage==NULL){
+					size_t e_frame_idx = choose_evicted_entry();
+					bool success = replace_frame_entry(fault_addr, e_frame_idx);
+					bool success2 = read_from_swap(fault_addr);
+					lock_release(&global_frame_table_lock);
+					if (success && success2){
+						return;
+					}
+				} else{
+					bool success = add_new_page_with_kpage (fault_addr, kpage);
+					bool success2 = read_from_swap(fault_addr);
+					lock_release(&global_frame_table_lock);
+					if (success && success2){
+						return;
+					}
+				}
 			} else{
-				size_t e_frame_idx = choose_evicted_entry();
-				bool success = replace_frame_entry(fault_addr, e_frame_idx);
-				if (success){
-					return;
+				if (kpage==NULL){
+					size_t e_frame_idx = choose_evicted_entry();
+					bool success = replace_frame_entry(fault_addr, e_frame_idx);
+					lock_release(&global_frame_table_lock);
+					if (success){
+						return;
+					}
+				} else{
+					bool success = add_new_page_with_kpage (fault_addr, kpage);
+					lock_release(&global_frame_table_lock);
+					if  (success){
+						return;
+					}
 				}
 			}
 		}
 	}	
-
 
   /* To implement virtual memory, delete the rest of the function
      body, and replace it with code that brings in the page to
