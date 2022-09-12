@@ -167,6 +167,11 @@ bool replace_frame_entry (void* fault_addr, size_t i){
 	lock_release(&frame_table_lock);
 //	printf("%x %x %x %x\n", page_addr, kva, i, frame_base_vaddr);
 	bool success = install_page(page_addr, kva, true);
+	char* page_addr_char = (char*)page_addr;
+	int j=0;
+	for (j=0; j<PGSIZE; j++){
+		page_addr_char[j]=0;
+	}
 
 //	printf("check2 %d\n", success);
 

@@ -4,6 +4,7 @@
 #include "threads/synch.h"
 #include "threads/vaddr.h"
 #include "threads/malloc.h"
+#include "threads/pte.h"
 #include "filesys/inode.h"
 #include "vm/swap.h"
 
@@ -35,6 +36,7 @@ swap_free_map_init(void){
 struct swap_block*
 swap_write_page(void* pages, size_t page_number){
 	lock_acquire(&swap_lock);
+	pages = (uint8_t*)((uintptr_t) pages & PTE_ADDR);
 
 	struct swap_block* sb = NULL;
 	size_t cnt = DIV_ROUND_UP(page_number * PGSIZE, BLOCK_SECTOR_SIZE); 
