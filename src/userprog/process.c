@@ -515,6 +515,7 @@ setup_stack (void **esp, char* file_name, char* argvs)
   uint8_t *kpage;
   bool success = false;
   kpage = palloc_get_page (PAL_USER | PAL_ZERO);
+
   if (kpage != NULL) 
     {
       success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
@@ -524,6 +525,14 @@ setup_stack (void **esp, char* file_name, char* argvs)
       else
         palloc_free_page (kpage);
     }
+	else
+		{
+			lock_acquire(&global_frame_table_lock);
+			size_t e_frame_idx = choose_evicted_entry();
+      success = replace_frame_entry(((uint8_t *) PHYS_BASE) - PGSIZE, e_frame_idx);
+			lock_release(&global_frame_table_lock);
+		}
+
   return success;
 }
 

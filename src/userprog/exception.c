@@ -186,7 +186,6 @@ page_fault (struct intr_frame *f)
 
 		lock_acquire(&global_frame_table_lock);
 		struct frame_sup_page_table_entry* spte = at_swap(fault_addr);
-//		bool is_full_frame = is_full_frame_table();
 		void* kpage = palloc_get_page(PAL_USER|PAL_ZERO);
 
 		if (spte!=NULL){
