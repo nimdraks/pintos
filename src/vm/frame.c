@@ -11,6 +11,7 @@ static uint8_t* frame_base_vaddr;
 static size_t frame_number;
 struct frame_entry* frame_table;
 struct lock frame_table_lock;
+struct lock global_frame_table_lock;
 
 void
 frame_table_init (){
@@ -20,6 +21,7 @@ frame_table_init (){
 	frame_table = (struct frame_entry*)palloc_get_multiple (PAL_ASSERT|PAL_ZERO, frame_pages);
 
 	lock_init(&frame_table_lock);	
+	lock_init(&global_frame_table_lock);	
 
 	size_t i =0;
 	for (i = 0; i < frame_number; i++){

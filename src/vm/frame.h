@@ -11,6 +11,7 @@
 
 
 extern struct frame_entry* frame_table;
+extern struct lock global_frame_table_lock;
 
 struct frame_entry{
 	bool used;
