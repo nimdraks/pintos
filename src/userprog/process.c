@@ -629,6 +629,8 @@ bool
 add_new_page (void* fault_addr){
 	uint8_t* kpage = palloc_get_page (PAL_USER | PAL_ZERO);
 	if (kpage != NULL){
+		int page_idx = pg_no (kpage) - pg_no(frame_base_vaddr);
+//		printf("%d frame will be installed\n", page_idx);
 		uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
 		bool success = install_page (page_addr, kpage, true);
 		if (success){
@@ -642,7 +644,22 @@ add_new_page (void* fault_addr){
 }
 
 
+bool
+add_new_page_with_kpage (void* fault_addr, void* kpage){
+	if (kpage != NULL){
+		int page_idx = pg_no (kpage) - pg_no(frame_base_vaddr);
+//		printf("%d frame will be installed\n", page_idx);
+		uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
+		bool success = install_page (page_addr, kpage, true);
+		if (success){
+			return true;
+		}
+	}else{
+		printf("page is full\n");
+	}
 
+	return false;
+}
 
 
 

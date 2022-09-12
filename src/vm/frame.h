@@ -9,7 +9,7 @@
 #include "stdint.h"
 
 
-
+uint8_t* frame_base_vaddr;
 extern struct frame_entry* frame_table;
 extern struct lock global_frame_table_lock;
 

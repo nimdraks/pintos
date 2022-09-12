@@ -101,6 +101,7 @@ palloc_get_multiple (enum palloc_flags flags, size_t page_cnt)
     }
 
 	if (flags & PAL_USER){
+//			printf("%d thread get page\n", thread_current()->tid);
 //		set_frame_table_entry_with_idx_cnt(page_idx, page_cnt, thread_current());
 	}
 

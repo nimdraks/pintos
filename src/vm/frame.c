@@ -7,7 +7,7 @@
 #include "vm/frame.h"
 
 
-static uint8_t* frame_base_vaddr;
+uint8_t* frame_base_vaddr;
 static size_t frame_number;
 struct frame_entry* frame_table;
 struct lock frame_table_lock;
@@ -165,9 +165,9 @@ bool replace_frame_entry (void* fault_addr, size_t i){
 	frame_table[i].vaddr=page_addr;
 	frame_table[i].kvaddr=kva;
 	lock_release(&frame_table_lock);
-
 //	printf("%x %x %x %x\n", page_addr, kva, i, frame_base_vaddr);
 	bool success = install_page(page_addr, kva, true);
+
 //	printf("check2 %d\n", success);
 
 	return success;
@@ -182,6 +182,7 @@ bool is_full_frame_table(){
 	for (i = 0; i < frame_number; i++){
 		if(frame_table[i].used==false){
 			full=false;
+			printf("%d frame is empty at t %d\n", i, frame_table[i].tid);
 			break;
 		}
 	}

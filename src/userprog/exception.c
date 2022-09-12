@@ -186,10 +186,11 @@ page_fault (struct intr_frame *f)
 
 		lock_acquire(&global_frame_table_lock);
 		struct frame_sup_page_table_entry* spte = at_swap(fault_addr);
-		bool is_full_frame = is_full_frame_table();
+//		bool is_full_frame = is_full_frame_table();
+		void* kpage = palloc_get_page(PAL_USER|PAL_ZERO);
 
 		if (spte!=NULL){
-			if (is_full_frame){
+			if (kpage==NULL){
 //				printf("case1\n");
 				size_t e_frame_idx = choose_evicted_entry();
 				bool success = replace_frame_entry(fault_addr, e_frame_idx);
@@ -202,11 +203,18 @@ page_fault (struct intr_frame *f)
 				}
 //					printf("check2\n");
 			} else{
-				lock_release(&global_frame_table_lock);
 //				printf("case2\n");
+				bool success = add_new_page_with_kpage (fault_addr, kpage);
+//				printf("success %d\n", success);
+				bool success2 = read_from_swap(fault_addr);
+//				printf("success %d\n", success2);
+				lock_release(&global_frame_table_lock);
+				if (success && success2){
+					return;
+				}
 			}
 		} else{
-			if (is_full_frame){
+			if (kpage==NULL){
 //				printf("case3\n");
 				size_t e_frame_idx = choose_evicted_entry();
 				bool success = replace_frame_entry(fault_addr, e_frame_idx);
@@ -218,7 +226,7 @@ page_fault (struct intr_frame *f)
 //				printf("case33\n");
 			} else{
 //				printf("case4\n");
-				bool success = add_new_page (fault_addr);
+				bool success = add_new_page_with_kpage (fault_addr, kpage);
 				lock_release(&global_frame_table_lock);
 				if  (success){
 					return;
