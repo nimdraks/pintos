@@ -190,8 +190,7 @@ page_fault (struct intr_frame *f)
 
 		if (spte!=NULL){
 			if (kpage==NULL){
-				size_t e_frame_idx = choose_evicted_entry();
-				bool success = replace_frame_entry(fault_addr, e_frame_idx);
+				bool success = replace_frame_entry(fault_addr);
 				bool success2 = read_from_swap(fault_addr);
 				lock_release(&global_frame_table_lock);
 				if (success && success2){
@@ -207,8 +206,7 @@ page_fault (struct intr_frame *f)
 			}
 		} else{
 			if (kpage==NULL){
-				size_t e_frame_idx = choose_evicted_entry();
-				bool success = replace_frame_entry(fault_addr, e_frame_idx);
+				bool success = replace_frame_entry(fault_addr);
 				lock_release(&global_frame_table_lock);
 				if (success){
 					return;
@@ -234,8 +232,7 @@ page_fault (struct intr_frame *f)
 
 			if (spte!=NULL){
 				if (kpage==NULL){
-					size_t e_frame_idx = choose_evicted_entry();
-					bool success = replace_frame_entry(fault_addr, e_frame_idx);
+					bool success = replace_frame_entry(fault_addr);
 					bool success2 = read_from_swap(fault_addr);
 					lock_release(&global_frame_table_lock);
 					if (success && success2){
@@ -251,8 +248,7 @@ page_fault (struct intr_frame *f)
 				}
 			} else{
 				if (kpage==NULL){
-					size_t e_frame_idx = choose_evicted_entry();
-					bool success = replace_frame_entry(fault_addr, e_frame_idx);
+					bool success = replace_frame_entry(fault_addr);
 					lock_release(&global_frame_table_lock);
 					if (success){
 						return;

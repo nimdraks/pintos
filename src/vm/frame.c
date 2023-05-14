@@ -120,20 +120,7 @@ void second_chance_entry (int clock) {
 		pagedir_set_accessed(t->pagedir, addr, false);
 }
 
-
-size_t choose_evicted_entry (void){
-	size_t i = 0;
-
-	for (i = 0; i < frame_number; i++){
-			if (frame_table[i].tid != -1 && frame_table[i].vaddr!=0)
-				if (frame_table[i].used==true && pagedir_is_accessed(tid_thread(frame_table[i].tid)->pagedir,frame_table[i].vaddr)==false)
-					break;	
-	}
-
-	return i;
-}
-
-bool replace_frame_entry (void* fault_addr, size_t i){
+bool replace_frame_entry (void* fault_addr){
 
 	void* evicted_uvaddr;
 	void* evicted_kvaddr;
@@ -142,6 +129,20 @@ bool replace_frame_entry (void* fault_addr, size_t i){
 
 //	printf("checks1 %x %x, %x %x\n", i, frame_table[i].used, frame_table[i].vaddr, frame_base_vaddr);
 	lock_acquire(&frame_table_lock);
+
+	size_t i = -1;
+
+	for (i = 0; i < frame_number; i++){
+			if (frame_table[i].tid != -1 && frame_table[i].vaddr!=0)
+				if (frame_table[i].used==true && pagedir_is_accessed(tid_thread(frame_table[i].tid)->pagedir,frame_table[i].vaddr)==false)
+					break;	
+	}
+
+	if (i==-1){
+		lock_release(&frame_table_lock);
+		return false;
+	}
+
 	frame_table[i].used=false;
 	evicted_uvaddr=frame_table[i].vaddr;
 	evicted_kvaddr=frame_table[i].kvaddr;
