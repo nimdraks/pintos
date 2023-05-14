@@ -184,9 +184,9 @@ page_fault (struct intr_frame *f)
 			return;
 		}
 
-		printf("try to get global ft lock %d \n", thread_tid());
+		printf("try to get global ft lock 1 %d \n", thread_tid());
 		lock_acquire(&global_frame_table_lock);
-		printf("get global ft lock %d \n", thread_tid());
+		printf("get global ft lock i %d \n", thread_tid());
 	
 		struct frame_sup_page_table_entry* spte = at_swap(fault_addr);
 		void* kpage = palloc_get_page(PAL_USER|PAL_ZERO);
@@ -195,7 +195,7 @@ page_fault (struct intr_frame *f)
 			if (kpage==NULL){
 				bool success = replace_frame_entry(fault_addr);
 				bool success2 = read_from_swap(fault_addr);
-				printf("release global ft lock%d \n", thread_tid());
+				printf("release global ft lock 1-1 %d \n", thread_tid());
 				lock_release(&global_frame_table_lock);
 				if (success && success2){
 					return;
@@ -203,7 +203,7 @@ page_fault (struct intr_frame *f)
 			} else{
 				bool success = add_new_page_with_kpage (fault_addr, kpage);
 				bool success2 = read_from_swap(fault_addr);
-				printf("release global ft lock%d \n", thread_tid());
+				printf("release global ft lock 1-1' %d \n", thread_tid());
 				lock_release(&global_frame_table_lock);
 				if (success && success2){
 					return;
@@ -212,14 +212,14 @@ page_fault (struct intr_frame *f)
 		} else{
 			if (kpage==NULL){
 				bool success = replace_frame_entry(fault_addr);
-				printf("release global ft lock%d \n", thread_tid());
+				printf("release global ft lock 1-2 %d \n", thread_tid());
 				lock_release(&global_frame_table_lock);
 				if (success){
 					return;
 				}
 			} else{
 				bool success = add_new_page_with_kpage (fault_addr, kpage);
-				printf("release global ft lock%d \n", thread_tid());
+				printf("release global ft lock 1-2' %d \n", thread_tid());
 				lock_release(&global_frame_table_lock);
 				if  (success){
 					return;
@@ -233,9 +233,9 @@ page_fault (struct intr_frame *f)
 		bool is_grown = is_grown_stack_kernel(fault_addr, fault_addr);
 		if (is_grown) {
 
-			printf("try to get global ft lock %d \n", thread_tid());
+			printf("try to get global ft lock 2 %d \n", thread_tid());
 			lock_acquire(&global_frame_table_lock);
-			printf("get global ft lock %d \n", thread_tid());
+			printf("get global ft lock 2 %d \n", thread_tid());
 			struct frame_sup_page_table_entry* spte = at_swap(fault_addr);
 			void* kpage = palloc_get_page(PAL_USER|PAL_ZERO);
 
@@ -243,7 +243,7 @@ page_fault (struct intr_frame *f)
 				if (kpage==NULL){
 					bool success = replace_frame_entry(fault_addr);
 					bool success2 = read_from_swap(fault_addr);
-			  	printf("release global ft lock%d \n", thread_tid());
+			  	printf("release global ft lock 2-1 %d \n", thread_tid());
 					lock_release(&global_frame_table_lock);
 					if (success && success2){
 						return;
@@ -251,7 +251,7 @@ page_fault (struct intr_frame *f)
 				} else{
 					bool success = add_new_page_with_kpage (fault_addr, kpage);
 					bool success2 = read_from_swap(fault_addr);
-		  		printf("release global ft lock%d \n", thread_tid());
+		  		printf("release global ft lock 2-1' %d \n", thread_tid());
 					lock_release(&global_frame_table_lock);
 					if (success && success2){
 						return;
@@ -260,14 +260,14 @@ page_fault (struct intr_frame *f)
 			} else{
 				if (kpage==NULL){
 					bool success = replace_frame_entry(fault_addr);
-  				printf("release global ft lock%d \n", thread_tid());
+  				printf("release global ft lock 2-2 %d \n", thread_tid());
 					lock_release(&global_frame_table_lock);
 					if (success){
 						return;
 					}
 				} else{
 					bool success = add_new_page_with_kpage (fault_addr, kpage);
-	  			printf("release global ft lock%d \n", thread_tid());
+	  			printf("release global ft lock 2-2' %d \n", thread_tid());
 					lock_release(&global_frame_table_lock);
 					if  (success){
 						return;
