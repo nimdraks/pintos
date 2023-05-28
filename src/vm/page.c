@@ -58,7 +58,10 @@ set_sup_page_table_entry(uint32_t *spd, const void* uaddr, bool is_kernel){
 		return false;
 	}
 	spte->in_memory = true;
+
+	spte->pin=0;
 	if (is_kernel){
+		spte->pin=5;
 	}
 	
 	return true;
@@ -114,7 +117,7 @@ read_from_swap(void* fault_addr){
 		swap_remove_block(spte->sector, spte->cnt);
 		spte->in_memory = true;
 		spte->sector = 0;
-		spte->cnt = 0;	
+		spte->cnt = 0;
 	}
 
 //	printf("check33\n");

@@ -9,6 +9,7 @@
 struct frame_sup_page_table_entry{
 	bool in_memory;
 	block_sector_t sector;
+	int pin;
 	size_t cnt;
 };
 

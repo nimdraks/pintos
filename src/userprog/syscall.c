@@ -129,6 +129,7 @@ syscall_handler (struct intr_frame *f)
 	struct mmapDesc* mmap_desc=NULL;
 	int mmid=-1;
 
+	int k=0;
 
 	switch(syscallNum){
 		case SYS_HALT:
@@ -213,6 +214,10 @@ syscall_handler (struct intr_frame *f)
 			}
 
 			printf("%d: try to sysread\n", thread_tid());
+			for (k=0; k<fileSize; k++){
+				fileBuffer[k]=0;
+			}
+
 
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);
 		  break;
@@ -264,6 +269,7 @@ syscall_handler (struct intr_frame *f)
 				exit_unexpectedly(t);
 				return;
 			}
+			printf("sys exec: %s\n", execFile);
 			copyExecFile = palloc_get_page(PAL_ASSERT|PAL_ZERO);
 			strlcpy(copyExecFile, execFile, strlen(execFile)+1);
 			execPid=process_execute(copyExecFile);

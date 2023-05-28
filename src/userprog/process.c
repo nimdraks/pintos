@@ -89,7 +89,10 @@ start_process (void *file_name_)
   if_.gs = if_.fs = if_.es = if_.ds = if_.ss = SEL_UDSEG;
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
+
+	printf("start_process\n");
   success = load (file_name, &if_.eip, &if_.esp);
+	printf("finish load : success %d\n", success);
   /* If load failed, quit. */
   palloc_free_page (file_name);
 	p_t->success=success;
@@ -311,6 +314,7 @@ load (char *file_name, void (**eip) (void), void **esp)
       goto done; 
     }
 
+	printf("read program heades %d\n", thread_tid());
   /* Read program headers. */
   file_ofs = ehdr.e_phoff;
   for (i = 0; i < ehdr.e_phnum; i++) 
@@ -368,8 +372,10 @@ load (char *file_name, void (**eip) (void), void **esp)
                   zero_bytes = ROUND_UP (page_offset + phdr.p_memsz, PGSIZE);
                 }
               if (!load_segment (file, file_page, (void *) mem_page,
-                                 read_bytes, zero_bytes, writable))
+                                 read_bytes, zero_bytes, writable)){
+								printf("failed to load segment %d\n", thread_tid());
                 goto done;
+							}
             }
           else
             goto done;
@@ -378,8 +384,10 @@ load (char *file_name, void (**eip) (void), void **esp)
     }
 
   /* Set up stack. */
-  if (!setup_stack (esp, file_name, argvs))
+  if (!setup_stack (esp, file_name, argvs)){
+		printf("failed to setup_stack: %d\n", thread_tid());
     goto done;
+	}
 
   /* Start address. */
   *eip = (void (*) (void)) ehdr.e_entry;
@@ -486,13 +494,23 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
 
       /* Get a page of memory. */
       uint8_t *kpage = palloc_get_page (PAL_ZERO|PAL_USER);
-      if (kpage == NULL)
-        return false;
+      if (kpage == NULL){
+				printf("failed to load segment 1 : %d\n", thread_tid());
+//				printf("read : %d, zero : %d\n", page_read_bytes, page_zero_bytes);
+//				printf("test L %x\n", find_evict());
+				kpage = find_evict();
+				if (kpage == NULL){
+					printf("failed to load segment 11 : %d\n", thread_tid());
+					return false;
+				}
+//        return false;
+			}
 
       /* Load this page. */
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
         {
           palloc_free_page (kpage);
+					printf("failed to load segment 2 : %d\n", thread_tid());
           return false; 
         }
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
@@ -501,6 +519,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       if (!install_page (upage, kpage, writable, true)) 
         {
           palloc_free_page (kpage);
+					printf("failed to load segment 3 : %d\n", thread_tid());
           return false; 
         }
 
