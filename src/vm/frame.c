@@ -150,15 +150,19 @@ bool replace_frame_entry (void* fault_addr){
 	printf("acquire frame lock at %d\n", thread_tid());
 
 	size_t i = -1;
+	size_t k = 0;
 
-	for (i = 0; i < frame_number; i++){
-			if (frame_table[i].tid != -1 && frame_table[i].vaddr!=0)
-				if (frame_table[i].used==true && pagedir_is_accessed(tid_thread(frame_table[i].tid)->pagedir,frame_table[i].vaddr)==false)
-					break;	
+	for (k = 0; k < frame_number; k++){
+			if (frame_table[k].tid != -1 && frame_table[k].vaddr!=0)
+				if (frame_table[k].used==true && pagedir_is_accessed(tid_thread(frame_table[k].tid)->pagedir,frame_table[k].vaddr)==false)
+					if (pagedir_is_dirty(tid_thread(frame_table[k].tid)->pagedir,frame_table[k].vaddr)==false){
+						i = k;
+						break;	
+					}
 	}
 
 	if (i==-1){
-		printf("release frame lock at %d\n", thread_tid());
+		printf("release frame lock at %d and fuck\n", thread_tid());
 		lock_release(&frame_table_lock);
 		return false;
 	}
@@ -172,11 +176,20 @@ bool replace_frame_entry (void* fault_addr){
   lock_release(&frame_table_lock);
 
 	evicted_t = tid_thread(evicted_tid);
+	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
+
 	struct swap_block* sw_bl=swap_write_page(evicted_kvaddr, 1);
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
 	spte->in_memory = false;
 	spte->sector = sw_bl->sector;
 	spte->cnt = sw_bl->sector_size;	
+
+/*
+	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
+	spte->in_memory = false;
+	spte->sector = 0;
+	spte->cnt = 0;	
+*/
 //	printf("write sector %d cnt %d\n", spte->sector, spte->cnt);
 
 	pagedir_clear_page( evicted_t->pagedir, evicted_uvaddr);

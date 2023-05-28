@@ -123,7 +123,9 @@ syscall_handler (struct intr_frame *f)
 	char* copyExecFile=NULL;
 	int execPid=0;
 	int waitPid=0;
-
+	int i=0;
+	char a=0;
+	
 	struct mmapDesc* mmap_desc=NULL;
 	int mmid=-1;
 
@@ -205,6 +207,13 @@ syscall_handler (struct intr_frame *f)
 				return;
 			}
 
+			for(i=0; i<=fileSize; i++) {
+				a=*((char*)fileBuffer + i);
+				a++;
+			}
+
+			printf("%d: try to sysread\n", thread_tid());
+
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);
 		  break;
 		case SYS_SEEK:
@@ -241,6 +250,11 @@ syscall_handler (struct intr_frame *f)
 				return;
 			}
 
+			for(i=0; i<=fileSize; i++) {
+				a=*((char*)fileBuffer + i);
+				a++;
+			}
+			printf("%d: try to syswirte\n", thread_tid());
 			f->eax = file_write(file, fileBuffer, fileSize);
 			break;
 

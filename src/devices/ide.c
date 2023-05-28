@@ -150,8 +150,9 @@ ide_init (void)
 
       /* Read hard disk identity information. */
       for (dev_no = 0; dev_no < 2; dev_no++)
-        if (c->devices[dev_no].is_ata)
+        if (c->devices[dev_no].is_ata){
           identify_ata_device (&c->devices[dev_no]);
+				}
     }
 }
 
