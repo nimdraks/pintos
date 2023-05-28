@@ -137,7 +137,7 @@ void second_chance_entry (int clock) {
 		pagedir_set_accessed(t->pagedir, addr, false);
 }
 
-bool replace_frame_entry (void* fault_addr){
+bool replace_frame_entry (void* fault_addr, bool is_kernel){
 
 	void* evicted_uvaddr;
 	void* evicted_kvaddr;

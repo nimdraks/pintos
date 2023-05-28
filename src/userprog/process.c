@@ -535,7 +535,7 @@ setup_stack (void **esp, char* file_name, char* argvs)
 			printf("try to get global ft lock at setup_stack %d \n", thread_tid());
 			lock_acquire(&global_frame_table_lock);
 			printf("get global ft lock at setup_stack %d \n", thread_tid());
-      success = replace_frame_entry(((uint8_t *) PHYS_BASE) - PGSIZE);
+      success = replace_frame_entry(((uint8_t *) PHYS_BASE) - PGSIZE, true);
 
 			printf("release global ft lock at setup_stack %d \n", thread_tid());
 			lock_release(&global_frame_table_lock);
@@ -665,7 +665,7 @@ add_new_page (void* fault_addr){
 
 
 bool
-add_new_page_with_kpage (void* fault_addr, void* kpage){
+add_new_page_with_kpage (void* fault_addr, void* kpage, bool is_kernel){
 	if (kpage != NULL){
 		int page_idx = pg_no (kpage) - pg_no(frame_base_vaddr);
 //		printf("%d frame will be installed\n", page_idx);
