@@ -635,7 +635,7 @@ install_page (void *upage, void *kpage, bool writable, bool is_kernel)
   struct thread *t = thread_current ();
 
 	if (pagedir_get_page (t->pagedir, upage) == NULL && pagedir_set_page (t->pagedir, upage, kpage, writable)){
-		set_sup_page_table_entry(t->s_pagedir, upage);
+		set_sup_page_table_entry(t->s_pagedir, upage, is_kernel);
 		set_frame_table_entry_with_va(upage, kpage);
 		return true;
 	} 

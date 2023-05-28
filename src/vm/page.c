@@ -52,12 +52,15 @@ set_sup_page_table () {
 }
 
 bool
-set_sup_page_table_entry(uint32_t *spd, const void* uaddr){
+set_sup_page_table_entry(uint32_t *spd, const void* uaddr, bool is_kernel){
 	struct frame_sup_page_table_entry* spte = lookup_sup_page_table_entry(spd, uaddr);
 	if(spte == NULL){
 		return false;
 	}
-	spte->in_memory = true;	
+	spte->in_memory = true;
+	if (is_kernel){
+	}
+	
 	return true;
 }
 
