@@ -498,7 +498,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
 
       /* Add the page to the process's address space. */
-      if (!install_page (upage, kpage, writable)) 
+      if (!install_page (upage, kpage, writable, true)) 
         {
           palloc_free_page (kpage);
           return false; 
@@ -523,7 +523,7 @@ setup_stack (void **esp, char* file_name, char* argvs)
 
   if (kpage != NULL) 
     {
-      success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true);
+      success = install_page (((uint8_t *) PHYS_BASE) - PGSIZE, kpage, true, true);
       if (success){
 				setup_argument(esp, file_name, argvs);
 			}
@@ -630,7 +630,7 @@ setup_argument (void **esp, char* file_name, char* argvs){
    Returns true on success, false if UPAGE is already mapped or
    if memory allocation fails. */
 bool
-install_page (void *upage, void *kpage, bool writable)
+install_page (void *upage, void *kpage, bool writable, bool is_kernel)
 {
   struct thread *t = thread_current ();
 
@@ -652,7 +652,7 @@ add_new_page (void* fault_addr){
 		int page_idx = pg_no (kpage) - pg_no(frame_base_vaddr);
 //		printf("%d frame will be installed\n", page_idx);
 		uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
-		bool success = install_page (page_addr, kpage, true);
+		bool success = install_page (page_addr, kpage, true, false);
 		if (success){
 			return true;
 		}
@@ -670,7 +670,7 @@ add_new_page_with_kpage (void* fault_addr, void* kpage, bool is_kernel){
 		int page_idx = pg_no (kpage) - pg_no(frame_base_vaddr);
 //		printf("%d frame will be installed\n", page_idx);
 		uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
-		bool success = install_page (page_addr, kpage, true);
+		bool success = install_page (page_addr, kpage, true, is_kernel);
 		if (success){
 			return true;
 		}

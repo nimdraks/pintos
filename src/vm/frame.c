@@ -207,7 +207,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
   printf("release frame lock at %d\n", thread_tid());
   lock_release(&frame_table_lock);
 //	printf("%x %x %x %x\n", page_addr, kva, i, frame_base_vaddr);
-	bool success = install_page(page_addr, kva, true);
+	bool success = install_page(page_addr, kva, true, is_kernel);
 	char* page_addr_char = (char*)page_addr;
 	int j=0;
 	for (j=0; j<PGSIZE; j++){
