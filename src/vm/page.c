@@ -61,7 +61,7 @@ set_sup_page_table_entry(uint32_t *spd, const void* uaddr, bool is_kernel){
 
 	spte->pin=0;
 	if (is_kernel){
-		spte->pin=5;
+		spte->pin=3;
 	}
 	
 	return true;
