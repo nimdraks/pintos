@@ -63,6 +63,11 @@ sort_chunks (const char *subprocess, int exit_status)
       quiet = false;
     }
 
+	msg ("start to wait");
+	for (i=0; i < CHUNK_CNT; i++){
+		msg("%d\n",children[i]);
+	}
+
   for (i = 0; i < CHUNK_CNT; i++) 
     {
       char fn[128];

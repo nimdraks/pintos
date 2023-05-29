@@ -189,6 +189,7 @@ syscall_handler (struct intr_frame *f)
 			break;
 
 		case SYS_READ:
+			printf("%d: try to sysread\n", thread_tid());
 			fd = *(espP+1);
 			fileBuffer = (char*)*(espP+2);
 			fileSize = *(espP+3);
@@ -213,13 +214,12 @@ syscall_handler (struct intr_frame *f)
 				a++;
 			}
 
-			printf("%d: try to sysread\n", thread_tid());
 			for (k=0; k<fileSize; k++){
 				fileBuffer[k]=0;
 			}
 
-
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);
+			printf("%d: finish to sysread\n", thread_tid());
 		  break;
 		case SYS_SEEK:
 			fd = *(espP+1);		
@@ -233,6 +233,7 @@ syscall_handler (struct intr_frame *f)
 			break;
 
 		case SYS_WRITE:
+			printf("%d: try to syswirte\n", thread_tid());
 			fd = *(espP+1);
 			if (fd == 1){
 				printf("%s", (char*)*(espP+2));
@@ -259,8 +260,13 @@ syscall_handler (struct intr_frame *f)
 				a=*((char*)fileBuffer + i);
 				a++;
 			}
-			printf("%d: try to syswirte\n", thread_tid());
+
+			for (k=0; k<fileSize; k++){
+				fileBuffer[k]=0;
+			}
+
 			f->eax = file_write(file, fileBuffer, fileSize);
+			printf("%d: finish to syswirte\n", thread_tid());
 			break;
 
 		case SYS_EXEC:
