@@ -962,6 +962,7 @@ thread_make_fd (struct file* file)
 	}
  
 	fdStruct = malloc(sizeof(struct fileDesc));
+	printf("fdStruct check %d %x\n", thread_tid(), fdStruct);
 	if (fdStruct == NULL){
 		return -1;
 	}

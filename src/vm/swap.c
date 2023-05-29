@@ -35,7 +35,7 @@ swap_free_map_init(void){
 
 struct swap_block*
 swap_write_page(void* pages, size_t page_number){
-	printf("try to get swap lock %d\n", thread_tid());
+	printf("try to get swap_write lock %d\n", thread_tid());
 	lock_acquire(&swap_lock);
 	printf("get swap lock %d for swap write page\n", thread_tid());
 	pages = (uint8_t*)((uintptr_t) pages & PTE_ADDR);
@@ -66,7 +66,7 @@ swap_write_page(void* pages, size_t page_number){
 
 bool
 swap_read_block(block_sector_t sector, size_t cnt, void* pages){
-	printf("try to get swap lock %d\n", thread_tid());
+	printf("try to get swap_read lock %d\n", thread_tid());
 	lock_acquire(&swap_lock);
 	printf("get swap lock %d\n", thread_tid());
 	size_t i=0;
@@ -86,7 +86,7 @@ swap_read_block(block_sector_t sector, size_t cnt, void* pages){
 
 void
 swap_remove_block(block_sector_t sector, size_t cnt){
- 	printf("try to get swap lock %d\n", thread_tid());
+ 	printf("try to get swap_remove lock %d\n", thread_tid());
 	lock_acquire(&swap_lock);
 	printf("get swap lock %d\n", thread_tid()); 
 	bitmap_set_multiple (swap_free_map, sector, cnt, false);

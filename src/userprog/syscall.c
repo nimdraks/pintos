@@ -141,7 +141,7 @@ syscall_handler (struct intr_frame *f)
 				printf("%s: exit(%d)\n",thread_current()->name,-1);
 			else
 				printf("%s: exit(%d)\n",thread_current()->name, *(espP+1));
-			
+			printf("byebye %d with return %d\n", thread_tid(), *(espP+1));
 			exit_expectedly(t, *(espP+1));
 			break;
 
@@ -176,10 +176,12 @@ syscall_handler (struct intr_frame *f)
 			}
 			file = filesys_open(fileName);
 			if (file == NULL){
+				printf("failed to open at tid %d for file %s\n", thread_tid(), fileName);
 				f->eax=-1;
 				break;
 			}
 			fd = thread_make_fd(file);
+			printf("fd check %d at tid %d for file %s\n", fd, thread_tid(), fileName);
 			f->eax=fd;
 			break; 
 
@@ -286,6 +288,7 @@ syscall_handler (struct intr_frame *f)
 		case SYS_WAIT:
 			waitPid = *(espP+1);
 			f->eax=process_wait(waitPid);
+			
 			break;
 
 		case SYS_MMAP:
