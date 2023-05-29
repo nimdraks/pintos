@@ -148,6 +148,8 @@ syscall_handler (struct intr_frame *f)
 		case SYS_CREATE:
 			fileName = (char*)*(espP+1);
 			fileInitSize = *(espP+2);
+			printf("sys_create %s\n", fileName);
+
 			if(check_ptr_invalidity(t, (void*)fileName, espP) || fileName==NULL ){
 				exit_unexpectedly(t);
 				return;
@@ -159,6 +161,7 @@ syscall_handler (struct intr_frame *f)
 			else
 				f->eax=filesys_create(fileName, fileInitSize);
 
+			printf("sys_create_success %d at file name %s at pid %d\n", f->eax, fileName, thread_tid());
 			if (f->eax == 0){
 				return;
 			}
@@ -166,6 +169,7 @@ syscall_handler (struct intr_frame *f)
 
 		case SYS_OPEN:
 			fileName = (char*)*(espP+1);
+			printf("sys_open name %s\n", fileName);
 			if(check_ptr_invalidity(t, (void*)fileName, espP) || fileName==NULL ){
 				exit_unexpectedly(t);
 				return;
@@ -187,6 +191,7 @@ syscall_handler (struct intr_frame *f)
 
 		case SYS_CLOSE:
 			fd = *(espP+1);
+			printf("sys_close fd %d at pid %d \n", fd, thread_tid());
 			thread_close_fd(fd);
 			break;
 
@@ -262,10 +267,11 @@ syscall_handler (struct intr_frame *f)
 				a=*((char*)fileBuffer + i);
 				a++;
 			}
-
+			
+			/*
 			for (k=0; k<fileSize; k++){
 				fileBuffer[k]=0;
-			}
+			}*/
 
 			f->eax = file_write(file, fileBuffer, fileSize);
 			printf("%d: finish to syswirte\n", thread_tid());

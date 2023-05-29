@@ -232,8 +232,9 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset)
           if (bounce == NULL) 
             {
               bounce = malloc (BLOCK_SECTOR_SIZE);
-              if (bounce == NULL)
+              if (bounce == NULL){
                 break;
+							}
             }
           block_read (fs_device, sector_idx, bounce);
           memcpy (buffer + bytes_read, bounce + sector_ofs, chunk_size);
