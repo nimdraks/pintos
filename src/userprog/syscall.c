@@ -275,10 +275,10 @@ syscall_handler (struct intr_frame *f)
 				a++;
 			}
 			
-			
+			/*
 			for (k=0; k<fileSize; k++){
 				fileBuffer[k]=0;
-			}
+			} */
 
 			f->eax = file_write(file, fileBuffer, fileSize);
 			printf("%d: finish to syswirte\n", thread_tid());

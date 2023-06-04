@@ -136,7 +136,7 @@ verify (void)
       while (histogram[hist_idx]-- > 0) 
         {
           if (buf2[buf_idx] != hist_idx)
-            fail ("bad value %d in byte %zu", buf2[buf_idx], buf_idx);
+            fail ("bad value %d in byte %zu -> %d", buf2[buf_idx], buf_idx, hist_idx);
           buf_idx++;
         } 
     }
