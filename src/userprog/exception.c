@@ -189,7 +189,7 @@ page_fault (struct intr_frame *f)
 //		if (global_frame_table_lock.holder != NULL)
 //			printf("this is owned by %d\n", global_frame_table_lock.holder->tid);
 		lock_acquire(&global_frame_table_lock);
-		printf("get global ft lock i %d \n", thread_tid());
+		printf("get global ft lock 1 %d \n", thread_tid());
 	
 		struct frame_sup_page_table_entry* spte = at_swap(fault_addr);
 		void* kpage = palloc_get_page(PAL_USER|PAL_ZERO);
