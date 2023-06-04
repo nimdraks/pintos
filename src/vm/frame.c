@@ -133,7 +133,16 @@ void second_chance_entry (int clock) {
 	int i = clock % frame_number;
 	struct thread* t = tid_thread(frame_table[i].tid);
 	void* addr=(void*)frame_table[i].vaddr;
+
+	if(frame_table[i].used==false)
+		return;
+
 	if (t!=NULL && t->pagedir!=NULL){
+		if (pagedir_get_page(t->pagedir, addr) == NULL){
+			PANIC("second chance panic");
+			return;
+		}
+
 		struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(t->s_pagedir, addr);
 		if (spte!=NULL && spte->pin>0){
 			spte->pin--;
@@ -175,6 +184,9 @@ void* find_evict () {
 	}
 
 	frame_table[i].used=false;
+	frame_table[i].tid=0;
+	frame_table[i].vaddr=0;
+	frame_table[i].kvaddr=0;
 	evicted_uvaddr=frame_table[i].vaddr;
 	evicted_kvaddr=frame_table[i].kvaddr;
 	evicted_tid=frame_table[i].tid;
@@ -229,6 +241,9 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 	}
 
 	frame_table[i].used=false;
+	frame_table[i].tid=0;
+	frame_table[i].vaddr=0;
+	frame_table[i].kvaddr=0;
 	evicted_uvaddr=frame_table[i].vaddr;
 	evicted_kvaddr=frame_table[i].kvaddr;
 	evicted_tid=frame_table[i].tid;
