@@ -41,7 +41,7 @@ check_ptr_invalidity(struct thread* t, void* ptr, void* esp){
 		printf("invalid 1\n");
 		return true;
 	}
-
+/*
  	if (pagedir_get_page(t->pagedir, ptr) == NULL) {
 		if ( is_grown_stack_kernel(esp, ptr)){
 			return false;
@@ -49,7 +49,7 @@ check_ptr_invalidity(struct thread* t, void* ptr, void* esp){
 			printf("invalid 2\n");
 			return true;
 	}
-
+*/
 	return false;
 }
 
@@ -233,6 +233,7 @@ syscall_handler (struct intr_frame *f)
 			printf("start to sys read\n");
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);
 			printf("%d: finish to sysread\n", thread_tid());
+			sup_page_table_pin_zero(t->s_pagedir);
 		  break;
 		case SYS_SEEK:
 			fd = *(espP+1);		
@@ -274,13 +275,15 @@ syscall_handler (struct intr_frame *f)
 				a++;
 			}
 			
-			/*
+			
 			for (k=0; k<fileSize; k++){
 				fileBuffer[k]=0;
-			}*/
+			}
 
 			f->eax = file_write(file, fileBuffer, fileSize);
 			printf("%d: finish to syswirte\n", thread_tid());
+
+			sup_page_table_pin_zero(t->s_pagedir);
 			break;
 
 		case SYS_EXEC:

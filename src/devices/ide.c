@@ -350,17 +350,17 @@ ide_read (void *d_, block_sector_t sec_no, void *buffer)
   struct channel *c = d->channel;
 
 	if( (c->lock).holder != NULL) {
-		printf("ide lock holded by %d\n", (c->lock).holder->tid);
+//		printf("ide lock holded by %d\n", (c->lock).holder->tid);
 	}
   lock_acquire (&c->lock);
-	printf("ide lock acq by %d\n", (c->lock).holder->tid);
+//	printf("ide lock acq by %d\n", (c->lock).holder->tid);
   select_sector (d, sec_no);
   issue_pio_command (c, CMD_READ_SECTOR_RETRY);
   sema_down (&c->completion_wait);
   if (!wait_while_busy (d))
     PANIC ("%s: disk read failed, sector=%"PRDSNu, d->name, sec_no);
   input_sector (c, buffer);
-	printf("ide lock rel by %d\n", (c->lock).holder->tid);
+//	printf("ide lock rel by %d\n", (c->lock).holder->tid);
   lock_release (&c->lock);
 }
 
@@ -376,17 +376,17 @@ ide_write (void *d_, block_sector_t sec_no, const void *buffer)
   struct channel *c = d->channel;
 
 	if( (c->lock).holder != NULL) {
-		printf("ide lock holded by %d\n", (c->lock).holder->tid);
+//		printf("ide lock holded by %d\n", (c->lock).holder->tid);
 	}
   lock_acquire (&c->lock);
-	printf("ide lock acq by %d\n", (c->lock).holder->tid);
+//	printf("ide lock acq by %d\n", (c->lock).holder->tid);
   select_sector (d, sec_no);
   issue_pio_command (c, CMD_WRITE_SECTOR_RETRY);
   if (!wait_while_busy (d))
     PANIC ("%s: disk write failed, sector=%"PRDSNu, d->name, sec_no);
   output_sector (c, buffer);
   sema_down (&c->completion_wait);
-	printf("ide lock rel by %d\n", (c->lock).holder->tid);
+//	printf("ide lock rel by %d\n", (c->lock).holder->tid);
   lock_release (&c->lock);
 }
 

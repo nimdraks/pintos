@@ -61,10 +61,30 @@ set_sup_page_table_entry(uint32_t *spd, const void* uaddr, bool is_kernel){
 
 	spte->pin=0;
 	if (is_kernel){
-		spte->pin=10;
+		spte->pin=10000;
 	}
 	
 	return true;
+}
+
+
+void
+sup_page_table_pin_zero (uint32_t * spd){
+	if (spd == NULL){
+		return;
+	}
+
+	uint32_t *spde;
+	for (spde = spd; spde < spd + pd_no(PHYS_BASE); spde++) {
+		if (*spde != 0) {
+			int i=0;
+			for(i=0; i< (1<<PTBITS); i++){
+				void* spte=*spde + sizeof(struct frame_sup_page_table_entry)*i;
+				struct frame_sup_page_table_entry* f = (struct frame_sup_page_table_entry*)(spte);
+				f->pin=0;
+			} 
+		}
+	}
 }
 
 
