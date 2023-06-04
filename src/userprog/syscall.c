@@ -15,6 +15,7 @@
 #include "lib/user/syscall.h"
 #include "lib/string.h"
 #include "devices/input.h"
+#include "vm/page.h"
 
 static void syscall_handler (struct intr_frame *);
 static struct semaphore sysSema;

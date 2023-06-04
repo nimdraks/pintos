@@ -10,5 +10,6 @@ void process_exit (void);
 void process_activate (void);
 bool install_page (void *upage, void *kpage, bool writable, bool is_kernel);
 bool add_new_page (void* fault_addr);
+bool add_new_page_with_kpage (void* fault_addr, void* kpage, bool is_kernel);
 
 #endif /* userprog/process.h */
