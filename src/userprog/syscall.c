@@ -37,7 +37,8 @@ check_esp_invalidity(struct thread* t, void* esp){
 
 bool
 check_ptr_invalidity(struct thread* t, void* ptr, void* esp){
-	if (!is_user_vaddr(ptr) ){
+	if (!is_user_vaddr(ptr)){
+		printf("invalid 1\n");
 		return true;
 	}
 
@@ -45,6 +46,7 @@ check_ptr_invalidity(struct thread* t, void* ptr, void* esp){
 		if ( is_grown_stack_kernel(esp, ptr)){
 			return false;
 		} else
+			printf("invalid 2\n");
 			return true;
 	}
 
@@ -202,16 +204,19 @@ syscall_handler (struct intr_frame *f)
 			fileSize = *(espP+3);
 
 			if(check_ptr_invalidity(t,fileBuffer, espP)){
+				printf("failed to sys read 1, tid: %d, fileBuffer: %x, espP %x\n", thread_tid(), fileBuffer, espP);
 				exit_unexpectedly(t);
 				return;
 			}
 
 			if (fd == 1){
+				printf("failed to sys read 2\n");
 				break;
 			}
 
 			file = thread_open_fd(fd);
 			if (file==NULL){
+				printf("failed to sys read 3\n");
 				exit_unexpectedly(t);
 				return;
 			}
@@ -225,6 +230,7 @@ syscall_handler (struct intr_frame *f)
 				fileBuffer[k]=0;
 			}
 
+			printf("start to sys read\n");
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);
 			printf("%d: finish to sysread\n", thread_tid());
 		  break;

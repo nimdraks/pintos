@@ -183,13 +183,15 @@ void* find_evict () {
 		return false;
 	}
 
+	evicted_uvaddr=frame_table[i].vaddr;
+	evicted_kvaddr=frame_table[i].kvaddr;
+	evicted_tid=frame_table[i].tid;
+
 	frame_table[i].used=false;
 	frame_table[i].tid=0;
 	frame_table[i].vaddr=0;
 	frame_table[i].kvaddr=0;
-	evicted_uvaddr=frame_table[i].vaddr;
-	evicted_kvaddr=frame_table[i].kvaddr;
-	evicted_tid=frame_table[i].tid;
+
 
   printf("release frame lock at %d\n", thread_tid());
   lock_release(&frame_table_lock);
@@ -240,20 +242,22 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 		return false;
 	}
 
+	evicted_uvaddr=frame_table[i].vaddr;
+	evicted_kvaddr=frame_table[i].kvaddr;
+	evicted_tid=frame_table[i].tid;
+	evicted_t = tid_thread(evicted_tid);
+
 	frame_table[i].used=false;
 	frame_table[i].tid=0;
 	frame_table[i].vaddr=0;
 	frame_table[i].kvaddr=0;
-	evicted_uvaddr=frame_table[i].vaddr;
-	evicted_kvaddr=frame_table[i].kvaddr;
-	evicted_tid=frame_table[i].tid;
+
 
   printf("release frame lock at %d\n", thread_tid());
   lock_release(&frame_table_lock);
 
-	evicted_t = tid_thread(evicted_tid);
-	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
 
+	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
 	struct swap_block* sw_bl=swap_write_page(evicted_kvaddr, 1);
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
 	spte->in_memory = false;
