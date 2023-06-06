@@ -86,12 +86,12 @@ swap_read_block(block_sector_t sector, size_t cnt, void* pages){
 
 void
 swap_remove_block(block_sector_t sector, size_t cnt){
- 	printf("try to get swap_remove lock %d\n", thread_tid());
+// 	printf("try to get swap_remove lock %d\n", thread_tid());
 	lock_acquire(&swap_lock);
-	printf("get swap lock %d\n", thread_tid()); 
+//	printf("get swap lock %d\n", thread_tid()); 
 	bitmap_set_multiple (swap_free_map, sector, cnt, false);
 
-	printf("release swap lock %d\n", thread_tid());
+//	printf("release swap lock %d\n", thread_tid());
 	lock_release(&swap_lock);
 }
 
