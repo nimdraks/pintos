@@ -204,6 +204,7 @@ void* find_evict () {
 	spte->in_memory = false;
 	spte->sector = sw_bl->sector;
 	spte->cnt = sw_bl->sector_size;	
+	free(sw_bl);
 
 	pagedir_clear_page( evicted_t->pagedir, evicted_uvaddr);
 
@@ -263,7 +264,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 	spte->in_memory = false;
 	spte->sector = sw_bl->sector;
 	spte->cnt = sw_bl->sector_size;	
-
+	free(sw_bl);
 /*
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
 	spte->in_memory = false;
