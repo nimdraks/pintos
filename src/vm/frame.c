@@ -200,6 +200,8 @@ void* find_evict () {
 	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
 
 	struct swap_block* sw_bl=swap_write_page(evicted_kvaddr, 1);
+	memset(evicted_kvaddr, 0, PGSIZE);
+;
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
 	spte->in_memory = false;
 	spte->sector = sw_bl->sector;
@@ -260,6 +262,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 
 	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
 	struct swap_block* sw_bl=swap_write_page(evicted_kvaddr, 1);
+	memset(evicted_kvaddr, 0, PGSIZE);
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
 	spte->in_memory = false;
 	spte->sector = sw_bl->sector;

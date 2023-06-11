@@ -22,13 +22,18 @@ is_partitioned (const unsigned char *array, size_t size,
   size_t i;
   
   for (i = 0; i < left_size; i++)
-    if (array[i] >= pivot)
+    if (array[i] >= pivot){
+			printf("arr 1 %x\n", array);
+//			printf("pivot %d, array[i] %d \n", pivot, array[i]);
       return false;
-
+		}
+		
   for (; i < size; i++)
-    if (array[i] < pivot)
+    if (array[i] < pivot){
+			printf("arr 2 %x\n", array);
+//			printf("pivot %d, array[i] %d \n", pivot, array[i]);
       return false;
-
+		}
   return true;
 }
 

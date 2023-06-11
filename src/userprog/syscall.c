@@ -199,11 +199,10 @@ syscall_handler (struct intr_frame *f)
 			break;
 
 		case SYS_READ:
-			printf("%d: try to sysread\n", thread_tid());
 			fd = *(espP+1);
 			fileBuffer = (char*)*(espP+2);
 			fileSize = *(espP+3);
-
+			printf("%d: sysread, fd %d, fileBuffer %x, fileSize %d\n", thread_tid(), fd, fileBuffer, fileSize);
 			if(check_ptr_invalidity(t,fileBuffer, espP)){
 				printf("failed to sys read 1, tid: %d, fileBuffer: %x, espP %x\n", thread_tid(), fileBuffer, espP);
 				exit_unexpectedly(t);
@@ -217,7 +216,7 @@ syscall_handler (struct intr_frame *f)
 
 			file = thread_open_fd(fd);
 			if (file==NULL){
-				printf("failed to sys read 3\n");
+				printf("failed to sys read 3, %x, %d\n", espP, *espP);
 				exit_unexpectedly(t);
 				return;
 			}
