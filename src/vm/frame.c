@@ -46,7 +46,7 @@ int get_frame_table_size(void){
 void set_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt, struct thread* t){
 	printf("try to acquire frame lock 1 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
-	printf("acquire frame lock at %d\n", thread_tid());
+//	printf("acquire frame lock at %d\n", thread_tid());
 	size_t offset=0;	
 
 	for (offset=0; offset < page_cnt; offset++){
@@ -69,7 +69,7 @@ void set_frame_table_entry_with_va(void* uva, void* kva){
 
 	printf("try to acquire frame lock 2 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
-	printf("acquire frame lock at %d\n", thread_tid());
+//	printf("acquire frame lock at %d\n", thread_tid());
 
 	if (frame_table[page_idx].used == true){
 		printf("tid:%d, vaddr:%p %x %x %d\n", frame_table[page_idx].tid, frame_table[page_idx].vaddr, uva, kva, page_idx);
@@ -162,7 +162,7 @@ void* find_evict () {
 
 	printf("try to acquire frame lock 55 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
-	printf("acquire frame lock at %d\n", thread_tid());
+//	printf("acquire frame lock at %d\n", thread_tid());
 
 
 	size_t i = -1;
@@ -223,7 +223,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 //	printf("checks1 %x %x, %x %x\n", i, frame_table[i].used, frame_table[i].vaddr, frame_base_vaddr);
 	printf("try to acquire frame lock 5 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
-	printf("acquire frame lock at %d\n", thread_tid());
+//	printf("acquire frame lock at %d\n", thread_tid());
 
 	size_t i = -1;
 	size_t k = 0;
@@ -280,7 +280,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 
 	printf("try to acquire frame lock 6 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
-	printf("acquire frame lock at %d\n", thread_tid());
+//	printf("acquire frame lock at %d\n", thread_tid());
 
 	frame_table[i].tid=thread_current()->tid;
 	frame_table[i].vaddr=page_addr;
