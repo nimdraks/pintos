@@ -247,7 +247,7 @@ syscall_handler (struct intr_frame *f)
 			break;
 
 		case SYS_WRITE:
-			printf("%d: try to syswirte\n", thread_tid());
+			printf("%d: try to syswrite\n", thread_tid());
 			fd = *(espP+1);
 			if (fd == 1){
 				printf("%s", (char*)*(espP+2));
