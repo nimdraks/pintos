@@ -90,9 +90,9 @@ start_process (void *file_name_)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
 
-	printf("start_process\n");
+//	printf("start_process\n");
   success = load (file_name, &if_.eip, &if_.esp);
-	printf("finish load : success %d\n", success);
+//	printf("finish load : success %d\n", success);
   /* If load failed, quit. */
   palloc_free_page (file_name);
 	p_t->success=success;
@@ -126,16 +126,16 @@ process_wait (tid_t child_tid)
 {
 	int ret=-1;
 
-	printf("process_wait %d \n", child_tid);
+//	printf("process_wait %d \n", child_tid);
 	struct childSema* childSema = thread_get_childSema(thread_current(), child_tid);
 	if (childSema == NULL){
-		printf("process_wait -> -1\n");
+//		printf("process_wait -> -1\n");
 		return ret;
 	}
 
 	sema_down(&childSema->sema);
 	ret = childSema->ret;
-	printf("pricess_wait %d -> ret %d\n", child_tid, ret);
+//	printf("pricess_wait %d -> ret %d\n", child_tid, ret);
 	thread_remove_childSema(thread_current(), child_tid);
   return ret;
 }
@@ -144,7 +144,7 @@ process_wait (tid_t child_tid)
 void
 process_exit (void)
 {
-	printf("process_exit : tid %d\n", thread_tid());
+//	printf("process_exit : tid %d\n", thread_tid());
   struct thread *cur = thread_current ();
   uint32_t *pd, *spd;
 	if(cur->tFile != NULL){
@@ -168,16 +168,16 @@ process_exit (void)
          directory, or our active page directory will be one
          that's been freed (and cleared). */
 
-			printf("try to get global ft lock at process_exit %d \n", thread_tid());
+//			printf("try to get global ft lock at process_exit %d \n", thread_tid());
 			lock_acquire(&global_frame_table_lock);
-			printf("get global ft lock at process_exit %d \n", thread_tid());
+//			printf("get global ft lock at process_exit %d \n", thread_tid());
       cur->pagedir = NULL;
       pagedir_activate (NULL);
       pagedir_destroy (pd);
 			sup_pagedir_destroy(spd);
 			unset_frame_table_entries_of_thread(thread_current());
 	
-			printf("release the lock at process_exit %d \n", thread_tid());
+//			printf("release the lock at process_exit %d \n", thread_tid());
 			lock_release(&global_frame_table_lock);
     }
 }
@@ -301,7 +301,7 @@ load (char *file_name, void (**eip) (void), void **esp)
   file = filesys_open (file_name);
   if (file == NULL) 
     {
-      printf ("load: %s: open failed\n", file_name);
+//      printf ("load: %s: open failed\n", file_name);
       goto done; 
     }
 
@@ -314,11 +314,11 @@ load (char *file_name, void (**eip) (void), void **esp)
       || ehdr.e_phentsize != sizeof (struct Elf32_Phdr)
       || ehdr.e_phnum > 1024) 
     {
-      printf ("load: %s: error loading executable\n", file_name);
+//      printf ("load: %s: error loading executable\n", file_name);
       goto done; 
     }
 
-	printf("read program heades %d\n", thread_tid());
+//	printf("read program heades %d\n", thread_tid());
   /* Read program headers. */
   file_ofs = ehdr.e_phoff;
   for (i = 0; i < ehdr.e_phnum; i++) 
@@ -377,7 +377,7 @@ load (char *file_name, void (**eip) (void), void **esp)
                 }
               if (!load_segment (file, file_page, (void *) mem_page,
                                  read_bytes, zero_bytes, writable)){
-								printf("failed to load segment %d\n", thread_tid());
+//								printf("failed to load segment %d\n", thread_tid());
                 goto done;
 							}
             }
@@ -389,7 +389,7 @@ load (char *file_name, void (**eip) (void), void **esp)
 
   /* Set up stack. */
   if (!setup_stack (esp, file_name, argvs)){
-		printf("failed to setup_stack: %d\n", thread_tid());
+//		printf("failed to setup_stack: %d\n", thread_tid());
     goto done;
 	}
 
@@ -499,12 +499,12 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       /* Get a page of memory. */
       uint8_t *kpage = palloc_get_page (PAL_ZERO|PAL_USER);
       if (kpage == NULL){
-				printf("failed to load segment 1 : %d\n", thread_tid());
+//				printf("failed to load segment 1 : %d\n", thread_tid());
 //				printf("read : %d, zero : %d\n", page_read_bytes, page_zero_bytes);
 //				printf("test L %x\n", find_evict());
 				kpage = find_evict();
 				if (kpage == NULL){
-					printf("failed to load segment 11 : %d\n", thread_tid());
+//					printf("failed to load segment 11 : %d\n", thread_tid());
 					return false;
 				}
 //        return false;
@@ -514,7 +514,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       if (file_read (file, kpage, page_read_bytes) != (int) page_read_bytes)
         {
           palloc_free_page (kpage);
-					printf("failed to load segment 2 : %d\n", thread_tid());
+//					printf("failed to load segment 2 : %d\n", thread_tid());
           return false; 
         }
       memset (kpage + page_read_bytes, 0, page_zero_bytes);
@@ -523,7 +523,7 @@ load_segment (struct file *file, off_t ofs, uint8_t *upage,
       if (!install_page (upage, kpage, writable, true)) 
         {
           palloc_free_page (kpage);
-					printf("failed to load segment 3 : %d\n", thread_tid());
+//					printf("failed to load segment 3 : %d\n", thread_tid());
           return false; 
         }
 
@@ -555,12 +555,12 @@ setup_stack (void **esp, char* file_name, char* argvs)
     }
 	else
 		{
-			printf("try to get global ft lock at setup_stack %d \n", thread_tid());
+//			printf("try to get global ft lock at setup_stack %d \n", thread_tid());
 			lock_acquire(&global_frame_table_lock);
-			printf("get global ft lock at setup_stack %d \n", thread_tid());
+//			printf("get global ft lock at setup_stack %d \n", thread_tid());
       success = replace_frame_entry(((uint8_t *) PHYS_BASE) - PGSIZE, true);
 
-			printf("release global ft lock at setup_stack %d \n", thread_tid());
+//			printf("release global ft lock at setup_stack %d \n", thread_tid());
 			lock_release(&global_frame_table_lock);
       if (success){
 				setup_argument(esp, file_name, argvs);
