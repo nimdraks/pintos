@@ -271,8 +271,11 @@ syscall_handler (struct intr_frame *f)
 			}
 
 
-			a = (char)memcmp(fileBuffer, fileBuffer, fileSize);
-			if(a != 0)
+			for (k=0; k<fileSize; k++){
+				 a += fileBuffer[k];
+			}
+
+			if(a == 0)
 				printf("shit  \n");	
 
 			printf("%d: start to syswirte\n", thread_tid());
