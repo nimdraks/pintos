@@ -230,7 +230,7 @@ syscall_handler (struct intr_frame *f)
 				fileBuffer[k]=0;
 			}
 
-			printf("start to sys read\n");
+//			printf("start to sys read\n");
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);
 			printf("%d: finish to sysread\n", thread_tid());
 			sup_page_table_pin_zero(t->s_pagedir);
@@ -274,11 +274,6 @@ syscall_handler (struct intr_frame *f)
 				a=*((char*)fileBuffer + i);
 				a++;
 			}
-			
-			/*
-			for (k=0; k<fileSize; k++){
-				fileBuffer[k]=0;
-			} */
 
 			f->eax = file_write(file, fileBuffer, fileSize);
 			printf("%d: finish to syswirte\n", thread_tid());
