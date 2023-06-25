@@ -65,7 +65,7 @@ sort_chunks (const char *subprocess, int exit_status)
 
 	msg ("start to wait");
 	for (i=0; i < CHUNK_CNT; i++){
-		msg("%d\n",children[i]);
+//		msg("%d\n",children[i]);
 	}
 
   for (i = 0; i < CHUNK_CNT; i++) 
