@@ -99,11 +99,12 @@ lookup (const struct dir *dir, const char *name,
   ASSERT (dir != NULL);
   ASSERT (name != NULL);
 
+/*
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e){
 		printf("find file : %s at %s, in tid %d\n", name, e.name, thread_tid());
 	}
-
+*/
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e){
     if (e.in_use && !strcmp (name, e.name)) 
@@ -132,11 +133,11 @@ dir_lookup (const struct dir *dir, const char *name,
   ASSERT (name != NULL);
 
   if (lookup (dir, name, &e, NULL)){
-		printf("dir_lookup 1\n");
+//		printf("dir_lookup 1\n");
     *inode = inode_open (e.inode_sector);
 	}
   else{
-		printf("dir_lookup 2\n");
+//		printf("dir_lookup 2\n");
     *inode = NULL;
 	}
 

@@ -35,9 +35,9 @@ swap_free_map_init(void){
 
 struct swap_block*
 swap_write_page(void* pages, size_t page_number){
-	printf("try to get swap_write lock %d\n", thread_tid());
+//	printf("try to get swap_write lock %d\n", thread_tid());
 	lock_acquire(&swap_lock);
-	printf("get swap lock %d for swap write page\n", thread_tid());
+//	printf("get swap lock %d for swap write page\n", thread_tid());
 	pages = (uint8_t*)((uintptr_t) pages & PTE_ADDR);
 
 	struct swap_block* sb = NULL;
@@ -53,7 +53,7 @@ swap_write_page(void* pages, size_t page_number){
 		block_write(swap_device, sector+i, addr);
 	}
 
-	printf("release swap lock %d for write\n", thread_tid());
+//	printf("release swap lock %d for write\n", thread_tid());
 	lock_release(&swap_lock);
 	
 	sb = malloc(sizeof(struct swap_block));
@@ -66,9 +66,9 @@ swap_write_page(void* pages, size_t page_number){
 
 bool
 swap_read_block(block_sector_t sector, size_t cnt, void* pages){
-	printf("try to get swap_read lock %d\n", thread_tid());
+//	printf("try to get swap_read lock %d\n", thread_tid());
 	lock_acquire(&swap_lock);
-	printf("get swap lock %d\n", thread_tid());
+//	printf("get swap lock %d\n", thread_tid());
 	size_t i=0;
 	void* addr = pages;
 
@@ -77,7 +77,7 @@ swap_read_block(block_sector_t sector, size_t cnt, void* pages){
 		block_read(swap_device, sector+i, addr);
 	}
 
-	printf("release swap lock %d\n", thread_tid());
+//	printf("release swap lock %d\n", thread_tid());
 	lock_release(&swap_lock);
 
 	return true;
