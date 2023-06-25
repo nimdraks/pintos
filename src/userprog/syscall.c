@@ -226,7 +226,7 @@ syscall_handler (struct intr_frame *f)
 			}
 
 			printf("read a is %d\n", a);
-			printf("start to sysread\n");
+			printf("%d: start to sysread\n", thread_tid());
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);
 			printf("%d: finish to sysread\n", thread_tid());
 			sup_page_table_pin_zero(t->s_pagedir);
