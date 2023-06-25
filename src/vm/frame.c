@@ -44,7 +44,7 @@ int get_frame_table_size(void){
 }
 
 void set_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt, struct thread* t){
-	printf("try to acquire frame lock 1 at %d\n", thread_tid());
+//	printf("try to acquire frame lock 1 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
 //	printf("acquire frame lock at %d\n", thread_tid());
 	size_t offset=0;	
@@ -59,7 +59,7 @@ void set_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt, struct
 		frame_table[page_no].tid=t->tid;
 	}
 
-	printf("release frame lock at %d\n", thread_tid());
+//	printf("release frame lock at %d\n", thread_tid());
 	lock_release(&frame_table_lock);
 }
 
@@ -67,7 +67,7 @@ void set_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt, struct
 void set_frame_table_entry_with_va(void* uva, void* kva){
 	int page_idx = pg_no (kva) - pg_no(frame_base_vaddr);
 
-	printf("try to acquire frame lock 2 at %d\n", thread_tid());
+//	printf("try to acquire frame lock 2 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
 //	printf("acquire frame lock at %d\n", thread_tid());
 
@@ -82,15 +82,15 @@ void set_frame_table_entry_with_va(void* uva, void* kva){
 	frame_table[page_idx].tid=thread_current()->tid;
 
 
-	printf("release frame lock at %d\n", thread_tid());
+//	printf("release frame lock at %d\n", thread_tid());
 	lock_release(&frame_table_lock);
 //	printf("allocated %x %x\n", page_idx, kva);
 }
 
 void unset_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt){
-	printf("try to acquire frame lock 3 at %d\n", thread_tid());
+//	printf("try to acquire frame lock 3 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
-	printf("acquire frame lock at %d\n", thread_tid());
+//	printf("acquire frame lock at %d\n", thread_tid());
 
 	size_t offset=0;
 
@@ -102,7 +102,7 @@ void unset_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt){
 		frame_table[page_no].kvaddr=0;
 	}
 
-	printf("release frame lock at %d\n", thread_tid());
+//	printf("release frame lock at %d\n", thread_tid());
 	lock_release(&frame_table_lock);
 }
 
@@ -110,9 +110,9 @@ void unset_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt){
 void unset_frame_table_entries_of_thread(struct thread* t){
 	size_t i = 0;
 
-	printf("try to acquire frame lock 4 at %d\n", thread_tid());
+//	printf("try to acquire frame lock 4 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
-	printf("acquire frame lock at %d\n", thread_tid());
+//	printf("acquire frame lock at %d\n", thread_tid());
 
 
 	for (i = 0; i < frame_number; i++){
@@ -124,7 +124,7 @@ void unset_frame_table_entries_of_thread(struct thread* t){
 		}
 	}
 
-	printf("release frame lock at %d\n", thread_tid());
+//	printf("release frame lock at %d\n", thread_tid());
 	lock_release(&frame_table_lock);
 }
 
@@ -160,7 +160,7 @@ void* find_evict () {
 	size_t evicted_tid;
 	struct thread* evicted_t;
 
-	printf("try to acquire frame lock 55 at %d\n", thread_tid());
+//	printf("try to acquire frame lock 55 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
 //	printf("acquire frame lock at %d\n", thread_tid());
 
@@ -190,7 +190,7 @@ void* find_evict () {
 
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
 
-	printf("pin is %d\n", spte->pin);
+//	printf("pin is %d\n", spte->pin);
 
 	pagedir_clear_page( evicted_t->pagedir, evicted_uvaddr);
 
@@ -200,7 +200,7 @@ void* find_evict () {
 	frame_table[i].kvaddr=0;
 
 
-	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
+//	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
 
 	struct swap_block* sw_bl=swap_write_page(evicted_kvaddr, 1);
 	memset(evicted_kvaddr, 0, PGSIZE);
@@ -210,7 +210,7 @@ void* find_evict () {
 	spte->cnt = sw_bl->sector_size;	
 	free(sw_bl);
 
-  printf("release frame lock at %d\n", thread_tid());
+//  printf("release frame lock at %d\n", thread_tid());
   lock_release(&frame_table_lock);
 
 	return evicted_kvaddr;
@@ -226,7 +226,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 	struct thread* evicted_t;
 
 //	printf("checks1 %x %x, %x %x\n", i, frame_table[i].used, frame_table[i].vaddr, frame_base_vaddr);
-	printf("try to acquire frame lock 5 at %d\n", thread_tid());
+//	printf("try to acquire frame lock 5 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
 //	printf("acquire frame lock at %d\n", thread_tid());
 
@@ -255,7 +255,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
 
-	printf("pin is %d\n", spte->pin);
+//	printf("pin is %d\n", spte->pin);
 
 	pagedir_clear_page( evicted_t->pagedir, evicted_uvaddr);
 
@@ -265,7 +265,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 	frame_table[i].kvaddr=0;
 
 
-	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
+//	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
 	struct swap_block* sw_bl=swap_write_page(evicted_kvaddr, 1);
 	memset(evicted_kvaddr, 0, PGSIZE);
 
@@ -274,7 +274,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 	spte->cnt = sw_bl->sector_size;	
 	free(sw_bl);
 
-  printf("release frame lock at %d\n", thread_tid());
+//  printf("release frame lock at %d\n", thread_tid());
   lock_release(&frame_table_lock);
 /*
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
@@ -289,14 +289,14 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 	void* kva =	i * (1 << PGBITS) + frame_base_vaddr;
 	uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
 
-	printf("try to acquire frame lock 6 at %d\n", thread_tid());
+//	printf("try to acquire frame lock 6 at %d\n", thread_tid());
 	lock_acquire (&frame_table_lock);
 //	printf("acquire frame lock at %d\n", thread_tid());
 
 	frame_table[i].tid=thread_current()->tid;
 	frame_table[i].vaddr=page_addr;
 	frame_table[i].kvaddr=kva;
-  printf("release frame lock at %d\n", thread_tid());
+//  printf("release frame lock at %d\n", thread_tid());
   lock_release(&frame_table_lock);
 //	printf("%x %x %x %x\n", page_addr, kva, i, frame_base_vaddr);
 	bool success = install_page(page_addr, kva, true, is_kernel);
