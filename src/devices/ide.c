@@ -350,7 +350,7 @@ ide_read (void *d_, block_sector_t sec_no, void *buffer)
   struct channel *c = d->channel;
 
 	if( (c->lock).holder != NULL) {
-		printf("ide lock holded by %d\n", (c->lock).holder->tid);
+//		printf("ide lock holded by %d\n", (c->lock).holder->tid);
 	} else {
 //		printf("ide lock holded by me %d\n", thread_tid());
 	}
@@ -378,7 +378,7 @@ ide_write (void *d_, block_sector_t sec_no, const void *buffer)
   struct channel *c = d->channel;
 
 	if( (c->lock).holder != NULL) {
-		printf("ide lock holded by %d\n", (c->lock).holder->tid);
+//		printf("ide lock holded by %d\n", (c->lock).holder->tid);
 	} else {
 //		printf("ide lock holded by me %d\n", thread_tid());
 	}	
