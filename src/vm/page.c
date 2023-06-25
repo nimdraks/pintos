@@ -61,12 +61,22 @@ set_sup_page_table_entry(uint32_t *spd, const void* uaddr, bool is_kernel){
 
 	spte->pin=0;
 	if (is_kernel){
-		spte->pin=10000;
+		spte->pin=1000000;
 	}
 	
 	return true;
 }
 
+bool
+set_sup_page_table_entry_only_pin(uint32_t *spd, const void* uaddr) {
+	struct frame_sup_page_table_entry* spte = lookup_sup_page_table_entry(spd, uaddr);
+	if(spte == NULL){
+		return false;
+	}
+	spte->pin=1000000;
+
+	return true;
+}
 
 void
 sup_page_table_pin_zero (uint32_t * spd){
