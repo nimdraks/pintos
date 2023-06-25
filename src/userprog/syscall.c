@@ -270,11 +270,12 @@ syscall_handler (struct intr_frame *f)
 				return;
 			}
 
-			for(i=0; i<=fileSize; i++) {
-				a=*((char*)fileBuffer + i);
-				a++;
-			}
 
+			a = (char)memcmp(fileBuffer, fileBuffer, fileSize);
+			if(a != 0)
+				printf("shit  \n");	
+
+			printf("%d: start to syswirte\n", thread_tid());
 			f->eax = file_write(file, fileBuffer, fileSize);
 			printf("%d: finish to syswirte\n", thread_tid());
 
