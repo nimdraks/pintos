@@ -144,14 +144,14 @@ syscall_handler (struct intr_frame *f)
 				printf("%s: exit(%d)\n",thread_current()->name,-1);
 			else
 				printf("%s: exit(%d)\n",thread_current()->name, *(espP+1));
-			printf("byebye %d with return %d\n", thread_tid(), *(espP+1));
+//			printf("byebye %d with return %d\n", thread_tid(), *(espP+1));
 			exit_expectedly(t, *(espP+1));
 			break;
 
 		case SYS_CREATE:
 			fileName = (char*)*(espP+1);
 			fileInitSize = *(espP+2);
-			printf("sys_create %s\n", fileName);
+//			printf("sys_create %s\n", fileName);
 
 			if(check_ptr_invalidity(t, (void*)fileName, espP) || fileName==NULL ){
 				exit_unexpectedly(t);
@@ -164,7 +164,7 @@ syscall_handler (struct intr_frame *f)
 			else
 				f->eax=filesys_create(fileName, fileInitSize);
 
-			printf("sys_create_success %d at file name %s at pid %d\n", f->eax, fileName, thread_tid());
+//			printf("sys_create_success %d at file name %s at pid %d\n", f->eax, fileName, thread_tid());
 			if (f->eax == 0){
 				return;
 			}
@@ -172,7 +172,7 @@ syscall_handler (struct intr_frame *f)
 
 		case SYS_OPEN:
 			fileName = (char*)*(espP+1);
-			printf("sys_open name %s\n", fileName);
+//			printf("sys_open name %s\n", fileName);
 			if(check_ptr_invalidity(t, (void*)fileName, espP) || fileName==NULL ){
 				exit_unexpectedly(t);
 				return;
@@ -188,13 +188,13 @@ syscall_handler (struct intr_frame *f)
 				break;
 			}
 			fd = thread_make_fd(file);
-			printf("fd check %d at tid %d for file %s\n", fd, thread_tid(), fileName);
+//			printf("fd check %d at tid %d for file %s\n", fd, thread_tid(), fileName);
 			f->eax=fd;
 			break; 
 
 		case SYS_CLOSE:
 			fd = *(espP+1);
-			printf("sys_close fd %d at pid %d \n", fd, thread_tid());
+//			printf("sys_close fd %d at pid %d \n", fd, thread_tid());
 			thread_close_fd(fd);
 			break;
 
@@ -202,7 +202,7 @@ syscall_handler (struct intr_frame *f)
 			fd = *(espP+1);
 			fileBuffer = (char*)*(espP+2);
 			fileSize = *(espP+3);
-			printf("%d: sysread, fd %d, fileBuffer %x, fileSize %d\n", thread_tid(), fd, fileBuffer, fileSize);
+//			printf("%d: sysread, fd %d, fileBuffer %x, fileSize %d\n", thread_tid(), fd, fileBuffer, fileSize);
 			if(check_ptr_invalidity(t,fileBuffer, espP)){
 				printf("failed to sys read 1, tid: %d, fileBuffer: %x, espP %x\n", thread_tid(), fileBuffer, espP);
 				exit_unexpectedly(t);
@@ -226,10 +226,10 @@ syscall_handler (struct intr_frame *f)
 				set_sup_page_table_entry_only_pin(t->s_pagedir, (void*)fileBuffer + k);
 			}
 
-			printf("read a is %d at %d\n", a, thread_tid());
-			printf("%d: start to sysread\n", thread_tid());
+//			printf("read a is %d at %d\n", a, thread_tid());
+//			printf("%d: start to sysread\n", thread_tid());
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);
-			printf("%d: finish to sysread\n", thread_tid());
+//			printf("%d: finish to sysread\n", thread_tid());
 			sup_page_table_pin_zero(t->s_pagedir);
 		  break;
 		case SYS_SEEK:
@@ -244,7 +244,7 @@ syscall_handler (struct intr_frame *f)
 			break;
 
 		case SYS_WRITE:
-			printf("%d: try to syswrite\n", thread_tid());
+//			printf("%d: try to syswrite\n", thread_tid());
 			fd = *(espP+1);
 			if (fd == 1){
 				printf("%s", (char*)*(espP+2));
@@ -273,11 +273,11 @@ syscall_handler (struct intr_frame *f)
 				set_sup_page_table_entry_only_pin(t->s_pagedir, (void*)fileBuffer + k);
 			}
 
-			printf("write a is %d at %d\n", a, thread_tid());
+//			printf("write a is %d at %d\n", a, thread_tid());
 
-			printf("%d: start to syswrite\n", thread_tid());
+//			printf("%d: start to syswrite\n", thread_tid());
 			f->eax = file_write(file, fileBuffer, fileSize);
-			printf("%d: finish to syswrite\n", thread_tid());
+//			printf("%d: finish to syswrite\n", thread_tid());
 
 			sup_page_table_pin_zero(t->s_pagedir);
 			break;
@@ -288,7 +288,7 @@ syscall_handler (struct intr_frame *f)
 				exit_unexpectedly(t);
 				return;
 			}
-			printf("sys exec: %s\n", execFile);
+//			printf("sys exec: %s\n", execFile);
 			copyExecFile = palloc_get_page(PAL_ASSERT|PAL_ZERO);
 			strlcpy(copyExecFile, execFile, strlen(execFile)+1);
 			execPid=process_execute(copyExecFile);
