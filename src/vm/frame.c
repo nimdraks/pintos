@@ -186,6 +186,9 @@ void* find_evict () {
 	evicted_uvaddr=frame_table[i].vaddr;
 	evicted_kvaddr=frame_table[i].kvaddr;
 	evicted_tid=frame_table[i].tid;
+	evicted_t = tid_thread(evicted_tid);
+
+	pagedir_clear_page( evicted_t->pagedir, evicted_uvaddr);
 
 	frame_table[i].used=false;
 	frame_table[i].tid=0;
@@ -193,10 +196,6 @@ void* find_evict () {
 	frame_table[i].kvaddr=0;
 
 
-  printf("release frame lock at %d\n", thread_tid());
-  lock_release(&frame_table_lock);
-
-	evicted_t = tid_thread(evicted_tid);
 	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
 
 	struct swap_block* sw_bl=swap_write_page(evicted_kvaddr, 1);
@@ -208,7 +207,8 @@ void* find_evict () {
 	spte->cnt = sw_bl->sector_size;	
 	free(sw_bl);
 
-	pagedir_clear_page( evicted_t->pagedir, evicted_uvaddr);
+  printf("release frame lock at %d\n", thread_tid());
+  lock_release(&frame_table_lock);
 
 	return evicted_kvaddr;
 }
@@ -250,14 +250,12 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 	evicted_tid=frame_table[i].tid;
 	evicted_t = tid_thread(evicted_tid);
 
+	pagedir_clear_page( evicted_t->pagedir, evicted_uvaddr);
+
 	frame_table[i].used=false;
 	frame_table[i].tid=0;
 	frame_table[i].vaddr=0;
 	frame_table[i].kvaddr=0;
-
-
-  printf("release frame lock at %d\n", thread_tid());
-  lock_release(&frame_table_lock);
 
 
 	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
@@ -268,6 +266,9 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 	spte->sector = sw_bl->sector;
 	spte->cnt = sw_bl->sector_size;	
 	free(sw_bl);
+
+  printf("release frame lock at %d\n", thread_tid());
+  lock_release(&frame_table_lock);
 /*
 	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
 	spte->in_memory = false;
@@ -276,7 +277,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 */
 //	printf("write sector %d cnt %d\n", spte->sector, spte->cnt);
 
-	pagedir_clear_page( evicted_t->pagedir, evicted_uvaddr);
+
 
 	void* kva =	i * (1 << PGBITS) + frame_base_vaddr;
 	uint8_t* page_addr = (uint8_t*)((uintptr_t)fault_addr & PTE_ADDR);
