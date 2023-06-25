@@ -221,8 +221,12 @@ syscall_handler (struct intr_frame *f)
 				return;
 			}
 
-			memset(fileBuffer, 0, fileSize);
-//			printf("start to sys read\n");
+			for (k=0; k<fileSize; k++){
+				 a += fileBuffer[k];
+			}
+
+			printf("read a is %d\n", a);
+			printf("start to sysread\n");
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);
 			printf("%d: finish to sysread\n", thread_tid());
 			sup_page_table_pin_zero(t->s_pagedir);
@@ -267,12 +271,11 @@ syscall_handler (struct intr_frame *f)
 				 a += fileBuffer[k];
 			}
 
-			if(a == 0)
-				printf("shit  \n");	
+			printf("write a is %d\n", a);
 
-			printf("%d: start to syswirte\n", thread_tid());
+			printf("%d: start to syswrite\n", thread_tid());
 			f->eax = file_write(file, fileBuffer, fileSize);
-			printf("%d: finish to syswirte\n", thread_tid());
+			printf("%d: finish to syswrite\n", thread_tid());
 
 			sup_page_table_pin_zero(t->s_pagedir);
 			break;
