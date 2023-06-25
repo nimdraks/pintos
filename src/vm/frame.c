@@ -188,6 +188,10 @@ void* find_evict () {
 	evicted_tid=frame_table[i].tid;
 	evicted_t = tid_thread(evicted_tid);
 
+	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
+
+	printf("pin is %d\n", spte->pin);
+
 	pagedir_clear_page( evicted_t->pagedir, evicted_uvaddr);
 
 	frame_table[i].used=false;
@@ -200,10 +204,7 @@ void* find_evict () {
 
 	struct swap_block* sw_bl=swap_write_page(evicted_kvaddr, 1);
 	memset(evicted_kvaddr, 0, PGSIZE);
-;
-	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
 
-	printf("pin is %d\n", spte->pin);
 	spte->in_memory = false;
 	spte->sector = sw_bl->sector;
 	spte->cnt = sw_bl->sector_size;	
@@ -252,6 +253,10 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 	evicted_tid=frame_table[i].tid;
 	evicted_t = tid_thread(evicted_tid);
 
+	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
+
+	printf("pin is %d\n", spte->pin);
+
 	pagedir_clear_page( evicted_t->pagedir, evicted_uvaddr);
 
 	frame_table[i].used=false;
@@ -263,9 +268,7 @@ bool replace_frame_entry (void* fault_addr, bool is_kernel){
 	printf("tid %d kvaddr %x uvaddr %x\n",evicted_tid, evicted_kvaddr, evicted_uvaddr);
 	struct swap_block* sw_bl=swap_write_page(evicted_kvaddr, 1);
 	memset(evicted_kvaddr, 0, PGSIZE);
-	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(evicted_t->s_pagedir, evicted_uvaddr);
 
-	printf("pin is %d\n", spte->pin);
 	spte->in_memory = false;
 	spte->sector = sw_bl->sector;
 	spte->cnt = sw_bl->sector_size;	
