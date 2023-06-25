@@ -220,16 +220,7 @@ syscall_handler (struct intr_frame *f)
 				exit_unexpectedly(t);
 				return;
 			}
-/*
-			for(i=0; i<=fileSize; i++) {
-				a=*((char*)fileBuffer + i);
-				a++;
-			}
 
-			for (k=0; k<fileSize; k++){
-				fileBuffer[k]=0;
-			}
-	*/
 			memset(fileBuffer, 0, fileSize);
 //			printf("start to sys read\n");
 			f->eax = file_read(file, (void*)fileBuffer, fileSize);
