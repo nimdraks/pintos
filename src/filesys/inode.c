@@ -121,6 +121,7 @@ inode_open (block_sector_t sector)
       inode = list_entry (e, struct inode, elem);
       if (inode->sector == sector) 
         {
+					printf("inode reopen %x %d\n", inode, inode->sector);
           inode_reopen (inode);
           return inode; 
         }
@@ -138,6 +139,7 @@ inode_open (block_sector_t sector)
   inode->deny_write_cnt = 0;
   inode->removed = false;
   block_read (fs_device, inode->sector, &inode->data);
+	printf("inode open %x %d\n", inode, inode->sector);
   return inode;
 }
 
