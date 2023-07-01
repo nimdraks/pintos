@@ -280,7 +280,7 @@ is_grown_stack_kernel (void* esp, void* fault_addr){
 
 bool
 is_grown_stack_user (void* esp, void* fault_addr){
-	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(thread_current()->s_pagedir, fault_addr);
+	struct frame_sup_page_table_entry* spte=just_lookup_sup_page_table_entry(thread_current()->s_pagedir, fault_addr);
 	if(spte!=NULL) 
 		return true;
 

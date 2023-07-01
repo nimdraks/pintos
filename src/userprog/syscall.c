@@ -39,18 +39,20 @@ check_esp_invalidity(struct thread* t, void* esp){
 bool
 check_ptr_invalidity(struct thread* t, void* ptr, void* esp){
 	if (!is_user_vaddr(ptr)){
-		printf("invalid 1\n");
+//		printf("invalid 1\n");
 		return true;
 	}
-/*
+
  	if (pagedir_get_page(t->pagedir, ptr) == NULL) {
-		if ( is_grown_stack_kernel(esp, ptr)){
+		if ( is_grown_stack_kernel(esp, ptr) || just_lookup_sup_page_table_entry(t->s_pagedir, ptr) !=NULL){
+//			printf("invalid 2\n");
 			return false;
-		} else
-			printf("invalid 2\n");
+		} else {
+//			printf("invalid 3\n");
 			return true;
+	 	}
 	}
-*/
+
 	return false;
 }
 
@@ -205,19 +207,19 @@ syscall_handler (struct intr_frame *f)
 			fileSize = *(espP+3);
 //			printf("%d: sysread, fd %d, fileBuffer %x, fileSize %d\n", thread_tid(), fd, fileBuffer, fileSize);
 			if(check_ptr_invalidity(t,fileBuffer, espP)){
-				printf("failed to sys read 1, tid: %d, fileBuffer: %x, espP %x\n", thread_tid(), fileBuffer, espP);
+//				printf("failed to sys read 1, tid: %d, fileBuffer: %x, espP %x\n", thread_tid(), fileBuffer, espP);
 				exit_unexpectedly(t);
 				return;
 			}
 
 			if (fd == 1){
-				printf("failed to sys read 2\n");
+//				printf("failed to sys read 2\n");
 				break;
 			}
 
 			file = thread_open_fd(fd);
 			if (file==NULL){
-				printf("failed to sys read 3, %x, %d\n", espP, *espP);
+//				printf("failed to sys read 3, %x, %d\n", espP, *espP);
 				exit_unexpectedly(t);
 				return;
 			}

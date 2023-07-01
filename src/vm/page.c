@@ -38,6 +38,22 @@ lookup_sup_page_table_entry (uint32_t *spd, const void* vaddr) {
 	return spte;
 }
 
+struct frame_sup_page_table_entry*
+just_lookup_sup_page_table_entry (uint32_t *spd, const void* vaddr) {
+	uint32_t *spde;
+	struct frame_sup_page_table_entry *spt, *spte;
+
+	spde = spd + pd_no(vaddr);
+	if (*spde == 0)
+		return NULL;
+
+	spt = (struct frame_sup_page_table_entry*)(*spde);
+	spte = spt + pt_no(vaddr);
+
+	return spte;
+}
+
+
 uint32_t*
 set_sup_page_table () {
 	size_sup_page_table_entry = sizeof(struct frame_sup_page_table_entry);
