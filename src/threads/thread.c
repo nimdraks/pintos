@@ -1172,6 +1172,7 @@ thread_close_mmapDesc (int mmid){
 	struct list_elem* e=list_begin(&(t->mmid_list));
 	struct mmapDesc* mmapStruct;
 	int i=0;
+	char a=0;
 
 	for ( e = list_begin(&(t->mmid_list)); e != list_end(&(t->mmid_list));
 				e = list_next(e))
@@ -1185,7 +1186,9 @@ thread_close_mmapDesc (int mmid){
 				void* page_addr = mmapStruct->addr + PGSIZE * i;
 				int size = (i == page_number-1) ? mmapStruct->offset - PGSIZE*i : PGSIZE;
 				if (pagedir_is_dirty (t->pagedir, page_addr) ){
-					printf("a%d\n", ((char*)mmapStruct->addr)[i]);
+					a += ((char*)mmapStruct->addr)[i];
+					if (a>9999)
+						printf("check\n");
 					file_write_at(mmapStruct->file, mmapStruct->addr, size ,i * PGSIZE );
 				}
 				unset_frame_table_entry_with_uva(t, page_addr);
@@ -1206,6 +1209,7 @@ thread_close_all_mmapDesc (void){
 	struct thread* t = thread_current();
 	struct list_elem* e=list_begin(&(t->mmid_list));
 	struct mmapDesc* mmapStruct;
+	char a=0;
 
 	while(!list_empty(&(t->mmid_list))){
       e = list_pop_front ( &(t->mmid_list) );
@@ -1216,7 +1220,9 @@ thread_close_all_mmapDesc (void){
 				void* page_addr = mmapStruct->addr + PGSIZE * i;
 				int size = (i == page_number -1) ? mmapStruct->offset - PGSIZE*i : PGSIZE;
 				if (pagedir_is_dirty (t->pagedir, page_addr) ){
-					printf("b%d\n", ((char*)mmapStruct->addr)[i]);
+					a += ((char*)mmapStruct->addr)[i];
+					if (a>9999)
+						printf("check\n");
 					file_write_at(mmapStruct->file, mmapStruct->addr, size ,i * PGSIZE );
 				}
 			}
