@@ -18,6 +18,7 @@
 #include "userprog/process.h"
 #endif
 #include "vm/frame.h"
+#include "filesys/file.h"
 
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
@@ -1136,6 +1137,27 @@ thread_get_mmapDesc (int mmid){
 	{
 		mmapStruct = list_entry (e, struct mmapDesc, elem);
 		if (mmapStruct->mmid == mmid){
+			return mmapStruct;
+		}
+	}
+
+	return NULL;
+}
+
+
+struct mmapDesc*
+thread_open_file_by_mmap(char* file_name) {
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->mmid_list));
+	struct mmapDesc* mmapStruct=NULL;
+
+	for ( e = list_begin(&(t->mmid_list)); e != list_end(&(t->mmid_list));
+				e = list_next(e))
+	{
+		mmapStruct = list_entry (e, struct mmapDesc, elem);
+		printf("%x %d %s %s\n", mmapStruct, mmapStruct->fd, mmapStruct->filename, file_name);
+		if (strcmp(mmapStruct->filename, file_name) == 0 ){
+			printf("i found it\n");
 			return mmapStruct;
 		}
 	}

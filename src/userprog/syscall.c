@@ -181,6 +181,15 @@ syscall_handler (struct intr_frame *f)
 				f->eax=-1;
 				break;
 			}
+
+			mmap_desc = thread_open_file_by_mmap(fileName);
+			if (mmap_desc != NULL) {
+				printf("debug %d, %s\n", mmap_desc->fd, mmap_desc->filename);
+				f->eax = mmap_desc->fd;
+				break;
+			}
+
+
 			file = filesys_open(fileName);
 			if (file == NULL){
 				printf("failed to open at tid %d for file %s\n", thread_tid(), fileName);

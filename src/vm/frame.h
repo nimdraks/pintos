@@ -34,6 +34,6 @@ void second_chance_entry(int clock);
 bool replace_frame_entry(void* fault_addr, bool is_kernel);
 bool is_full_frame_table(void);
 
-void* find_evict();
+void* find_evict(void);
 
 #endif

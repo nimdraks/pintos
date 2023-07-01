@@ -225,6 +225,7 @@ void thread_remove_all_childSema (void);
 
 struct mmapDesc* thread_make_mmid(int fd);
 struct mmapDesc* thread_get_mmapDesc (int mmid);
+struct mmapDesc* thread_open_file_by_mmap(char* file_name);
 bool thread_close_mmapDesc(int mmid);
 void thread_close_all_mmapDesc (void);
 void thread_mmapDesc_page_dirty_init(int mmid);
