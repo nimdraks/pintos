@@ -106,6 +106,28 @@ void unset_frame_table_entry_with_idx_cnt(size_t page_idx, size_t page_cnt){
 	lock_release(&frame_table_lock);
 }
 
+void unset_frame_table_entry_with_uva(struct thread* t, void* uva){
+//	printf("try to acquire frame lock 3 at %d\n", thread_tid());
+	lock_acquire (&frame_table_lock);
+//	printf("acquire frame lock at %d\n", thread_tid());
+
+
+	size_t i =0;
+	uint8_t* page_addr = (uint8_t*)((uintptr_t)uva & PTE_ADDR);
+
+	for (i=0; i < frame_number; i++){
+		if ( frame_table[i].tid == t->tid && frame_table[i].vaddr == page_addr ) {
+			frame_table[i].used=false;
+			frame_table[i].tid=0;
+			frame_table[i].vaddr=0;
+			frame_table[i].kvaddr=0;
+		}
+	}
+
+//	printf("release frame lock at %d\n", thread_tid());
+	lock_release(&frame_table_lock);
+}
+
 
 void unset_frame_table_entries_of_thread(struct thread* t){
 	size_t i = 0;

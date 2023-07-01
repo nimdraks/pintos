@@ -4,6 +4,7 @@
 #include <random.h>
 #include <stdio.h>
 #include <string.h>
+#include <round.h>
 #include "threads/flags.h"
 #include "threads/interrupt.h"
 #include "threads/intr-stubs.h"
@@ -1154,8 +1155,8 @@ thread_mmapDesc_page_dirty_init(int mmid){
 	{
 		mmapStruct = list_entry (e, struct mmapDesc, elem);
 		if (mmapStruct->mmid == mmid){
-			int page_number = mmapStruct->offset / PGSIZE;
-			for (i=0; i<page_number+1; i++){
+			int page_number = ROUND_UP(mmapStruct->offset, PGSIZE);
+			for (i=0; i<page_number; i++){
 				void* page_addr = mmapStruct->addr + PGSIZE * i;
 				pagedir_set_dirty (t->pagedir, page_addr, false);
 			}
@@ -1179,14 +1180,14 @@ thread_close_mmapDesc (int mmid){
 		if (mmapStruct->mmid == mmid){
 			list_remove(e);
 
-			int page_number = mmapStruct->offset / PGSIZE;
-			for (i=0; i<page_number+1; i++){
+			int page_number = ROUND_UP(mmapStruct->offset, PGSIZE);
+			for (i=0; i<page_number; i++){
 				void* page_addr = mmapStruct->addr + PGSIZE * i;
-				int size = i == page_number ? mmapStruct->offset - PGSIZE*i : PGSIZE;
+				int size = (i == page_number-1) ? mmapStruct->offset - PGSIZE*i : PGSIZE;
 				if (pagedir_is_dirty (t->pagedir, page_addr) ){
 					file_write_at(mmapStruct->file, mmapStruct->addr, size ,i * PGSIZE );
 				}
-
+				unset_frame_table_entry_with_uva(t, page_addr);
 				palloc_free_page(pagedir_get_page(t->pagedir ,page_addr));
 				pagedir_clear_page(t->pagedir, page_addr);
 			}
@@ -1208,11 +1209,11 @@ thread_close_all_mmapDesc (void){
 	while(!list_empty(&(t->mmid_list))){
       e = list_pop_front ( &(t->mmid_list) );
 			mmapStruct = list_entry (e, struct mmapDesc, elem);
-			int page_number = mmapStruct->offset / PGSIZE;
+			int page_number = ROUND_UP(mmapStruct->offset, PGSIZE);
 			int i=0;
-			for (i=0; i<page_number+1; i++){
+			for (i=0; i<page_number; i++){
 				void* page_addr = mmapStruct->addr + PGSIZE * i;
-				int size = i == page_number ? mmapStruct->offset - PGSIZE*i : PGSIZE;
+				int size = (i == page_number -1) ? mmapStruct->offset - PGSIZE*i : PGSIZE;
 				if (pagedir_is_dirty (t->pagedir, page_addr) ){
 					file_write_at(mmapStruct->file, mmapStruct->addr, size ,i * PGSIZE );
 				}
