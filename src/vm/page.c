@@ -50,6 +50,9 @@ just_lookup_sup_page_table_entry (uint32_t *spd, const void* vaddr) {
 	spt = (struct frame_sup_page_table_entry*)(*spde);
 	spte = spt + pt_no(vaddr);
 
+	if(spte->in_memory==false && spte->cnt==0)
+		return NULL;
+
 	return spte;
 }
 
