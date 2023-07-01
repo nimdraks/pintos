@@ -292,10 +292,10 @@ syscall_handler (struct intr_frame *f)
 				return;
 			}
 //			printf("sys exec: %s\n", execFile);
-			copyExecFile = palloc_get_page(PAL_ASSERT|PAL_ZERO);
+			copyExecFile = malloc(strlen(execFile)+1);
 			strlcpy(copyExecFile, execFile, strlen(execFile)+1);
 			execPid=process_execute(copyExecFile);
-			palloc_free_page (copyExecFile);
+			free (copyExecFile);
 			f->eax=execPid;
 			break;
 
