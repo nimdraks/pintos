@@ -18,6 +18,7 @@
 #include "userprog/process.h"
 #endif
 #include "vm/frame.h"
+#include "vm/page.h"
 
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
@@ -1171,6 +1172,7 @@ thread_close_mmapDesc (int mmid){
 	struct thread* t = thread_current();
 	struct list_elem* e=list_begin(&(t->mmid_list));
 	struct mmapDesc* mmapStruct;
+	struct frame_sup_page_table_entry* spde;
 	int i=0;
 	char a=0;
 
@@ -1192,6 +1194,9 @@ thread_close_mmapDesc (int mmid){
 					file_write_at(mmapStruct->file, page_addr, size ,i * PGSIZE );
 				}
 				unset_frame_table_entry_with_uva(t, page_addr);
+				spde = lookup_sup_page_table_entry(t->s_pagedir, page_addr);
+				spde->in_memory = false;
+				spde->cnt=0;
 				palloc_free_page(pagedir_get_page(t->pagedir ,page_addr));
 				pagedir_clear_page(t->pagedir, page_addr);
 			}
