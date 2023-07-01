@@ -126,16 +126,16 @@ process_wait (tid_t child_tid)
 {
 	int ret=-1;
 
-//	printf("process_wait %d \n", child_tid);
+	printf("process_wait %d \n", child_tid);
 	struct childSema* childSema = thread_get_childSema(thread_current(), child_tid);
 	if (childSema == NULL){
-//		printf("process_wait -> -1\n");
+		printf("process_wait -> -1\n");
 		return ret;
 	}
 
 	sema_down(&childSema->sema);
 	ret = childSema->ret;
-//	printf("pricess_wait %d -> ret %d\n", child_tid, ret);
+	printf("pricess_wait %d -> ret %d\n", child_tid, ret);
 	thread_remove_childSema(thread_current(), child_tid);
   return ret;
 }
@@ -144,7 +144,7 @@ process_wait (tid_t child_tid)
 void
 process_exit (void)
 {
-//	printf("process_exit : tid %d\n", thread_tid());
+	printf("process_exit : tid %d\n", thread_tid());
   struct thread *cur = thread_current ();
   uint32_t *pd, *spd;
 	if(cur->tFile != NULL){

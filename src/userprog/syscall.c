@@ -128,6 +128,7 @@ syscall_handler (struct intr_frame *f)
 	int waitPid=0;
 	int i=0;
 	char a=0;
+	int byteread=0;
 	
 	struct mmapDesc* mmap_desc=NULL;
 	int mmid=-1;
@@ -144,7 +145,7 @@ syscall_handler (struct intr_frame *f)
 				printf("%s: exit(%d)\n",thread_current()->name,-1);
 			else
 				printf("%s: exit(%d)\n",thread_current()->name, *(espP+1));
-//			printf("byebye %d with return %d\n", thread_tid(), *(espP+1));
+			printf("byebye %d with return %d\n", thread_tid(), *(espP+1));
 			exit_expectedly(t, *(espP+1));
 			break;
 
@@ -305,6 +306,7 @@ syscall_handler (struct intr_frame *f)
 		case SYS_MMAP:
 			fd = *(espP+1);
 			addr = (void*)*(espP+2);
+			printf("tid:%d mmap start, fd: %d\n", thread_tid(), fd);
 			if (check_mmap_argument_invalidty(fd, addr)){
 				f->eax=-1;
 				break;
@@ -323,7 +325,15 @@ syscall_handler (struct intr_frame *f)
 				break;
 			}
 
-			file_read(file, addr, fileSize);
+			for (k=0; k<fileSize; k++){
+				((char*)addr)[k]=0;
+				set_sup_page_table_entry_only_pin(t->s_pagedir, (void*)addr + k);
+			}
+
+			byteread=file_read(file, addr, fileSize);
+			sup_page_table_pin_zero(t->s_pagedir);
+			printf("tid: %d, byteread %d, fileSize %d\n", thread_tid(), byteread, fileSize);
+
 			file_seek(file, 0);
 
 			mmap_desc->file = file;
@@ -333,6 +343,7 @@ syscall_handler (struct intr_frame *f)
 
 			f->eax = mmap_desc->mmid;
 
+			printf("tid:%d mmap finish, fd: %d, mmid %d\n", thread_tid(), fd, f->eax);
 
 			break;
 

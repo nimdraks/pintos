@@ -7,6 +7,7 @@
 #include "threads/palloc.h"
 #include "threads/vaddr.h"
 #include "threads/thread.h"
+#include "vm/page.h"
 
 static uint32_t *active_pd (void);
 static void invalidate_pagedir (uint32_t *);
@@ -279,6 +280,11 @@ is_grown_stack_kernel (void* esp, void* fault_addr){
 
 bool
 is_grown_stack_user (void* esp, void* fault_addr){
+	struct frame_sup_page_table_entry* spte=lookup_sup_page_table_entry(thread_current()->s_pagedir, fault_addr);
+	if(spte!=NULL) 
+		return true;
+
+
 	if (esp <= fault_addr) {
 		return true;
 	}	else {

@@ -166,6 +166,7 @@ page_fault (struct intr_frame *f)
           write ? "writing" : "reading",
           user ? "user" : "kernel",  thread_tid());
 */
+
 	if(!not_present){
 		exit_unexpectedly(thread_current());
 		return;
@@ -181,7 +182,6 @@ page_fault (struct intr_frame *f)
 
 		bool is_grown = is_grown_stack_user(f->esp, fault_addr);
 		if (!is_grown) {
-//			printf("cc\n");
 			exit_unexpectedly(thread_current());
 			return;
 		}

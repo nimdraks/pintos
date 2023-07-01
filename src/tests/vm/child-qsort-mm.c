@@ -16,6 +16,8 @@ main (int argc UNUSED, char *argv[])
   unsigned char *p = (unsigned char *) 0x10000000;
 
   quiet = true;
+	
+	printf("test file name is %s\n", argv[1]);
 
   CHECK ((handle = open (argv[1])) > 1, "open \"%s\"", argv[1]);
   CHECK (mmap (handle, p) != MAP_FAILED, "mmap \"%s\"", argv[1]);
