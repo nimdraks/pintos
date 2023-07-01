@@ -183,7 +183,7 @@ syscall_handler (struct intr_frame *f)
 			}
 			file = filesys_open(fileName);
 			if (file == NULL){
-				printf("failed to open at tid %d for file %s\n", thread_tid(), fileName);
+//				printf("failed to open at tid %d for file %s\n", thread_tid(), fileName);
 				f->eax=-1;
 				break;
 			}
