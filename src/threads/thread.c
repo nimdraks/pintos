@@ -231,7 +231,7 @@ thread_create (const char *name, int priority,
 
   intr_set_level (old_level);
 
-	printf("tid %d, %s created\n", tid, aux);
+//	printf("tid %d, %s created\n", tid, aux);
 
   /* Add to run queue. */
   thread_unblock (t);
@@ -962,7 +962,7 @@ thread_make_fd (struct file* file)
 	}
  
 	fdStruct = malloc(sizeof(struct fileDesc));
-	printf("fdStruct check %d %x\n", thread_tid(), fdStruct);
+//	printf("fdStruct check %d %x\n", thread_tid(), fdStruct);
 	if (fdStruct == NULL){
 		return -1;
 	}
