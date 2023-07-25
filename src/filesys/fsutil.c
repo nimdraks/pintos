@@ -117,12 +117,21 @@ fsutil_extract (char **argv UNUSED)
 
           printf ("Putting '%s' into the file system...\n", file_name);
 
+#ifdef INFO5
+					printf("Start filesys_create when extract with file_name: %s, size: %d\n", file_name, size);
+#endif
           /* Create destination file. */
           if (!filesys_create (file_name, size))
             PANIC ("%s: create failed", file_name);
+#ifdef INFO5
+					printf("End filesys_create when extract with file_name: %s, size: %d\n", file_name, size);
+#endif
           dst = filesys_open (file_name);
           if (dst == NULL)
             PANIC ("%s: open failed", file_name);
+#ifdef INFO5
+					printf("End filesys_open when extract with file_name: %s, size: %d\n", file_name, size);
+#endif
 
           /* Do copy. */
           while (size > 0)

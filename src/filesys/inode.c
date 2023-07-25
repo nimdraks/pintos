@@ -74,8 +74,12 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 	struct inode_disk_second* zeros=(struct inode_disk_second*)new_zeros_sector();
 
 
-#ifdef INFO3
+#ifdef INFO5
 	printf("inode sector at expand_first: %d with length %d\n", id_first_sector, id_first->length );
+	struct buffer_cache* bc2 = get_buffer_cache_value_from_sector(0);
+	struct inode_disk_first* id_first2=(struct inode_disk_first*)(bc->data);
+	printf("0 sector test length: %d\n", id_first2->length);
+	free(bc2);
 #endif
 
 	for(i=0; i<ID_FIRST_SIZE; i++){
@@ -89,7 +93,7 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 			write_src_to_buffer_cache_from_sector(id_first->id_second_table[i], 0, zeros, BLOCK_SECTOR_SIZE);
 		}
 
-#ifdef INFO2
+#ifdef INFO5
 		printf("id_first idx at expand_first: %d, and its id_second_sector: %d\n", i, id_first->id_second_table[i]);
 #endif
 		ret = offset_to_sector_with_expand_second(id_first->id_second_table[i], &offset);
@@ -110,6 +114,7 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 block_sector_t
 offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offset){
 	int i=0;
+	block_sector_t ret=0;
 	char *zeros = new_zeros_sector();
  	struct buffer_cache* bc = get_buffer_cache_value_from_sector(id_second_sector);
 	struct inode_disk_second* id_second=(struct inode_disk_second*)(bc->data);
@@ -125,17 +130,18 @@ offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offs
 			write_src_to_buffer_cache_from_sector(id_second->data_table[i], 0, zeros, BLOCK_SECTOR_SIZE);
 		}
 
-#ifdef INFO2
+#ifdef INFO5
 		printf("id_second idx : %d -> data_sector %d\n", i, id_second->data_table[i]);
 #endif
 
 		if((*offset)==0){
-#ifdef INFO2
-			printf("id_second idx at expand_second: %d\n", i);
+#ifdef INFO5
+		printf("id_second idx : %d -> data_sector %d when return\n", i, id_second->data_table[i]);
 #endif
+			ret = id_second->data_table[i];
 			free(bc);
 			free(zeros);
-			return id_second->data_table[i];
+			return ret;
 		}
 		(*offset)--;
 	}
@@ -143,7 +149,7 @@ offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offs
 	free(bc);
 	free(zeros);
 
-	return 0;
+	return ret;
 }
 
 block_sector_t 
@@ -310,7 +316,7 @@ inode_create_2 (block_sector_t sector, off_t length)
   size_t sectors = bytes_to_sectors (length);
 	off_t offset_sectors = sectors-1;
 	block_sector_t data_sector = offset_to_sector_with_expand(sector, offset_sectors);
-#ifdef INFO3
+#ifdef INFO5
 	printf("inode %d create with sectors %d, length %d\n", sector, sectors, length);
 #endif
 	ASSERT (data_sector != 0);
@@ -692,7 +698,7 @@ inode_write_at_2 (struct inode *inode, const void *buffer_, off_t size,
       if (chunk_size <= 0)
         break;
 
-#ifdef INFO
+#ifdef INFO5
 			printf("bc selected when write inode at sector_idx %d\n", sector_idx);
 #endif
 

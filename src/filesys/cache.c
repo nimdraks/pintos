@@ -48,6 +48,9 @@ void
 write_src_to_buffer_cache_from_sector(block_sector_t sector_idx, int sector_ofs, const void* src, int size){
 	lock_acquire(&buffer_cache_lock);
 
+#ifdef INFO5
+	printf("write_src_buffer_cache_from sector_idx:%d\n", sector_idx);
+#endif
   struct buffer_cache* bc = get_buffer_cache_from_sector(sector_idx);
 	memcpy(bc->data + sector_ofs ,src ,size);
 	bc->is_dirty=true;
