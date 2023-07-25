@@ -533,6 +533,7 @@ inode_read_at_2 (struct inode *inode, void *buffer_, off_t size, off_t offset)
 {
   uint8_t *buffer = buffer_;
   off_t bytes_read = 0;
+	off_t offset_sector = 0;
 	struct buffer_cache* bc;
  	struct inode_disk_first* id_first;
 
@@ -544,7 +545,9 @@ inode_read_at_2 (struct inode *inode, void *buffer_, off_t size, off_t offset)
 #endif
 			bc = get_buffer_cache_value_from_sector(inode->sector);
 			id_first = (struct inode_disk_first*)(bc->data);
-      block_sector_t sector_idx = offset_to_sector (id_first, offset / BLOCK_SECTOR_SIZE);
+			offset_sector = offset / BLOCK_SECTOR_SIZE;
+      block_sector_t sector_idx = offset_to_sector (id_first, offset_sector);
+			free(bc);
       int sector_ofs = offset % BLOCK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
@@ -557,9 +560,7 @@ inode_read_at_2 (struct inode *inode, void *buffer_, off_t size, off_t offset)
       if (chunk_size <= 0)
         break;
 
-			free(bc);
 			bc = get_buffer_cache_value_from_sector(sector_idx);
-
 #ifdef INFO
 			printf("bc selected when read inode at sector_idx %d\n", sector_idx);
 #endif
@@ -658,6 +659,7 @@ inode_write_at_2 (struct inode *inode, const void *buffer_, off_t size,
 {
   const uint8_t *buffer = buffer_;
   off_t bytes_written = 0;
+	off_t offset_sector = 0;
 
   if (inode->deny_write_cnt)
     return 0;
@@ -665,7 +667,8 @@ inode_write_at_2 (struct inode *inode, const void *buffer_, off_t size,
   while (size > 0) 
     {
       /* Sector to write, starting byte offset within sector. */
-      block_sector_t sector_idx = offset_to_sector_with_expand (inode->sector, offset / BLOCK_SECTOR_SIZE);
+			offset_sector = offset / BLOCK_SECTOR_SIZE;
+      block_sector_t sector_idx = offset_to_sector_with_expand (inode->sector, offset_sector);
       int sector_ofs = offset % BLOCK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
