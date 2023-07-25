@@ -59,6 +59,8 @@ new_inode_disk_second(void) {
 char*
 new_zeros_sector(void){
 	char* zeros = malloc(BLOCK_SECTOR_SIZE);
+	memset(zeros, 0, ID_SECOND_SIZE * sizeof(block_sector_t) );
+
 	return zeros;
 }
 
@@ -70,6 +72,7 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 	struct buffer_cache* bc = get_buffer_cache_value_from_sector(id_first_sector);
 	struct inode_disk_first* id_first=(struct inode_disk_first*)(bc->data);
 	struct inode_disk_second* zeros=(struct inode_disk_second*)new_zeros_sector();
+
 
 #ifdef INFO2
 	printf("inode sector at expand_first: %d\n", id_first_sector);
@@ -115,7 +118,6 @@ offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offs
 				PANIC("failed to allocated a sector for data_sector\n");
 			}
 			id_second->data_table[i] = data_sector;
-
 			write_src_to_buffer_cache_from_sector(id_second_sector, 0, id_second, BLOCK_SECTOR_SIZE);
 			write_src_to_buffer_cache_from_sector(id_second->data_table[i], 0, zeros, BLOCK_SECTOR_SIZE);
 		}
@@ -142,7 +144,7 @@ offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offs
 block_sector_t 
 offset_to_sector(struct inode_disk_first* id_first, off_t offset)
 {
-#ifdef INFO3
+#ifdef INFO2
 	printf("offset to sector with offset %d\n", offset);
 #endif
 
@@ -239,7 +241,7 @@ inode_init (void)
    Returns false if memory or disk allocation fails. */
 bool
 inode_create (block_sector_t sector, off_t length){
-	if(true){
+	if(false){
 		return inode_create_1 (sector, length);
 	}
 	return inode_create_2 (sector, length);
@@ -314,7 +316,7 @@ inode_create_2 (block_sector_t sector, off_t length)
 	inode.sector = sector;
 
 #ifdef INFO2
-	printf("inode length sectors from arameter: %d\n", sectors);
+	printf("inode length sectors from parameter: %d\n", sectors);
 	printf("inode_sector_length: %d\n", inode_sector_length(&inode));
 #endif
 
@@ -384,7 +386,7 @@ inode_get_inumber (const struct inode *inode)
    If INODE was also a removed inode, frees its blocks. */
 void
 inode_close (struct inode* inode){
-	if (true){
+	if (false){
 		inode_close_1 (inode);
 	} else {
 		inode_close_2 (inode);
@@ -467,7 +469,7 @@ inode_remove (struct inode *inode)
 off_t
 inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) 
 {
-	if (true)
+	if (false)
 		return inode_read_at_1 (inode, buffer_, size, offset);
 	
 	return inode_read_at_2 (inode, buffer_, size, offset);
@@ -598,7 +600,7 @@ off_t
 inode_write_at (struct inode *inode, const void *buffer_, off_t size,
                 off_t offset) 
 {
-	if (true)
+	if (false)
 		return inode_write_at_1 (inode, buffer_, size, offset); 
 
 	return inode_write_at_2 (inode, buffer_, size, offset);
