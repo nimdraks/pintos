@@ -74,8 +74,8 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 	struct inode_disk_second* zeros=(struct inode_disk_second*)new_zeros_sector();
 
 
-#ifdef INFO2
-	printf("inode sector at expand_first: %d\n", id_first_sector);
+#ifdef INFO3
+	printf("inode sector at expand_first: %d with length %d\n", id_first_sector, id_first->length );
 #endif
 
 	for(i=0; i<ID_FIRST_SIZE; i++){
@@ -144,13 +144,13 @@ offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offs
 block_sector_t 
 offset_to_sector(struct inode_disk_first* id_first, off_t offset)
 {
-#ifdef INFO2
-	printf("offset to sector with offset %d\n", offset);
+#ifdef INFO3
+	printf("offset_to_sector with offset %d\n", offset);
 #endif
 
 	int i=0, j=0;
 	off_t remain_offset=offset;
-	block_sector_t ret=0;
+	block_sector_t ret=-1;
  	struct buffer_cache* bc;
 	struct inode_disk_second* id_second;
  
@@ -167,6 +167,9 @@ offset_to_sector(struct inode_disk_first* id_first, off_t offset)
 			if(id_second->data_table[j]!=0 && remain_offset==0){
 				ret=id_second->data_table[j];
 				free(bc);
+#ifdef INFO3
+	printf("offset_to_sector i: %d, j: %d, ret: %d\n", i, j, ret);
+#endif
 				return ret;
 			}
 			if (id_second->data_table[j]!=0){
@@ -176,11 +179,9 @@ offset_to_sector(struct inode_disk_first* id_first, off_t offset)
 		free(bc);
 	}
 
-	if (remain_offset!=0){
-		PANIC("offset is over the length of inode: remain_offset %d\n", remain_offset);
-	}	
+//		PANIC("offset is over the length of inode: remain_offset %d\n", remain_offset);
 
-	return ret;
+	return -1;
 }
 
 
@@ -298,9 +299,6 @@ inode_create_2 (block_sector_t sector, off_t length)
 		return true;
 	}
 
-#ifdef INFO2
-	printf("inode sector at inode_create: %d\n", sector);
-#endif
   /* If this assertion fails, the inode structure is not exactly
      one sector in size, and you should fix that. */
 
@@ -308,7 +306,7 @@ inode_create_2 (block_sector_t sector, off_t length)
 	off_t offset_sectors = sectors-1;
 	block_sector_t data_sector = offset_to_sector_with_expand(sector, offset_sectors);
 #ifdef INFO3
-	printf("inode create with sectors %d\n", sectors);
+	printf("inode %d create with sectors %d, length %d\n", sector, sectors, length);
 #endif
 	ASSERT (data_sector != 0);
 
@@ -539,6 +537,9 @@ inode_read_at_2 (struct inode *inode, void *buffer_, off_t size, off_t offset)
 	struct buffer_cache* bc;
  	struct inode_disk_first* id_first;
 
+#ifdef INFO3
+	printf("call inode_read_at_2 at sector %d\n", inode->sector);
+#endif
   while (size > 0) 
     {
       /* Disk sector to read, starting byte offset within sector. */
@@ -559,6 +560,9 @@ inode_read_at_2 (struct inode *inode, void *buffer_, off_t size, off_t offset)
 
       /* Number of bytes to actually copy out of this sector. */
       int chunk_size = size < min_left ? size : min_left;
+#ifdef INFO3
+			printf("chunk_size %d, sector_idx %d, inode_length %d\n", chunk_size, sector_idx, inode_length(inode));
+#endif
       if (chunk_size <= 0)
         break;
 
@@ -730,14 +734,28 @@ inode_allow_write (struct inode *inode)
 /* Returns the length, in bytes, of INODE's data. */
 off_t
 inode_length (const struct inode *inode){
-	return inode_byte_length(inode);
+	if (false)
+		return inode_byte_length_1(inode);
+	return inode_byte_length_2(inode);
 }
 
 off_t
-inode_byte_length(const struct inode *inode)
+inode_byte_length_1(const struct inode *inode)
 {
 	struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);	
 	struct inode_disk* id = (struct inode_disk*)(bc->data);
+	off_t ret = id->length;
+
+	free(bc);
+
+	return ret;
+}
+
+off_t
+inode_byte_length_2(const struct inode *inode)
+{
+	struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);	
+	struct inode_disk_first* id = (struct inode_disk_first*)(bc->data);
 	off_t ret = id->length;
 
 	free(bc);
