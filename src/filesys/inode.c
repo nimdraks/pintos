@@ -299,12 +299,12 @@ inode_create_2 (block_sector_t sector, off_t length)
 #ifdef INFO2
 	printf("inode sector at inode_create: %d\n", sector);
 #endif
-
-
   /* If this assertion fails, the inode structure is not exactly
      one sector in size, and you should fix that. */
+
   size_t sectors = bytes_to_sectors (length);
-	block_sector_t data_sector = offset_to_sector_with_expand(sector, sectors-1);
+	off_t offset_sectors = sectors-1;
+	block_sector_t data_sector = offset_to_sector_with_expand(sector, offset_sectors);
 #ifdef INFO3
 	printf("inode create with sectors %d\n", sectors);
 #endif
@@ -312,12 +312,13 @@ inode_create_2 (block_sector_t sector, off_t length)
 
 	struct inode inode;
 	inode.sector = sector;
+
 #ifdef INFO2
-	printf("inode length parameter: %d\n", sectors);
-	printf("inode_length 2: %d\n", inode_length_2(&inode));
+	printf("inode length sectors from arameter: %d\n", sectors);
+	printf("inode_sector_length: %d\n", inode_sector_length(&inode));
 #endif
 
-	ASSERT(sectors == (size_t)inode_length_2(&inode));
+	ASSERT(sectors == (size_t)inode_sector_length(&inode));
 
   return true;
 }
@@ -439,7 +440,7 @@ inode_close_2 (struct inode *inode)
 					
 					struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);
 			  	struct inode_disk_first* id_first = (struct inode_disk_first*)(bc->data);
-					int i = 0, length = inode_length_2(inode);
+					int i = 0, length = inode_sector_length(inode);
 					for (i = 0; i < length; i++) {
 						block_sector_t sector = offset_to_sector(id_first, i);
 						free_map_release(sector, 1);
@@ -724,14 +725,11 @@ inode_allow_write (struct inode *inode)
 /* Returns the length, in bytes, of INODE's data. */
 off_t
 inode_length (const struct inode *inode){
-	if (true)
-		return inode_length_1(inode);
-
-	return inode_length_2(inode);
+	return inode_byte_length(inode);
 }
 
 off_t
-inode_length_1 (const struct inode *inode)
+inode_byte_length(const struct inode *inode)
 {
 	struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);	
 	struct inode_disk* id = (struct inode_disk*)(bc->data);
@@ -743,7 +741,7 @@ inode_length_1 (const struct inode *inode)
 }
 
 off_t
-inode_length_2(const struct inode* inode){
+inode_sector_length(const struct inode* inode){
 	int i=0, j=0;
 	off_t length=0;
  	struct buffer_cache* bc;

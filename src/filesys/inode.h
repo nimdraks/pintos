@@ -35,7 +35,7 @@ off_t inode_write_at_2 (struct inode *, const void *, off_t size, off_t offset);
 void inode_deny_write (struct inode *);
 void inode_allow_write (struct inode *);
 off_t inode_length (const struct inode *);
-off_t inode_length_1(const struct inode *);
-off_t inode_length_2(const struct inode *);
+off_t inode_byte_length(const struct inode *);
+off_t inode_sector_length(const struct inode *);
 
 #endif /* filesys/inode.h */
