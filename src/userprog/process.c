@@ -260,7 +260,10 @@ load (char *file_name, void (**eip) (void), void **esp)
 	char *input_str=file_name;
 	char *argvs;
 	file_name = strtok_r (input_str, " ", &argvs);
-	
+
+#ifdef INFO4
+	printf("load file %s\n", file_name);
+#endif
 
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();

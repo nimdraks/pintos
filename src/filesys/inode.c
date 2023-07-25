@@ -93,8 +93,11 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 		printf("id_first idx at expand_first: %d, and its id_second_sector: %d\n", i, id_first->id_second_table[i]);
 #endif
 		ret = offset_to_sector_with_expand_second(id_first->id_second_table[i], &offset);
-		if (ret!=0)
+		if (ret!=0){
+			free(bc);
+			free(zeros);
 			return ret;
+		}
 	}		
 
 	free(bc);
@@ -130,6 +133,8 @@ offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offs
 #ifdef INFO2
 			printf("id_second idx at expand_second: %d\n", i);
 #endif
+			free(bc);
+			free(zeros);
 			return id_second->data_table[i];
 		}
 		(*offset)--;
@@ -144,7 +149,7 @@ offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offs
 block_sector_t 
 offset_to_sector(struct inode_disk_first* id_first, off_t offset)
 {
-#ifdef INFO3
+#ifdef INFO4
 	printf("offset_to_sector with offset %d\n", offset);
 #endif
 
