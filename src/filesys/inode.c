@@ -76,10 +76,6 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 
 #ifdef INFO5
 	printf("inode sector at expand_first: %d with length %d\n", id_first_sector, id_first->length );
-	struct buffer_cache* bc2 = get_buffer_cache_value_from_sector(0);
-	struct inode_disk_first* id_first2=(struct inode_disk_first*)(bc2->data);
-	printf("0 sector test length: %d\n", id_first2->length);
-	free(bc2);
 #endif
 
 	for(i=0; i<ID_FIRST_SIZE; i++){
