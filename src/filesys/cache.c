@@ -34,7 +34,8 @@ get_buffer_cache_value_from_sector(block_sector_t sector_idx){
 	lock_acquire(&buffer_cache_lock);
 
   struct buffer_cache* bc = get_buffer_cache_from_sector(sector_idx);
-#ifdef INFO4
+#ifdef INFO5
+	if (sector_idx==0)
 	printf("get_buffer_cache_value sector_idx:%d, bc: %p, ret:%p\n", sector_idx, bc, ret);
 #endif
 	memcpy(ret, bc, sizeof(struct buffer_cache));
@@ -48,12 +49,14 @@ void
 write_src_to_buffer_cache_from_sector(block_sector_t sector_idx, int sector_ofs, const void* src, int size){
 	lock_acquire(&buffer_cache_lock);
 
-#ifdef INFO5
-	printf("write_src_buffer_cache_from sector_idx:%d\n", sector_idx);
-#endif
+
   struct buffer_cache* bc = get_buffer_cache_from_sector(sector_idx);
 	memcpy(bc->data + sector_ofs ,src ,size);
 	bc->is_dirty=true;
+
+#ifdef INFO5
+	printf("write_src_buffer_cache_from sector_idx:%d, bc:%p\n", sector_idx, bc);
+#endif
 
 	lock_release(&buffer_cache_lock);
 }
@@ -94,8 +97,8 @@ write_in_buffer_cache_arr(block_sector_t sector_idx) {
 	int idx = find_empty_in_buffer_cache_arr();
 	struct buffer_cache* bc = buffer_cache_arr + idx;
 
-#ifdef INFO
-	printf("sector idx %d will be written to buffer cache i %d\n", sector_idx, idx);
+#ifdef INFO5
+	printf("sector idx %d will be written to buffer cache to idx %d, bc:%p\n", sector_idx, idx, bc);
 #endif
 
 	bc->sector_idx = sector_idx;
@@ -104,9 +107,32 @@ write_in_buffer_cache_arr(block_sector_t sector_idx) {
 	bc->is_dirty = false;
 	bc->access_cnt = 1;
 
+#ifdef INFO5
+	int i=0;
+	if (sector_idx==0){
+		for (i=0; i<BLOCK_SECTOR_SIZE; i++){
+			printf("%d ", (bc->data)[i]);
+		}
+		printf("\nis before\n");
+	}
+#endif
+
 	block_read(fs_device, sector_idx, bc->data);
 
+#ifdef INFO5
+	printf("sector idx %d is written to buffer cache to idx %d, bc:%p\n", sector_idx, idx, bc);
+	if (sector_idx==0){
+		for (i=0; i<BLOCK_SECTOR_SIZE; i++){
+			printf("%d ", (bc->data)[i]);
+		}
+		printf("\nis after\n");
+		struct buffer_cache test;
+		block_read(fs_device, sector_idx, &test);
+		printf("\ntest\n");
+	}
 
+
+#endif
 
 	return bc;
 }
@@ -154,9 +180,9 @@ choose_victim_in_buffer_cache_arr() {
 
 	bc = buffer_cache_arr + victim_idx;
 
-#ifdef INFO
+#ifdef INFO5
 	printf("victim idx is %d and its sector %d\n", victim_idx, bc->sector_idx);
-	printf("written to addr %p\n", bc->data);
+	printf("written to addr %p if dirty %d\n", bc->data, bc->is_dirty);
 #endif
 
 	if(victim_idx == -1)
@@ -211,6 +237,11 @@ write_dirty_buffer_cache_to_sector(void) {
 	for (i = 0; i < BUFFER_CACHE_ARR_SIZE; i++) {
 		bc = buffer_cache_arr + i;
 		if (bc->is_used==true && bc->is_dirty==true) {
+#ifdef INFO5
+			if (bc->sector_idx==0)
+				printf("sector 0 is written peridicallly\n");
+#endif
+
 			block_write(fs_device, bc->sector_idx, bc->data);
 		}
 	}
