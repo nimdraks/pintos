@@ -89,6 +89,18 @@ is_in_buffer_cache_arr(block_sector_t sector_idx){
 		}
 	}
 
+#ifdef INFO5
+	for (i = 0; i < BUFFER_CACHE_ARR_SIZE; i++) {
+		bc = buffer_cache_arr + i;
+		if (bc->sector_idx ==0 && bc->is_used==true){
+			if (((int*)bc->data)[0] != 512 ){
+				printf("sector 0 length %d\n", ((int*)bc->data)[0]);
+				PANIC("fuck");
+			}
+		}
+	}
+#endif
+
 	return bc_return;
 }
 
@@ -233,6 +245,7 @@ write_dirty_buffer_cache_to_sector(void) {
 
 	int i=0;
 	struct buffer_cache* bc=NULL;
+	lock_acquire(&buffer_cache_lock);
 
 	for (i = 0; i < BUFFER_CACHE_ARR_SIZE; i++) {
 		bc = buffer_cache_arr + i;
@@ -245,6 +258,8 @@ write_dirty_buffer_cache_to_sector(void) {
 			block_write(fs_device, bc->sector_idx, bc->data);
 		}
 	}
+
+	lock_release(&buffer_cache_lock);
 
 	return;
 }
