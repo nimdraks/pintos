@@ -47,8 +47,10 @@ get_buffer_cache_value_from_sector(block_sector_t sector_idx){
 
 void
 write_src_to_buffer_cache_from_sector(block_sector_t sector_idx, int sector_ofs, const void* src, int size){
-	lock_acquire(&buffer_cache_lock);
+	if (size-sector_ofs > BLOCK_SECTOR_SIZE)
+		PANIC("size-sector_ofs should be smaller than BLOCK_SECTOR_SIZE\n");		
 
+	lock_acquire(&buffer_cache_lock);
 
   struct buffer_cache* bc = get_buffer_cache_from_sector(sector_idx);
 	memcpy(bc->data + sector_ofs ,src ,size);
@@ -86,6 +88,7 @@ is_in_buffer_cache_arr(block_sector_t sector_idx){
 			printf("found sector_idx %d at buffer cache i %d\n", sector_idx, i);
 #endif
 			bc_return=bc;
+			break;
 		}
 	}
 
@@ -122,8 +125,8 @@ write_in_buffer_cache_arr(block_sector_t sector_idx) {
 #ifdef INFO5
 	int i=0;
 	if (sector_idx==0){
-		for (i=0; i<BLOCK_SECTOR_SIZE; i++){
-			printf("%d ", (bc->data)[i]);
+		for (i=0; i<128; i++){
+			printf("%d ", ((int*)(bc->data))[i]);
 		}
 		printf("\nis before\n");
 	}
@@ -134,13 +137,13 @@ write_in_buffer_cache_arr(block_sector_t sector_idx) {
 #ifdef INFO5
 	printf("sector idx %d is written to buffer cache to idx %d, bc:%p\n", sector_idx, idx, bc);
 	if (sector_idx==0){
-		for (i=0; i<BLOCK_SECTOR_SIZE; i++){
-			printf("%d ", (bc->data)[i]);
+		for (i=0; i<128; i++){
+			printf("%d ", ((int*)(bc->data))[i]);
 		}
 		printf("\nis after\n");
 		struct buffer_cache test;
 		block_read(fs_device, sector_idx, &test);
-		printf("\ntest\n");
+		printf("test\n");
 	}
 
 
@@ -245,7 +248,6 @@ write_dirty_buffer_cache_to_sector(void) {
 
 	int i=0;
 	struct buffer_cache* bc=NULL;
-	lock_acquire(&buffer_cache_lock);
 
 	for (i = 0; i < BUFFER_CACHE_ARR_SIZE; i++) {
 		bc = buffer_cache_arr + i;
@@ -258,8 +260,6 @@ write_dirty_buffer_cache_to_sector(void) {
 			block_write(fs_device, bc->sector_idx, bc->data);
 		}
 	}
-
-	lock_release(&buffer_cache_lock);
 
 	return;
 }
