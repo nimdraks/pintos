@@ -68,8 +68,9 @@ void
 test_zero_sector_size(void){
 #ifdef INFO5
 	struct buffer_cache* bc2 = get_buffer_cache_value_from_sector(0);
-	struct inode_disk_first* id_first2=(struct inode_disk_first*)(bc2->data);
-	printf("sector 0 test with length %d\n", id_first2->length);
+	struct inode_disk_first* id_first=(struct inode_disk_first*)(bc2->data);
+	ASSERT(id_first->magic == INODE_MAGIC);
+	printf("sector 0 test with length %d\n", id_first->length);
 	free(bc2);
 #endif
 }
