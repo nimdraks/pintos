@@ -259,6 +259,8 @@ write_dirty_buffer_cache_to_sector(void) {
 	int i=0;
 	struct buffer_cache* bc=NULL;
 
+	lock_acquire(&buffer_cache_lock);
+
 	for (i = 0; i < BUFFER_CACHE_ARR_SIZE; i++) {
 		bc = buffer_cache_arr + i;
 		if (bc->is_used==true && bc->is_dirty==true) {
@@ -270,6 +272,8 @@ write_dirty_buffer_cache_to_sector(void) {
 			block_write(fs_device, bc->sector_idx, bc->data);
 		}
 	}
+
+	lock_release(&buffer_cache_lock);
 
 #ifdef INFO5
 	printf("interrupt finished\n");
