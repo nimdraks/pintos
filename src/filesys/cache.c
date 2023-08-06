@@ -197,7 +197,13 @@ choose_victim_in_buffer_cache_arr() {
 
 #ifdef INFO5
 	printf("victim idx is %d and its sector %d\n", victim_idx, bc->sector_idx);
-	printf("written to addr %p if dirty %d\n", bc->data, bc->is_dirty);
+	if (bc->sector_idx==0){
+		int i=0;
+		for (i=0; i<128; i++){
+			printf("%d ", ((int*)(bc->data))[i]);
+		}
+	}
+	printf("\nwritten to addr %p if dirty %d\n", bc->data, bc->is_dirty);
 #endif
 
 	if(victim_idx == -1)
@@ -246,6 +252,10 @@ write_dirty_buffer_cache_to_sector(void) {
 	if (buffer_cache_arr == NULL)
 		return;
 
+#ifdef INFO5
+	printf("interrupt\n");
+#endif
+
 	int i=0;
 	struct buffer_cache* bc=NULL;
 
@@ -260,6 +270,10 @@ write_dirty_buffer_cache_to_sector(void) {
 			block_write(fs_device, bc->sector_idx, bc->data);
 		}
 	}
+
+#ifdef INFO5
+	printf("interrupt finished\n");
+#endif
 
 	return;
 }
