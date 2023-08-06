@@ -84,6 +84,7 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 	struct inode_disk_first* id_first=(struct inode_disk_first*)(bc->data);
 	struct inode_disk_second* zeros=(struct inode_disk_second*)new_zeros_sector();
 
+	ASSERT(id_first->magic == INODE_MAGIC);
 
 #ifdef INFO5
 	printf("inode sector at expand_first: %d with length %d\n", id_first_sector, id_first->length );
@@ -165,6 +166,8 @@ offset_to_sector(struct inode_disk_first* id_first, off_t offset)
 #ifdef INFO4
 	printf("offset_to_sector with offset %d\n", offset);
 #endif
+
+	ASSERT(id_first->magic==INODE_MAGIC);
 
 	int i=0, j=0;
 	off_t remain_offset=offset;
@@ -311,6 +314,7 @@ inode_create_2 (block_sector_t sector, off_t length)
 
 	struct inode_disk_first* id_first = new_inode_disk_first(length);
 	write_src_to_buffer_cache_from_sector(sector, 0, id_first, BLOCK_SECTOR_SIZE);
+	ASSERT(id_first->magic==INODE_MAGIC);
 	free(id_first);
 
 	if(length == 0){
@@ -458,6 +462,9 @@ inode_close_2 (struct inode *inode)
 					
 					struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);
 			  	struct inode_disk_first* id_first = (struct inode_disk_first*)(bc->data);
+
+					ASSERT(id_first->magic==INODE_MAGIC);
+
 					int i = 0, length = inode_sector_length(inode);
 					for (i = 0; i < length; i++) {
 						block_sector_t sector = offset_to_sector(id_first, i);
@@ -566,9 +573,12 @@ inode_read_at_2 (struct inode *inode, void *buffer_, off_t size, off_t offset)
 #endif
 			bc = get_buffer_cache_value_from_sector(inode->sector);
 			id_first = (struct inode_disk_first*)(bc->data);
+			ASSERT(id_first->magic==INODE_MAGIC);
+
 			offset_sector = offset / BLOCK_SECTOR_SIZE;
       block_sector_t sector_idx = offset_to_sector (id_first, offset_sector);
 			free(bc);
+
       int sector_ofs = offset % BLOCK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
@@ -774,6 +784,7 @@ inode_byte_length_2(const struct inode *inode)
 {
 	struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);	
 	struct inode_disk_first* id = (struct inode_disk_first*)(bc->data);
+	ASSERT(id->magic==INODE_MAGIC);
 	off_t ret = id->length;
 
 	free(bc);
