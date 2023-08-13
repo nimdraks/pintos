@@ -162,6 +162,13 @@ syscall_handler (struct intr_frame *f)
 			fd = *(espP+1);		
 			file = thread_open_fd(fd);
 			file_seek(file, *(espP+2));	
+			break;
+
+		case SYS_TELL:
+			fd = *(espP+1);		
+			file = thread_open_fd(fd);
+			f->eax = file_tell(file);	
+			break;
 
 		case SYS_FILESIZE:
 			fd = *(espP+1);
