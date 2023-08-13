@@ -713,6 +713,11 @@ inode_write_at_2 (struct inode *inode, const void *buffer_, off_t size,
 
       /* Number of bytes to actually write into this sector. */
       int chunk_size = size < min_left ? size : min_left;
+
+#ifdef INFO6
+			printf("inode_write_at_2: inode %x, buffer %x, size %d, offset %d, offset_sector %d, sector_idx %d, sector_ofs %d, inode_left %d, sector_left %d, min_left %d, chunk_size %d\n", inode, buffer, size, offset, offset_sector, sector_idx, sector_ofs, inode_left, sector_left, min_left, chunk_size);
+#endif
+
       if (chunk_size <= 0)
         break;
 

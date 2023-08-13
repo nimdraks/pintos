@@ -181,6 +181,10 @@ syscall_handler (struct intr_frame *f)
 			fileBuffer = (char*)*(espP+2);
 			fileSize = *(espP+3);
 
+#ifdef INFO6
+			printf("SYS_WRITE: fd %d, fileBuffer %x, fileSize %d\n", fd, fileBuffer, fileSize);
+#endif
+
 			if(check_ptr_invalidity(t,fileBuffer)){
 				exit_unexpectedly(t);
 				return;
@@ -193,6 +197,9 @@ syscall_handler (struct intr_frame *f)
 			}
 
 			f->eax = file_write(file, fileBuffer, fileSize);
+#ifdef INFO6
+			printf("SYS_WRITE: writtend byte %d\n", f->eax);
+#endif
 			break;
 
 		case SYS_EXEC:
