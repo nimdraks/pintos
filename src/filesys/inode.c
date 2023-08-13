@@ -695,6 +695,7 @@ inode_write_at_2 (struct inode *inode, const void *buffer_, off_t size,
   const uint8_t *buffer = buffer_;
   off_t bytes_written = 0;
 	off_t offset_sector = 0;
+	off_t init_offset = offset;
 
   if (inode->deny_write_cnt)
     return 0;
@@ -707,15 +708,17 @@ inode_write_at_2 (struct inode *inode, const void *buffer_, off_t size,
       int sector_ofs = offset % BLOCK_SECTOR_SIZE;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
-      off_t inode_left = inode_length (inode) - offset;
-      int sector_left = BLOCK_SECTOR_SIZE - sector_ofs;
-      int min_left = inode_left < sector_left ? inode_left : sector_left;
+  //    off_t inode_left = inode_length (inode) - offset;
+//      int sector_left = BLOCK_SECTOR_SIZE - sector_ofs;
+//      int min_left = inode_left < sector_left ? inode_left : sector_left;
+			int min_left = BLOCK_SECTOR_SIZE - sector_ofs;
 
       /* Number of bytes to actually write into this sector. */
       int chunk_size = size < min_left ? size : min_left;
 
 #ifdef INFO6
-			printf("inode_write_at_2: inode %x, buffer %x, size %d, offset %d, offset_sector %d, sector_idx %d, sector_ofs %d, inode_left %d, sector_left %d, min_left %d, chunk_size %d\n", inode, buffer, size, offset, offset_sector, sector_idx, sector_ofs, inode_left, sector_left, min_left, chunk_size);
+//			printf("inode_write_at_2: inode %x, buffer %x, size %d, offset %d, offset_sector %d, sector_idx %d, sector_ofs %d, inode_left %d, sector_left %d, min_left %d, chunk_size %d\n", inode, buffer, size, offset, offset_sector, sector_idx, sector_ofs, inode_left, sector_left, min_left, chunk_size);
+			printf("inode_write_at_2: inode %x, buffer %x, size %d, offset %d, offset_sector %d, sector_idx %d, sector_ofs %d, min_left %d, chunk_size %d\n", inode, buffer, size, offset, offset_sector, sector_idx, sector_ofs, min_left, chunk_size);
 #endif
 
       if (chunk_size <= 0)
@@ -740,6 +743,11 @@ inode_write_at_2 (struct inode *inode, const void *buffer_, off_t size,
       offset += chunk_size;
       bytes_written += chunk_size;
     }
+
+
+	if (inode_length(inode) < init_offset + bytes_written)
+		inode_set_byte_length_2(inode, init_offset+bytes_written);
+
 
   return bytes_written;
 }
@@ -796,6 +804,19 @@ inode_byte_length_2(const struct inode *inode)
 	free(bc);
 
 	return ret;
+}
+
+void
+inode_set_byte_length_2(const struct inode *inode, off_t length)
+{
+	struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);	
+	struct inode_disk_first* id = (struct inode_disk_first*)(bc->data);
+	ASSERT(id->magic==INODE_MAGIC);
+	id->length = length;
+
+	write_src_to_buffer_cache_from_sector(inode->sector, 0, id, BLOCK_SECTOR_SIZE);
+
+	free(bc);
 }
 
 off_t
