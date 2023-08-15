@@ -105,6 +105,8 @@ DEV_LBA	src/devices/ide.c	43;"	d	file:
 DEV_MBS	src/devices/ide.c	42;"	d	file:
 DIM	src/examples/matmult.c	29;"	d	file:
 DIRECTORY	src/tests/filesys/extended/grow-dir-lg.c	5;"	d	file:
+DIR_DELIMIT	src/filesys/directory.c	/^char DIR_DELIMIT = '\/';$/;"	v
+DIR_DELIMIT_STR	src/filesys/directory.c	/^char* DIR_DELIMIT_STR = "\/";$/;"	v
 DIV_ROUND_UP	src/lib/round.h	10;"	d
 Die	src/tests/Algorithm/Diff.pm	/^sub Die$/;"	s
 Diff	src/tests/Algorithm/Diff.pm	/^sub Diff {$/;"	s
@@ -878,6 +880,7 @@ dir_entry	src/filesys/directory.c	/^struct dir_entry $/;"	s	file:
 dir_get_inode	src/filesys/directory.c	/^dir_get_inode (struct dir *dir) $/;"	f
 dir_lookup	src/filesys/directory.c	/^dir_lookup (const struct dir *dir, const char *name,$/;"	f
 dir_open	src/filesys/directory.c	/^dir_open (struct inode *inode) $/;"	f
+dir_open_recursive	src/filesys/directory.c	/^dir_open_recursive (char* path) {$/;"	f
 dir_open_root	src/filesys/directory.c	/^dir_open_root (void)$/;"	f
 dir_readdir	src/filesys/directory.c	/^dir_readdir (struct dir *dir, char name[NAME_MAX + 1])$/;"	f
 dir_remove	src/filesys/directory.c	/^dir_remove (struct dir *dir, const char *name) $/;"	f
@@ -1075,6 +1078,7 @@ get_buffer_cache_value_from_sector	src/filesys/cache.c	/^get_buffer_cache_value_
 get_core_output	src/tests/tests.pm	/^sub get_core_output {$/;"	s
 get_inumber	src/examples/pwd.c	/^get_inumber (const char *file_name, int *inum) $/;"	f	file:
 get_load_average	src/utils/pintos	/^sub get_load_average {$/;"	s
+get_name_from_end	src/filesys/directory.c	/^get_name_from_end(char* path) {$/;"	f
 get_scratch_file	src/utils/pintos	/^sub get_scratch_file {$/;"	s
 getcwd	src/examples/pwd.c	/^getcwd (char *cwd, size_t cwd_size) $/;"	f	file:
 gid	src/lib/ustar.c	/^    char gid[8];                \/* Group ID as octal string. *\/$/;"	m	struct:ustar_header	file:
@@ -1249,7 +1253,7 @@ invalidate_pagedir	src/userprog/pagedir.c	/^invalidate_pagedir (uint32_t *pd) $/
 invariant_keymap	src/devices/kbd.c	/^static const struct keymap invariant_keymap[] = $/;"	v	typeref:struct:keymap	file:
 inw	src/threads/io.h	/^inw (uint16_t port)$/;"	f
 irq	src/devices/ide.c	/^    uint8_t irq;                \/* Interrupt in use. *\/$/;"	m	struct:channel	file:
-is_absolute_path	src/filesys/directory.c	/^is_absolute_path(char* path) {$/;"	f
+is_absolute	src/filesys/directory.c	/^is_absolute(char* path) {$/;"	f
 is_accessed	src/filesys/cache.h	/^  bool is_accessed;$/;"	m	struct:buffer_cache
 is_all_zeros	src/lib/ustar.c	/^is_all_zeros (const char *block, size_t cnt)$/;"	f	file:
 is_ata	src/devices/ide.c	/^    bool is_ata;                \/* Is device an ATA disk? *\/$/;"	m	struct:ata_disk	file:
