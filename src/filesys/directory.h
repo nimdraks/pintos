@@ -30,7 +30,10 @@ bool dir_add_file (struct dir *, const char *name, block_sector_t);
 bool dir_remove (struct dir *, const char *name);
 bool dir_readdir (struct dir *, char name[NAME_MAX + 1]);
 
-bool is_absolute_path(char* path);
+
+struct dir* dir_open_recursive (char* path);
+bool is_absolute(char* path);
 int count_token(char* str, char* delimiter);
+char* get_name_from_end(char* path);
 
 #endif /* filesys/directory.h */

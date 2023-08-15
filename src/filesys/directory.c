@@ -7,6 +7,10 @@
 #include "threads/malloc.h"
 #include "threads/thread.h"
 
+char DIR_DELIMIT = '/';
+char* DIR_DELIMIT_STR = "/";
+
+
 /* A directory. */
 struct dir 
   {
@@ -275,27 +279,81 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
 }
 
 
+struct dir *
+dir_open_recursive (char* path) {
+	struct dir* curr=NULL;
+	if (is_absolute(path))
+		curr = dir_open_root();
+ 	else 
+		curr = dir_open(inode_open(thread_current()->cwd_sector));
+	
+	int token_count = count_token(path, DIR_DELIMIT_STR);
+	if (token_count == 1)
+		return curr;
+
+  char temp[TOKEN_MAX];
+  memcpy (temp, path, strlen(path)+1);
+
+	int cnt = 0;
+  char *token, *save_ptr;
+  for (token = strtok_r (temp, DIR_DELIMIT_STR, &save_ptr); token != NULL;
+ 	 	token = strtok_r (NULL, DIR_DELIMIT_STR, &save_ptr)) {
+
+		struct inode *inode=NULL;
+		bool dir_find = dir_lookup(curr, token, &inode);
+		if (!dir_find)
+			return NULL;
+
+		curr = dir_open(inode);
+		cnt++;
+	
+		if (cnt == token_count-1)
+			break;
+  }
+
+	return curr;
+}
+
+
 bool 
-is_absolute_path(char* path) {
+is_absolute(char* path) {
 	if (strlen(path) <= 0 )
 		PANIC("empty path at is absolute_path\n");
 
-	return path[0] == '/';
+	return path[0] == DIR_DELIMIT;
 }
 
 
 int
 count_token(char* str, char* delimiter) {
-    char temp[TOKEN_MAX];
-    memcpy (temp, str, strlen(str)+1);
+  char temp[TOKEN_MAX];
+  memcpy (temp, str, strlen(str)+1);
 
-    int cnt=0;
+  int cnt=0;
 
-    char *token, *save_ptr;
-    for (token = strtok_r (temp, delimiter, &save_ptr); token != NULL;
-         token = strtok_r (NULL, delimiter, &save_ptr)) {
-         cnt++;
-    }
+  char *token, *save_ptr;
+  for (token = strtok_r (temp, delimiter, &save_ptr); token != NULL;
+ 	 	token = strtok_r (NULL, delimiter, &save_ptr)) {
+	  cnt++;
+  }
     
-    return cnt;
+  return cnt;
+}
+
+
+char*
+get_name_from_end(char* path) {
+  char temp[TOKEN_MAX];
+  memcpy (temp, path, strlen(path)+1);
+
+  char *token, *save_ptr, *prev;
+  for (token = strtok_r (temp, DIR_DELIMIT_STR, &save_ptr); token != NULL;
+ 	 	token = strtok_r (NULL, DIR_DELIMIT_STR, &save_ptr)) {
+		prev = token;
+  }
+   
+	char* ret = malloc (strlen(prev)+1);
+	memcpy(ret, prev, strlen(prev)+1);
+ 
+  return ret;
 }
