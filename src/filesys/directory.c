@@ -304,6 +304,8 @@ dir_open_recursive (char* path) {
 
 		struct inode *inode=NULL;
 		bool dir_find = dir_lookup(curr, token, &inode);
+		dir_close(curr);
+
 		if (!dir_find)
 			return NULL;
 
