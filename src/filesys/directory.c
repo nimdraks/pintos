@@ -281,13 +281,16 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
 
 struct dir *
 dir_open_recursive (char* path) {
+	int token_count = count_token(path, DIR_DELIMIT_STR);
+	if (token_count == 0)
+		return NULL;
+
 	struct dir* curr=NULL;
 	if (is_absolute(path))
 		curr = dir_open_root();
  	else 
 		curr = dir_open(inode_open(thread_current()->cwd_sector));
 	
-	int token_count = count_token(path, DIR_DELIMIT_STR);
 	if (token_count == 1)
 		return curr;
 
