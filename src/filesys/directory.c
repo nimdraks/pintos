@@ -273,3 +273,20 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
     }
   return false;
 }
+
+
+int
+count_token(char* str, char* delimiter) {
+    char temp[TOKEN_MAX];
+    memcpy (temp, str, strlen(str)+1);
+
+    int cnt=0;
+
+    char *token, *save_ptr;
+    for (token = strtok_r (temp, delimiter, &save_ptr); token != NULL;
+         token = strtok_r (NULL, delimiter, &save_ptr)) {
+         cnt++;
+    }
+    
+    return cnt;
+}
