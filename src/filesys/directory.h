@@ -31,9 +31,9 @@ bool dir_remove (struct dir *, const char *name);
 bool dir_readdir (struct dir *, char name[NAME_MAX + 1]);
 
 
-struct dir* dir_open_recursive (char* path);
-bool is_absolute(char* path);
-int count_token(char* str, char* delimiter);
-char* get_name_from_end(char* path);
+struct dir* dir_open_recursive (const char* path);
+bool is_absolute(const char* path);
+int count_token(const char* str, const char* delimiter);
+char* get_name_from_end(const char* path);
 
 #endif /* filesys/directory.h */

@@ -8,7 +8,7 @@
 #include "filesys/directory.h"
 #include "threads/thread.h"
 #include "threads/synch.h"
-
+#include "threads/malloc.h"
 
 static struct semaphore fileSema;
 

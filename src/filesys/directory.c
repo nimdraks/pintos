@@ -280,7 +280,7 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
 
 
 struct dir *
-dir_open_recursive (char* path) {
+dir_open_recursive (const char* path) {
 	int token_count = count_token(path, DIR_DELIMIT_STR);
 	if (token_count == 0)
 		return NULL;
@@ -321,7 +321,7 @@ dir_open_recursive (char* path) {
 
 
 bool 
-is_absolute(char* path) {
+is_absolute(const char* path) {
 	if (strlen(path) <= 0 )
 		PANIC("empty path at is absolute_path\n");
 
@@ -330,7 +330,7 @@ is_absolute(char* path) {
 
 
 int
-count_token(char* str, char* delimiter) {
+count_token(const char* str, const char* delimiter) {
   char temp[TOKEN_MAX];
   memcpy (temp, str, strlen(str)+1);
 
@@ -347,7 +347,7 @@ count_token(char* str, char* delimiter) {
 
 
 char*
-get_name_from_end(char* path) {
+get_name_from_end(const char* path) {
   char temp[TOKEN_MAX];
   memcpy (temp, path, strlen(path)+1);
 
