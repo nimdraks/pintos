@@ -90,11 +90,19 @@ filesys_open (const char *name)
   struct dir *dir;
   struct inode *inode = NULL;
 
-	dir = dir_open(inode_open(thread_current()->cwd_sector));
+	if(false){
+		dir = dir_open(inode_open(thread_current()->cwd_sector));
+	} else {
+		dir = dir_open_recursive(name);
+	}
+
+	char* name_end = get_name_from_end(name);
 
   if (dir != NULL)
-    dir_lookup (dir, name, &inode);
+    dir_lookup (dir, name_end, &inode);
   dir_close (dir);
+
+	free(name_end);
 
 	sema_up(&fileSema);
   return file_open (inode);
