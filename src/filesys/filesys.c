@@ -115,9 +115,20 @@ filesys_open (const char *name)
 bool
 filesys_remove (const char *name) 
 {
-  struct dir *dir = dir_open_root ();
-  bool success = dir != NULL && dir_remove (dir, name);
+  struct dir *dir;
+
+	if(false){
+		dir = dir_open(inode_open(thread_current()->cwd_sector));
+	} else {
+		dir = dir_open_recursive(name);
+	}
+
+	char* name_end = get_name_from_end(name);
+
+  bool success = dir != NULL && dir_remove (dir, name_end);
+
   dir_close (dir); 
+	free(name_end);
 
   return success;
 }
