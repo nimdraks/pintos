@@ -6,6 +6,7 @@
 #include "filesys/free-map.h"
 #include "filesys/inode.h"
 #include "filesys/directory.h"
+#include "threads/thread.h"
 #include "threads/synch.h"
 
 
@@ -52,7 +53,13 @@ bool
 filesys_create (const char *name, off_t initial_size) 
 {
   block_sector_t inode_sector = 0;
-  struct dir *dir = dir_open_root ();
+  struct dir *dir;
+
+	if (false)
+		dir = dir_open_root ();
+	else
+		dir = dir_open(inode_open(thread_current()->cwd_sector));
+
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
                   && inode_create (inode_sector, initial_size)
@@ -73,8 +80,13 @@ struct file *
 filesys_open (const char *name)
 {
 	sema_down(&fileSema);
-  struct dir *dir = dir_open_root ();
+  struct dir *dir;
   struct inode *inode = NULL;
+
+	if (false)
+		dir = dir_open_root ();
+	else
+		dir = dir_open(inode_open(thread_current()->cwd_sector));
 
   if (dir != NULL)
     dir_lookup (dir, name, &inode);
