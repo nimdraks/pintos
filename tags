@@ -1249,6 +1249,7 @@ invalidate_pagedir	src/userprog/pagedir.c	/^invalidate_pagedir (uint32_t *pd) $/
 invariant_keymap	src/devices/kbd.c	/^static const struct keymap invariant_keymap[] = $/;"	v	typeref:struct:keymap	file:
 inw	src/threads/io.h	/^inw (uint16_t port)$/;"	f
 irq	src/devices/ide.c	/^    uint8_t irq;                \/* Interrupt in use. *\/$/;"	m	struct:channel	file:
+is_absolute_path	src/filesys/directory.c	/^is_absolute_path(char* path) {$/;"	f
 is_accessed	src/filesys/cache.h	/^  bool is_accessed;$/;"	m	struct:buffer_cache
 is_all_zeros	src/lib/ustar.c	/^is_all_zeros (const char *block, size_t cnt)$/;"	f	file:
 is_ata	src/devices/ide.c	/^    bool is_ata;                \/* Is device an ATA disk? *\/$/;"	m	struct:ata_disk	file:
