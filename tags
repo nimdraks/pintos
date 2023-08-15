@@ -9,7 +9,7 @@ ACTUAL	src/tests/vm/child-mm-wrt.c	12;"	d	file:
 ACTUAL	src/tests/vm/mmap-close.c	10;"	d	file:
 ACTUAL	src/tests/vm/mmap-unmap.c	9;"	d	file:
 ACTUAL	src/tests/vm/mmap-write.c	11;"	d	file:
-AFTER_DECIMAL	src/threads/thread.h	30;"	d
+AFTER_DECIMAL	src/threads/thread.h	31;"	d
 ARENA_MAGIC	src/threads/malloc.c	47;"	d	file:
 ASSERT	src/lib/debug.h	27;"	d
 ASSERT	src/lib/debug.h	31;"	d
@@ -17,7 +17,7 @@ ASSERT	src/lib/debug.h	37;"	d
 Algorithm::Diff	src/tests/Algorithm/Diff.pm	/^package Algorithm::Diff;$/;"	p
 Algorithm::Diff::_impl	src/tests/Algorithm/Diff.pm	/^package Algorithm::Diff::_impl;$/;"	p
 B	src/examples/matmult.c	/^int B[DIM][DIM];$/;"	v
-BEFORE_DECIMAL	src/threads/thread.h	29;"	d
+BEFORE_DECIMAL	src/threads/thread.h	30;"	d
 BEST_ELEMS_PER_BUCKET	src/lib/kernel/hash.c	344;"	d	file:
 BITMAP_ERROR	src/lib/kernel/bitmap.h	36;"	d
 BITMASK	src/threads/vaddr.h	15;"	d
@@ -241,16 +241,16 @@ PANIC	src/lib/debug.h	14;"	d
 PDBITS	src/threads/pte.h	28;"	d
 PDMASK	src/threads/pte.h	29;"	d
 PDSHIFT	src/threads/pte.h	27;"	d
-PE32Ax	src/userprog/process.c	186;"	d	file:
-PE32Hx	src/userprog/process.c	188;"	d	file:
-PE32Ox	src/userprog/process.c	187;"	d	file:
-PE32Wx	src/userprog/process.c	185;"	d	file:
+PE32Ax	src/userprog/process.c	189;"	d	file:
+PE32Hx	src/userprog/process.c	191;"	d	file:
+PE32Ox	src/userprog/process.c	190;"	d	file:
+PE32Wx	src/userprog/process.c	188;"	d	file:
 PF_P	src/userprog/exception.h	5;"	d
-PF_R	src/userprog/process.c	238;"	d	file:
+PF_R	src/userprog/process.c	241;"	d	file:
 PF_U	src/userprog/exception.h	7;"	d
 PF_W	src/userprog/exception.h	6;"	d
-PF_W	src/userprog/process.c	237;"	d	file:
-PF_X	src/userprog/process.c	236;"	d	file:
+PF_W	src/userprog/process.c	240;"	d	file:
+PF_X	src/userprog/process.c	239;"	d	file:
 PGBITS	src/threads/vaddr.h	19;"	d
 PGMASK	src/threads/vaddr.h	21;"	d
 PGSHIFT	src/threads/vaddr.h	18;"	d
@@ -275,9 +275,9 @@ PRIX64	src/lib/inttypes.h	32;"	d
 PRIX8	src/lib/inttypes.h	11;"	d
 PRIXMAX	src/lib/inttypes.h	39;"	d
 PRIXPTR	src/lib/inttypes.h	46;"	d
-PRI_DEFAULT	src/threads/thread.h	26;"	d
-PRI_MAX	src/threads/thread.h	27;"	d
-PRI_MIN	src/threads/thread.h	25;"	d
+PRI_DEFAULT	src/threads/thread.h	27;"	d
+PRI_MAX	src/threads/thread.h	28;"	d
+PRI_MIN	src/threads/thread.h	26;"	d
 PRId16	src/lib/inttypes.h	13;"	d
 PRId32	src/lib/inttypes.h	20;"	d
 PRId64	src/lib/inttypes.h	27;"	d
@@ -325,14 +325,14 @@ PTRDIFF_MAX	src/lib/stdint.h	47;"	d
 PTRDIFF_MIN	src/lib/stdint.h	46;"	d
 PTSHIFT	src/threads/pte.h	21;"	d
 PTSPAN	src/threads/pte.h	23;"	d
-PT_DYNAMIC	src/userprog/process.c	228;"	d	file:
-PT_INTERP	src/userprog/process.c	229;"	d	file:
-PT_LOAD	src/userprog/process.c	227;"	d	file:
-PT_NOTE	src/userprog/process.c	230;"	d	file:
-PT_NULL	src/userprog/process.c	226;"	d	file:
-PT_PHDR	src/userprog/process.c	232;"	d	file:
-PT_SHLIB	src/userprog/process.c	231;"	d	file:
-PT_STACK	src/userprog/process.c	233;"	d	file:
+PT_DYNAMIC	src/userprog/process.c	231;"	d	file:
+PT_INTERP	src/userprog/process.c	232;"	d	file:
+PT_LOAD	src/userprog/process.c	230;"	d	file:
+PT_NOTE	src/userprog/process.c	233;"	d	file:
+PT_NULL	src/userprog/process.c	229;"	d	file:
+PT_PHDR	src/userprog/process.c	235;"	d	file:
+PT_SHLIB	src/userprog/process.c	234;"	d	file:
+PT_STACK	src/userprog/process.c	236;"	d	file:
 Prev	src/tests/Algorithm/Diff.pm	/^sub Prev {$/;"	s
 QUEUE	src/devices/serial.c	/^static enum { UNINIT, POLL, QUEUE } mode;$/;"	e	enum:__anon1	file:
 RBR_REG	src/devices/serial.c	21;"	d	file:
@@ -474,9 +474,10 @@ THREAD_MAGIC	src/threads/thread.c	26;"	d	file:
 THREAD_READY	src/threads/thread.h	/^    THREAD_READY,       \/* Not running but ready to run. *\/$/;"	e	enum:thread_status
 THREAD_RUNNING	src/threads/thread.h	/^    THREAD_RUNNING,     \/* Running thread. *\/$/;"	e	enum:thread_status
 THR_REG	src/devices/serial.c	22;"	d	file:
-TID_ERROR	src/threads/thread.h	22;"	d
+TID_ERROR	src/threads/thread.h	23;"	d
 TIMER_FREQ	src/devices/timer.h	8;"	d
 TIME_SLICE	src/threads/thread.c	68;"	d	file:
+TOKEN_MAX	src/filesys/directory.h	13;"	d
 UCHAR_MAX	src/lib/limits.h	8;"	d
 UINT16_MAX	src/lib/stdint.h	24;"	d
 UINT32_MAX	src/lib/stdint.h	27;"	d
@@ -826,6 +827,7 @@ consume_some_resources	src/tests/userprog/no-vm/multi-oom.c	/^consume_some_resou
 consume_some_resources_and_die	src/tests/userprog/no-vm/multi-oom.c	/^consume_some_resources_and_die (int seed)$/;"	f	file:
 copy_file	src/utils/Pintos.pm	/^sub copy_file {$/;"	s
 copy_string_across_boundary	src/tests/userprog/boundary.c	/^copy_string_across_boundary (const char *src) $/;"	f
+count_token	src/filesys/directory.c	/^count_token(char* str, char* delimiter) {$/;"	f
 cp_SRC	src/examples/Makefile	/^cp_SRC = cp.c$/;"	m
 cpu	src/utils/pintos	/^cpu: ips=1000000$/;"	l
 cr3	src/userprog/tss.c	/^    uint32_t cr3;$/;"	m	struct:tss	file:
@@ -836,6 +838,7 @@ cs	src/userprog/tss.c	/^    uint16_t cs, :16;$/;"	m	struct:tss	file:
 cur	src/threads/switch.h	/^    struct thread *cur;         \/* 20: switch_threads()'s CUR argument. *\/$/;"	m	struct:switch_threads_frame	typeref:struct:switch_threads_frame::thread
 curse	src/examples/insult.c	/^char *curse[] =$/;"	v
 curseLoc	src/examples/insult.c	/^char curseLoc[] = { 4, 0, 3, 7, 13, 20 };$/;"	v
+cwd_sector	src/threads/thread.h	/^		block_sector_t cwd_sector;	$/;"	m	struct:thread
 cx	src/devices/vga.c	/^static size_t cx, cy;$/;"	v	file:
 cy	src/devices/vga.c	/^static size_t cx, cy;$/;"	v	file:
 cyl_sectors	src/utils/Pintos.pm	/^sub cyl_sectors {$/;"	s
@@ -866,9 +869,11 @@ devminor	src/lib/ustar.c	/^    char devminor[8];           \/* Device minor numb
 diff	src/tests/Algorithm/Diff.pm	/^sub diff$/;"	s
 digits	src/lib/stdio.c	/^    const char *digits;         \/* Collection of digits. *\/$/;"	m	struct:integer_base	file:
 dir	src/filesys/directory.c	/^struct dir $/;"	s	file:
-dir_add	src/filesys/directory.c	/^dir_add (struct dir *dir, const char *name, block_sector_t inode_sector)$/;"	f
+dir_add	src/filesys/directory.c	/^dir_add (struct dir *dir, const char *name, block_sector_t inode_sector, bool is_dir)$/;"	f
+dir_add_file	src/filesys/directory.c	/^dir_add_file (struct dir *dir, const char *name, block_sector_t inode_sector)$/;"	f
 dir_close	src/filesys/directory.c	/^dir_close (struct dir *dir) $/;"	f
-dir_create	src/filesys/directory.c	/^dir_create (block_sector_t sector, size_t entry_cnt)$/;"	f
+dir_create	src/filesys/directory.c	/^dir_create (block_sector_t sector, size_t entry_cnt, block_sector_t parent)$/;"	f
+dir_create_root	src/filesys/directory.c	/^dir_create_root (block_sector_t sector, size_t entry_cnt)$/;"	f
 dir_entry	src/filesys/directory.c	/^struct dir_entry $/;"	s	file:
 dir_get_inode	src/filesys/directory.c	/^dir_get_inode (struct dir *dir) $/;"	f
 dir_lookup	src/filesys/directory.c	/^dir_lookup (const struct dir *dir, const char *name,$/;"	f
@@ -1184,6 +1189,7 @@ inode_remove	src/filesys/inode.c	/^inode_remove (struct inode *inode) $/;"	f
 inode_reopen	src/filesys/inode.c	/^inode_reopen (struct inode *inode)$/;"	f
 inode_sector	src/filesys/directory.c	/^    block_sector_t inode_sector;        \/* Sector number of header. *\/$/;"	m	struct:dir_entry	file:
 inode_sector_length	src/filesys/inode.c	/^inode_sector_length(const struct inode* inode){$/;"	f
+inode_set_byte_length_2	src/filesys/inode.c	/^inode_set_byte_length_2(const struct inode *inode, off_t length)$/;"	f
 inode_write_at	src/filesys/inode.c	/^inode_write_at (struct inode *inode, const void *buffer_, off_t size,$/;"	f
 inode_write_at_1	src/filesys/inode.c	/^inode_write_at_1 (struct inode *inode, const void *buffer_, off_t size,$/;"	f
 inode_write_at_2	src/filesys/inode.c	/^inode_write_at_2 (struct inode *inode, const void *buffer_, off_t size,$/;"	f
@@ -1246,6 +1252,7 @@ irq	src/devices/ide.c	/^    uint8_t irq;                \/* Interrupt in use. *\
 is_accessed	src/filesys/cache.h	/^  bool is_accessed;$/;"	m	struct:buffer_cache
 is_all_zeros	src/lib/ustar.c	/^is_all_zeros (const char *block, size_t cnt)$/;"	f	file:
 is_ata	src/devices/ide.c	/^    bool is_ata;                \/* Is device an ATA disk? *\/$/;"	m	struct:ata_disk	file:
+is_dir	src/filesys/directory.c	/^		bool is_dir;$/;"	m	struct:dir_entry	file:
 is_dir	src/tests/tests.pm	/^sub is_dir {$/;"	s
 is_dirty	src/filesys/cache.h	/^  bool is_dirty;$/;"	m	struct:buffer_cache
 is_head	src/lib/kernel/list.c	/^is_head (struct list_elem *elem)$/;"	f	file:
