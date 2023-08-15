@@ -18,7 +18,7 @@
 #ifdef FILESYS
 #include "filesys/cache.h"
 #endif
-
+#include "filesys/filesys.h"
 
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
@@ -210,6 +210,7 @@ thread_create (const char *name, int priority,
   tid = t->tid = allocate_tid ();
 	t->p_tid = thread_current()->tid;
 	t->tFile = NULL;
+	t->cwd_sector = ROOT_DIR_SECTOR;
 
   /* Prepare thread for first run by initializing its stack.
      Do this atomically so intermediate values for the 'stack' 

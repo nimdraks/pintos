@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "threads/synch.h"
 #include "filesys/file.h"
+#include "devices/block.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -128,6 +129,8 @@ struct thread
     uint32_t *pagedir;                  /* Page directory. */
 		struct file* tFile;
 #endif
+
+		block_sector_t cwd_sector;	
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */

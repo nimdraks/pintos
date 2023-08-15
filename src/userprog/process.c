@@ -58,6 +58,9 @@ process_execute (const char *file_name)
     palloc_free_page (fn_copy);
 	thread_make_childSema(tid);
 
+	struct thread* new_t = tid_thread(tid);
+	new_t->cwd_sector = thread_current()->cwd_sector;
+
 	/* Wait the process load proeperly */
 	sema_down( &(thread_current()->execSema));
 	if(! (thread_current()->success )){
