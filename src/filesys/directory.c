@@ -275,6 +275,15 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
 }
 
 
+bool 
+is_absolute_path(char* path) {
+	if (strlen(path) <= 0 )
+		PANIC("empty path at is absolute_path\n");
+
+	return path[0] == '/';
+}
+
+
 int
 count_token(char* str, char* delimiter) {
     char temp[TOKEN_MAX];
