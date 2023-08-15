@@ -64,6 +64,11 @@ filesys_create (const char *name, off_t initial_size)
 
 	char* name_end = get_name_from_end(name);
 
+#ifdef INFO7
+	printf("filesys_create: dir %p\n", dir);
+	printf("filesys_create: parent sector %d, name_end %s\n", inode_to_sector(dir_to_inode(dir)), name_end);
+#endif
+
   bool success = (dir != NULL
                   && free_map_allocate (1, &inode_sector)
                   && inode_create (inode_sector, initial_size)
@@ -76,6 +81,30 @@ filesys_create (const char *name, off_t initial_size)
 	free(name_end);
 
   return success;
+}
+
+bool 
+filesys_create_dir (const char* name) {
+  block_sector_t inode_sector = 0;
+
+	struct dir* parent = dir_open_recursive(name);
+	char* name_end = get_name_from_end(name);
+
+#ifdef INFO7
+	printf("filesys_create_dir: parent sector %d, name_end %s\n", inode_to_sector(dir_to_inode(parent)), name_end);
+#endif
+
+	bool success = (parent != NULL
+									&& free_map_allocate(1, &inode_sector)
+									&& dir_create(inode_sector, 16, inode_to_sector(dir_to_inode(parent)))
+                  && dir_add (parent, name_end, inode_sector, true));
+
+  if (!success && inode_sector != 0) 
+    free_map_release (inode_sector, 1);
+	dir_close(parent);
+	free(name_end);
+
+	return success;
 }
 
 /* Opens the file with the given NAME.

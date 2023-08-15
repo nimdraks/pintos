@@ -227,6 +227,11 @@ syscall_handler (struct intr_frame *f)
 			f->eax=process_wait(waitPid);
 			break;
 
+		case SYS_MKDIR:
+			fileName = (char*)*(espP+1);
+			f->eax=filesys_create_dir(fileName);
+			break;
+
 		default:
 			break;
 	}

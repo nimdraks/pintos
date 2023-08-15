@@ -41,7 +41,6 @@ dir_create (block_sector_t sector, size_t entry_cnt, block_sector_t parent)
 		PANIC("failed to inode_open at dir_create()");
 	}
 
-
 	success = dir_add (dir, "..", parent, true);
 	if (success==false){
 		PANIC("failed to .. at dir_add");
@@ -290,6 +289,10 @@ dir_open_recursive (const char* path) {
 		curr = dir_open_root();
  	else 
 		curr = dir_open(inode_open(thread_current()->cwd_sector));
+
+#ifdef INFO7
+	printf("dir_open_recursive: curr %d, token_count %d\n", inode_to_sector(dir_to_inode(curr)), token_count);
+#endif
 	
 	if (token_count == 1)
 		return curr;
@@ -302,6 +305,9 @@ dir_open_recursive (const char* path) {
   for (token = strtok_r (temp, DIR_DELIMIT_STR, &save_ptr); token != NULL;
  	 	token = strtok_r (NULL, DIR_DELIMIT_STR, &save_ptr)) {
 
+#ifdef INFO7
+	printf("dir_open_recursive: token %s, cnt %d\n", token, cnt);
+#endif
 		struct inode *inode=NULL;
 		bool dir_find = dir_lookup(curr, token, &inode);
 		dir_close(curr);
@@ -315,6 +321,10 @@ dir_open_recursive (const char* path) {
 		if (cnt == token_count-1)
 			break;
   }
+
+#ifdef INFO7
+	printf("dir_open_recursive in final: curr %d\n", inode_to_sector(dir_to_inode(curr)));
+#endif
 
 	return curr;
 }
@@ -361,4 +371,9 @@ get_name_from_end(const char* path) {
 	memcpy(ret, prev, strlen(prev)+1);
  
   return ret;
+}
+
+struct inode*
+dir_to_inode(struct dir* dir){
+	return dir->inode;
 }

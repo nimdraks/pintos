@@ -35,5 +35,5 @@ struct dir* dir_open_recursive (const char* path);
 bool is_absolute(const char* path);
 int count_token(const char* str, const char* delimiter);
 char* get_name_from_end(const char* path);
-
+struct inode* dir_to_inode(struct dir*);
 #endif /* filesys/directory.h */

@@ -868,3 +868,8 @@ inode_sector_length(const struct inode* inode){
 	free(bc); 
 	return length;
 }
+
+
+block_sector_t inode_to_sector(struct inode* inode) {
+	return inode->sector;
+}

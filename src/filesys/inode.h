@@ -40,5 +40,5 @@ off_t inode_byte_length_1(const struct inode *);
 off_t inode_byte_length_2(const struct inode *);
 void inode_set_byte_length_2(const struct inode *, off_t length);
 off_t inode_sector_length(const struct inode *);
-
+block_sector_t inode_to_sector(struct inode*);
 #endif /* filesys/inode.h */
