@@ -16,7 +16,7 @@ struct file
    and returns the new file.  Returns a null pointer if an
    allocation fails or if INODE is null. */
 struct file *
-file_open (struct inode *inode) 
+file_open (struct inode *inode, bool is_dir) 
 {
   struct file *file = calloc (1, sizeof *file);
   if (inode != NULL && file != NULL)
@@ -24,6 +24,7 @@ file_open (struct inode *inode)
       file->inode = inode;
       file->pos = 0;
       file->deny_write = false;
+			file->is_dir = is_dir;
       return file;
     }
   else
@@ -34,12 +35,13 @@ file_open (struct inode *inode)
     }
 }
 
+
 /* Opens and returns a new file for the same inode as FILE.
    Returns a null pointer if unsuccessful. */
 struct file *
 file_reopen (struct file *file) 
 {
-  return file_open (inode_reopen (file->inode));
+  return file_open (inode_reopen (file->inode), file->is_dir);
 }
 
 /* Closes FILE. */
@@ -168,7 +170,7 @@ file_tell (struct file *file)
   return file->pos;
 }
 
-void
-file_set_is_dir (struct file *file, bool is_dir) {
-	file->is_dir = is_dir;
+bool
+file_is_dir (struct file *file) {
+	return file->is_dir;
 }

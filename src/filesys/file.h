@@ -13,7 +13,7 @@ struct fileDesc
 	};
 
 /* Opening and closing files. */
-struct file *file_open (struct inode *);
+struct file *file_open (struct inode *, bool);
 struct file *file_reopen (struct file *);
 void file_close (struct file *);
 struct inode *file_get_inode (struct file *);
@@ -33,5 +33,5 @@ void file_seek (struct file *, off_t);
 off_t file_tell (struct file *);
 off_t file_length (struct file *);
 
-void file_set_is_dir(struct file*, bool);
+bool file_is_dir(struct file*);
 #endif /* filesys/file.h */

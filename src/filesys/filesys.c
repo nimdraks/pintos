@@ -118,6 +118,7 @@ filesys_open (const char *name)
 	sema_down(&fileSema);
   struct dir *dir;
   struct inode *inode = NULL;
+	bool is_dir=false;
 
 	if(false){
 		dir = dir_open(inode_open(thread_current()->cwd_sector));
@@ -127,14 +128,16 @@ filesys_open (const char *name)
 
 	char* name_end = get_name_from_end(name);
 
-  if (dir != NULL)
+  if (dir != NULL){
     dir_lookup (dir, name_end, &inode);
+		is_dir = dir_is_dir (dir, name_end);
+	}
   dir_close (dir);
 
 	free(name_end);
 
 	sema_up(&fileSema);
-  return file_open (inode);
+  return file_open (inode, is_dir);
 }
 
 bool

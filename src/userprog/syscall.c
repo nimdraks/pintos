@@ -203,6 +203,11 @@ syscall_handler (struct intr_frame *f)
 				return;
 			}
 
+			if (file_is_dir(file)){
+				exit_unexpectedly(t);
+				return;
+			}
+
 			f->eax = file_write(file, fileBuffer, fileSize);
 #ifdef INFO6
 			printf("SYS_WRITE: writtend byte %d\n", f->eax);
