@@ -252,6 +252,18 @@ syscall_handler (struct intr_frame *f)
 			f->eax=filesys_inumber(fd);
 			break;
 
+		case SYS_ISDIR:
+			fd = (char*)*(espP+1);
+
+			file = thread_open_fd(fd);
+			if (file==NULL){
+				exit_unexpectedly(t);
+				return;
+			}
+
+			f->eax=file_is_dir(file);
+			break;
+
 		default:
 			break;
 	}
