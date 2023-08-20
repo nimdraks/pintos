@@ -33,4 +33,5 @@ void file_seek (struct file *, off_t);
 off_t file_tell (struct file *);
 off_t file_length (struct file *);
 
+void file_set_is_dir(struct file*, bool);
 #endif /* filesys/file.h */
