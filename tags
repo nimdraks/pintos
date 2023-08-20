@@ -829,7 +829,7 @@ consume_some_resources	src/tests/userprog/no-vm/multi-oom.c	/^consume_some_resou
 consume_some_resources_and_die	src/tests/userprog/no-vm/multi-oom.c	/^consume_some_resources_and_die (int seed)$/;"	f	file:
 copy_file	src/utils/Pintos.pm	/^sub copy_file {$/;"	s
 copy_string_across_boundary	src/tests/userprog/boundary.c	/^copy_string_across_boundary (const char *src) $/;"	f
-count_token	src/filesys/directory.c	/^count_token(char* str, char* delimiter) {$/;"	f
+count_token	src/filesys/directory.c	/^count_token(const char* str, const char* delimiter) {$/;"	f
 cp_SRC	src/examples/Makefile	/^cp_SRC = cp.c$/;"	m
 cpu	src/utils/pintos	/^cpu: ips=1000000$/;"	l
 cr3	src/userprog/tss.c	/^    uint32_t cr3;$/;"	m	struct:tss	file:
@@ -880,11 +880,12 @@ dir_entry	src/filesys/directory.c	/^struct dir_entry $/;"	s	file:
 dir_get_inode	src/filesys/directory.c	/^dir_get_inode (struct dir *dir) $/;"	f
 dir_lookup	src/filesys/directory.c	/^dir_lookup (const struct dir *dir, const char *name,$/;"	f
 dir_open	src/filesys/directory.c	/^dir_open (struct inode *inode) $/;"	f
-dir_open_recursive	src/filesys/directory.c	/^dir_open_recursive (char* path) {$/;"	f
+dir_open_recursive	src/filesys/directory.c	/^dir_open_recursive (const char* path) {$/;"	f
 dir_open_root	src/filesys/directory.c	/^dir_open_root (void)$/;"	f
 dir_readdir	src/filesys/directory.c	/^dir_readdir (struct dir *dir, char name[NAME_MAX + 1])$/;"	f
 dir_remove	src/filesys/directory.c	/^dir_remove (struct dir *dir, const char *name) $/;"	f
 dir_reopen	src/filesys/directory.c	/^dir_reopen (struct dir *dir) $/;"	f
+dir_to_inode	src/filesys/directory.c	/^dir_to_inode(struct dir* dir){$/;"	f
 disk_geometry	src/utils/pintos	/^sub disk_geometry {$/;"	s
 div_round_up	src/utils/Pintos.pm	/^sub div_round_up {$/;"	s
 divl	src/lib/arithmetic.c	/^divl (uint64_t n, uint32_t d)$/;"	f	file:
@@ -1014,6 +1015,7 @@ filesys_SRC	src/userprog/build/Makefile	/^filesys_SRC  = filesys\/filesys.c	# Fi
 filesys_SRC	src/vm/build/Makefile	/^filesys_SRC  = filesys\/filesys.c	# Filesystem core.$/;"	m
 filesys_bdev_name	src/threads/init.c	/^static const char *filesys_bdev_name;$/;"	v	file:
 filesys_create	src/filesys/filesys.c	/^filesys_create (const char *name, off_t initial_size) $/;"	f
+filesys_create_dir	src/filesys/filesys.c	/^filesys_create_dir (const char* name) {$/;"	f
 filesys_done	src/filesys/filesys.c	/^filesys_done (void) $/;"	f
 filesys_init	src/filesys/filesys.c	/^filesys_init (bool format) $/;"	f
 filesys_open	src/filesys/filesys.c	/^filesys_open (const char *name)$/;"	f
@@ -1078,7 +1080,7 @@ get_buffer_cache_value_from_sector	src/filesys/cache.c	/^get_buffer_cache_value_
 get_core_output	src/tests/tests.pm	/^sub get_core_output {$/;"	s
 get_inumber	src/examples/pwd.c	/^get_inumber (const char *file_name, int *inum) $/;"	f	file:
 get_load_average	src/utils/pintos	/^sub get_load_average {$/;"	s
-get_name_from_end	src/filesys/directory.c	/^get_name_from_end(char* path) {$/;"	f
+get_name_from_end	src/filesys/directory.c	/^get_name_from_end(const char* path) {$/;"	f
 get_scratch_file	src/utils/pintos	/^sub get_scratch_file {$/;"	s
 getcwd	src/examples/pwd.c	/^getcwd (char *cwd, size_t cwd_size) $/;"	f	file:
 gid	src/lib/ustar.c	/^    char gid[8];                \/* Group ID as octal string. *\/$/;"	m	struct:ustar_header	file:
@@ -1194,6 +1196,7 @@ inode_reopen	src/filesys/inode.c	/^inode_reopen (struct inode *inode)$/;"	f
 inode_sector	src/filesys/directory.c	/^    block_sector_t inode_sector;        \/* Sector number of header. *\/$/;"	m	struct:dir_entry	file:
 inode_sector_length	src/filesys/inode.c	/^inode_sector_length(const struct inode* inode){$/;"	f
 inode_set_byte_length_2	src/filesys/inode.c	/^inode_set_byte_length_2(const struct inode *inode, off_t length)$/;"	f
+inode_to_sector	src/filesys/inode.c	/^block_sector_t inode_to_sector(struct inode* inode) {$/;"	f
 inode_write_at	src/filesys/inode.c	/^inode_write_at (struct inode *inode, const void *buffer_, off_t size,$/;"	f
 inode_write_at_1	src/filesys/inode.c	/^inode_write_at_1 (struct inode *inode, const void *buffer_, off_t size,$/;"	f
 inode_write_at_2	src/filesys/inode.c	/^inode_write_at_2 (struct inode *inode, const void *buffer_, off_t size,$/;"	f
@@ -1253,7 +1256,7 @@ invalidate_pagedir	src/userprog/pagedir.c	/^invalidate_pagedir (uint32_t *pd) $/
 invariant_keymap	src/devices/kbd.c	/^static const struct keymap invariant_keymap[] = $/;"	v	typeref:struct:keymap	file:
 inw	src/threads/io.h	/^inw (uint16_t port)$/;"	f
 irq	src/devices/ide.c	/^    uint8_t irq;                \/* Interrupt in use. *\/$/;"	m	struct:channel	file:
-is_absolute	src/filesys/directory.c	/^is_absolute(char* path) {$/;"	f
+is_absolute	src/filesys/directory.c	/^is_absolute(const char* path) {$/;"	f
 is_accessed	src/filesys/cache.h	/^  bool is_accessed;$/;"	m	struct:buffer_cache
 is_all_zeros	src/lib/ustar.c	/^is_all_zeros (const char *block, size_t cnt)$/;"	f	file:
 is_ata	src/devices/ide.c	/^    bool is_ata;                \/* Is device an ATA disk? *\/$/;"	m	struct:ata_disk	file:

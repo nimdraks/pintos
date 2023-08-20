@@ -137,6 +137,30 @@ filesys_open (const char *name)
   return file_open (inode);
 }
 
+bool
+filesys_change_dir(const char *name){
+
+	struct dir* dir;
+	struct inode* inode = NULL;
+	bool success = false;
+	dir = dir_open_recursive(name);
+
+	char* name_end = get_name_from_end(name);
+
+  if (dir != NULL)
+    dir_lookup (dir, name_end, &inode);
+  dir_close (dir);
+
+	if (inode != NULL){
+		thread_current()->cwd_sector=inode_to_sector(inode);
+		success=true;
+	}
+
+	free(name_end);	
+	return success;
+}
+
+
 /* Deletes the file named NAME.
    Returns true if successful, false on failure.
    Fails if no file named NAME exists,
