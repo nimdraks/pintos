@@ -254,6 +254,10 @@ dir_remove (struct dir *dir, const char *name)
   if (!lookup (dir, name, &e, &ofs))
     goto done;
 
+
+	if (e.inode_sector == ROOT_DIR_SECTOR)
+		goto done;
+
   /* Open inode. */
   inode = inode_open (e.inode_sector);
   if (inode == NULL)
