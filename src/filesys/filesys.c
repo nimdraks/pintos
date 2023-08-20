@@ -120,6 +120,14 @@ filesys_open (const char *name)
   struct inode *inode = NULL;
 	bool is_dir=false;
 
+#ifdef INFO9
+	printf("filesys_open: name %s\n", name);
+#endif
+	if (strcmp(name, "/") == 0){
+		sema_up(&fileSema);
+		return file_open(inode_open(ROOT_DIR_SECTOR), true);
+	}
+
 	if(false){
 		dir = dir_open(inode_open(thread_current()->cwd_sector));
 	} else {

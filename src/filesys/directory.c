@@ -340,7 +340,7 @@ dir_open_recursive (const char* path) {
  	else 
 		curr = dir_open(inode_open(thread_current()->cwd_sector));
 
-#ifdef INFO8
+#ifdef INFO9
 	printf("dir_open_recursive: curr %d, token_count %d\n", inode_to_sector(dir_to_inode(curr)), token_count);
 #endif
 	
