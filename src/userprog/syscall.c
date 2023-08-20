@@ -82,7 +82,6 @@ syscall_handler (struct intr_frame *f)
 	int execPid=0;
 	int waitPid=0;
 
-
 	switch(syscallNum){
 		case SYS_HALT:
 			exit_expectedly(t, 0);

@@ -152,6 +152,9 @@ filesys_change_dir(const char *name){
 
   if (dir != NULL)
     dir_lookup (dir, name_end, &inode);
+#ifdef INFO8
+//	printf("change succeed at dir %d, target %d, name_end %s\n", inode_to_sector(dir_to_inode(dir)), inode_to_sector(inode), name_end);
+#endif
   dir_close (dir);
 
 	if (inode != NULL){

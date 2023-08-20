@@ -133,6 +133,9 @@ lookup (const struct dir *dir, const char *name,
        ofs += sizeof e) 
     if (e.in_use && !strcmp (name, e.name)) 
       {
+#ifdef INFO8
+	printf("dir %d, name %s, e.in_use %d, e.name %s, e.sector %d at lookup\n", inode_to_sector(dir->inode), name, e.in_use, e.name, e.inode_sector);
+#endif
         if (ep != NULL)
           *ep = e;
         if (ofsp != NULL)
@@ -159,6 +162,10 @@ dir_lookup (const struct dir *dir, const char *name,
     *inode = inode_open (e.inode_sector);
   else
     *inode = NULL;
+
+#ifdef INFO8
+	printf("%p %s\n", *inode, name);
+#endif
 
   return *inode != NULL;
 }
@@ -225,6 +232,10 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector, bool is
 
   success = inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
 
+#ifdef INFO8
+	printf("succed to add: name %s, dir %d, ofs %d \n", name, inode_to_sector(dir->inode), ofs);
+#endif
+
  done:
   return success;
 }
@@ -260,7 +271,8 @@ dir_remove (struct dir *dir, const char *name)
 	struct dir* cwd = dir_open(inode_open(thread_current()->cwd_sector));
 	if (cwd != NULL) {
 		struct dir_entry ee;
-  	if(lookup (cwd, "..", &ee, &ofs)
+		off_t ofss;
+  	if(lookup (cwd, "..", &ee, &ofss)
 			&& ee.inode_sector == e.inode_sector)
 			goto done;
 	}
@@ -274,6 +286,17 @@ dir_remove (struct dir *dir, const char *name)
   e.in_use = false;
   if (inode_write_at (dir->inode, &e, sizeof e, ofs) != sizeof e) 
     goto done;
+
+#ifdef INFO8
+	printf("remove succeed at dir %d, target %d\n", inode_to_sector(dir->inode), e.inode_sector);
+	struct dir_entry eee;
+	off_t ofsss;
+	inode_read_at (dir->inode, &eee, sizeof eee, ofs);
+//	printf("eee.in_use %d, ofs %d\n", eee.in_use, ofs);
+//	printf("eee.in_use %d, lookup %d name %s after write for checking remove\n", eee.in_use, lookup(dir, name, &eee, &ofsss), name);
+//	printf("ofsss %d\n", ofsss);
+#endif
+
 
   /* Remove inode. */
   inode_remove (inode);
@@ -317,7 +340,7 @@ dir_open_recursive (const char* path) {
  	else 
 		curr = dir_open(inode_open(thread_current()->cwd_sector));
 
-#ifdef INFO7
+#ifdef INFO8
 	printf("dir_open_recursive: curr %d, token_count %d\n", inode_to_sector(dir_to_inode(curr)), token_count);
 #endif
 	
@@ -332,16 +355,17 @@ dir_open_recursive (const char* path) {
   for (token = strtok_r (temp, DIR_DELIMIT_STR, &save_ptr); token != NULL;
  	 	token = strtok_r (NULL, DIR_DELIMIT_STR, &save_ptr)) {
 
-#ifdef INFO7
+#ifdef INFO8
 	printf("dir_open_recursive: token %s, cnt %d\n", token, cnt);
 #endif
 		struct inode *inode=NULL;
 		bool dir_find = dir_lookup(curr, token, &inode);
 		dir_close(curr);
 
-		if (!dir_find)
+		if (!dir_find){
 			return NULL;
-
+		}
+	
 		curr = dir_open(inode);
 		cnt++;
 	
@@ -349,7 +373,7 @@ dir_open_recursive (const char* path) {
 			break;
   }
 
-#ifdef INFO7
+#ifdef INFO8
 	printf("dir_open_recursive in final: curr %d\n", inode_to_sector(dir_to_inode(curr)));
 #endif
 

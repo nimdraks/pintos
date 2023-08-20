@@ -34,8 +34,7 @@ get_buffer_cache_value_from_sector(block_sector_t sector_idx){
 	lock_acquire(&buffer_cache_lock);
 
   struct buffer_cache* bc = get_buffer_cache_from_sector(sector_idx);
-#ifdef INFO5
-	if (sector_idx==0)
+#ifdef INFO7
 	printf("get_buffer_cache_value sector_idx:%d, bc: %p, ret:%p\n", sector_idx, bc, ret);
 #endif
 	memcpy(ret, bc, sizeof(struct buffer_cache));
@@ -56,7 +55,7 @@ write_src_to_buffer_cache_from_sector(block_sector_t sector_idx, int sector_ofs,
 	memcpy(bc->data + sector_ofs ,src ,size);
 	bc->is_dirty=true;
 
-#ifdef INFO5
+#ifdef INFO7
 	printf("write_src_buffer_cache_from sector_idx:%d, bc:%p\n", sector_idx, bc);
 #endif
 
