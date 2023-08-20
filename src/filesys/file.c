@@ -2,6 +2,7 @@
 #include <debug.h>
 #include "filesys/inode.h"
 #include "threads/malloc.h"
+#include "threads/thread.h"
 
 /* An open file. */
 struct file 
@@ -174,3 +175,15 @@ bool
 file_is_dir (struct file *file) {
 	return file->is_dir;
 }
+
+
+block_sector_t
+file_sector_number (int fd){
+	struct file* file = thread_open_fd(fd);
+	if(file == NULL){
+		return -1;
+	}
+
+	return inode_to_sector(file->inode);
+}
+

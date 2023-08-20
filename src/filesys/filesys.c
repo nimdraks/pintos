@@ -191,7 +191,14 @@ filesys_remove (const char *name)
 
   return success;
 }
-
+
+
+block_sector_t
+filesys_inumber(int fd){
+	return file_sector_number(fd);
+}
+
+
 /* Formats the file system. */
 static void
 do_format (void)

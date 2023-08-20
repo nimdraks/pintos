@@ -246,6 +246,12 @@ syscall_handler (struct intr_frame *f)
 			f->eax=filesys_remove(fileName);
 			break;
 
+		case SYS_INUMBER:
+			fd = (char*)*(espP+1);
+
+			f->eax=filesys_inumber(fd);
+			break;
+
 		default:
 			break;
 	}

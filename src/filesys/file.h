@@ -3,6 +3,7 @@
 
 #include "filesys/off_t.h"
 #include <list.h>
+#include "devices/block.h"
 
 struct inode;
 struct fileDesc
@@ -34,4 +35,5 @@ off_t file_tell (struct file *);
 off_t file_length (struct file *);
 
 bool file_is_dir(struct file*);
+block_sector_t file_sector_number(int fd);
 #endif /* filesys/file.h */
