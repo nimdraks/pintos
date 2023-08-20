@@ -878,6 +878,7 @@ dir_create	src/filesys/directory.c	/^dir_create (block_sector_t sector, size_t e
 dir_create_root	src/filesys/directory.c	/^dir_create_root (block_sector_t sector, size_t entry_cnt)$/;"	f
 dir_entry	src/filesys/directory.c	/^struct dir_entry $/;"	s	file:
 dir_get_inode	src/filesys/directory.c	/^dir_get_inode (struct dir *dir) $/;"	f
+dir_is_dir	src/filesys/directory.c	/^dir_is_dir (const struct dir *dir, const char *name) $/;"	f
 dir_lookup	src/filesys/directory.c	/^dir_lookup (const struct dir *dir, const char *name,$/;"	f
 dir_open	src/filesys/directory.c	/^dir_open (struct inode *inode) $/;"	f
 dir_open_recursive	src/filesys/directory.c	/^dir_open_recursive (const char* path) {$/;"	f
@@ -995,11 +996,12 @@ file_allow_write	src/filesys/file.c	/^file_allow_write (struct file *file) $/;"	
 file_close	src/filesys/file.c	/^file_close (struct file *file) $/;"	f
 file_deny_write	src/filesys/file.c	/^file_deny_write (struct file *file) $/;"	f
 file_get_inode	src/filesys/file.c	/^file_get_inode (struct file *file) $/;"	f
+file_is_dir	src/filesys/file.c	/^file_is_dir (struct file *file) {$/;"	f
 file_length	src/filesys/file.c	/^file_length (struct file *file) $/;"	f
 file_name	src/tests/filesys/base/syn-read.h	/^static const char file_name[] = "data";$/;"	v
 file_name	src/tests/filesys/base/syn-write.h	/^static const char file_name[] = "stuff";$/;"	v
 file_name	src/tests/filesys/extended/syn-rw.h	/^static const char file_name[] = "logfile";$/;"	v
-file_open	src/filesys/file.c	/^file_open (struct inode *inode) $/;"	f
+file_open	src/filesys/file.c	/^file_open (struct inode *inode, bool is_dir) $/;"	f
 file_read	src/filesys/file.c	/^file_read (struct file *file, void *buffer, off_t size) $/;"	f
 file_read_at	src/filesys/file.c	/^file_read_at (struct file *file, void *buffer, off_t size, off_t file_ofs) $/;"	f
 file_reopen	src/filesys/file.c	/^file_reopen (struct file *file) $/;"	f
@@ -1014,6 +1016,7 @@ filesys_SRC	src/threads/build/Makefile	/^filesys_SRC  = filesys\/filesys.c	# Fil
 filesys_SRC	src/userprog/build/Makefile	/^filesys_SRC  = filesys\/filesys.c	# Filesystem core.$/;"	m
 filesys_SRC	src/vm/build/Makefile	/^filesys_SRC  = filesys\/filesys.c	# Filesystem core.$/;"	m
 filesys_bdev_name	src/threads/init.c	/^static const char *filesys_bdev_name;$/;"	v	file:
+filesys_change_dir	src/filesys/filesys.c	/^filesys_change_dir(const char *name){$/;"	f
 filesys_create	src/filesys/filesys.c	/^filesys_create (const char *name, off_t initial_size) $/;"	f
 filesys_create_dir	src/filesys/filesys.c	/^filesys_create_dir (const char* name) {$/;"	f
 filesys_done	src/filesys/filesys.c	/^filesys_done (void) $/;"	f
@@ -1261,6 +1264,7 @@ is_accessed	src/filesys/cache.h	/^  bool is_accessed;$/;"	m	struct:buffer_cache
 is_all_zeros	src/lib/ustar.c	/^is_all_zeros (const char *block, size_t cnt)$/;"	f	file:
 is_ata	src/devices/ide.c	/^    bool is_ata;                \/* Is device an ATA disk? *\/$/;"	m	struct:ata_disk	file:
 is_dir	src/filesys/directory.c	/^		bool is_dir;$/;"	m	struct:dir_entry	file:
+is_dir	src/filesys/file.c	/^		bool is_dir;$/;"	m	struct:file	file:
 is_dir	src/tests/tests.pm	/^sub is_dir {$/;"	s
 is_dirty	src/filesys/cache.h	/^  bool is_dirty;$/;"	m	struct:buffer_cache
 is_head	src/lib/kernel/list.c	/^is_head (struct list_elem *elem)$/;"	f	file:
