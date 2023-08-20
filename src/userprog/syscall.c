@@ -249,7 +249,13 @@ syscall_handler (struct intr_frame *f)
 		case SYS_INUMBER:
 			fd = (char*)*(espP+1);
 
-			f->eax=filesys_inumber(fd);
+			file = thread_open_fd(fd);
+			if (file==NULL){
+				exit_unexpectedly(t);
+				return;
+			}
+
+			f->eax=file_sector_number(file);
 			break;
 
 		case SYS_ISDIR:

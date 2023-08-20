@@ -19,6 +19,5 @@ bool filesys_create_dir (const char* name);
 bool filesys_change_dir (const char* name);
 struct file *filesys_open (const char *name);
 bool filesys_remove (const char *name);
-block_sector_t filesys_inumber (int);
 
 #endif /* filesys/filesys.h */
