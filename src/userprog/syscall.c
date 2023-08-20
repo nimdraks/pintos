@@ -244,7 +244,7 @@ syscall_handler (struct intr_frame *f)
 
 		case SYS_REMOVE:
 			fileName = (char*)*(espP+1);
-			f->eax=filesys_change_dir(fileName);
+			f->eax=filesys_remove(fileName);
 			break;
 
 		default:
