@@ -154,8 +154,13 @@ filesys_change_dir(const char *name){
 	struct dir* dir;
 	struct inode* inode = NULL;
 	bool success = false;
-	dir = dir_open_recursive(name);
 
+	if (strcmp(name, "/") == 0){
+		thread_current()->cwd_sector=ROOT_DIR_SECTOR;
+		return true;
+	}
+
+	dir = dir_open_recursive(name);
 	char* name_end = get_name_from_end(name);
 
   if (dir != NULL)
