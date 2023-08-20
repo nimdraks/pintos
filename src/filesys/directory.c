@@ -163,6 +163,22 @@ dir_lookup (const struct dir *dir, const char *name,
   return *inode != NULL;
 }
 
+bool
+dir_is_dir (const struct dir *dir, const char *name) 
+{
+  struct dir_entry e;
+	bool is_dir=false;
+
+  ASSERT (dir != NULL);
+  ASSERT (name != NULL);
+
+  if (lookup (dir, name, &e, NULL)){
+		is_dir = e.is_dir;
+	}
+
+  return is_dir;
+}
+
 /* Adds a file named NAME to DIR, which must not already contain a
    file by that name.  The file's inode is in sector
    INODE_SECTOR.
