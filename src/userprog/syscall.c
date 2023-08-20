@@ -232,6 +232,11 @@ syscall_handler (struct intr_frame *f)
 			f->eax=filesys_create_dir(fileName);
 			break;
 
+		case SYS_CHDIR:
+			fileName = (char*)*(espP+1);
+			f->eax=filesys_change_dir(fileName);
+			break;
+
 		default:
 			break;
 	}
