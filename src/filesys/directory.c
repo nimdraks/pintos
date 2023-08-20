@@ -265,7 +265,7 @@ dir_remove (struct dir *dir, const char *name)
   if (!lookup (dir, name, &e, &ofs))
     goto done;
 
-	if (e.inode_sector == ROOT_DIR_SECTOR)
+	if (e.inode_sector == ROOT_DIR_SECTOR || e.inode_sector == thread_current()->cwd_sector)
 		goto done;
 
 	struct dir* cwd = dir_open(inode_open(thread_current()->cwd_sector));
