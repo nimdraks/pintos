@@ -138,7 +138,7 @@ FLAG_MBS	src/threads/flags.h	5;"	d
 FNV_32_BASIS	src/lib/kernel/hash.c	262;"	d	file:
 FNV_32_PRIME	src/lib/kernel/hash.c	261;"	d	file:
 FRACTION	src/threads/thread.c	/^static int FRACTION = 16384;$/;"	v	file:
-FREE_MAP_SECTOR	src/filesys/filesys.h	8;"	d
+FREE_MAP_SECTOR	src/filesys/filesys.h	9;"	d
 GRAN_BYTE	src/userprog/gdt.c	/^    GRAN_BYTE = 0,              \/* Limit has 1-byte granularity. *\/$/;"	e	enum:seg_granularity	file:
 GRAN_PAGE	src/userprog/gdt.c	/^    GRAN_PAGE = 1               \/* Limit has 4 kB granularity. *\/$/;"	e	enum:seg_granularity	file:
 GRAY_ON_BLACK	src/devices/vga.c	22;"	d	file:
@@ -341,7 +341,7 @@ RBR_REG	src/devices/serial.c	21;"	d	file:
 READDIR_MAX_LEN	src/lib/user/syscall.h	16;"	d
 REAL	src/threads/intr-stubs.S	/^#define REAL                                    \\$/;"	d
 RECURSE	src/tests/userprog/no-vm/multi-oom.c	/^enum child_termination_mode { RECURSE, CRASH };$/;"	e	enum:child_termination_mode	file:
-ROOT_DIR_SECTOR	src/filesys/filesys.h	9;"	d
+ROOT_DIR_SECTOR	src/filesys/filesys.h	10;"	d
 ROUND_DOWN	src/lib/round.h	14;"	d
 ROUND_UP	src/lib/round.h	6;"	d
 ROW_CNT	src/devices/vga.c	15;"	d	file:
@@ -1005,6 +1005,7 @@ file_open	src/filesys/file.c	/^file_open (struct inode *inode, bool is_dir) $/;"
 file_read	src/filesys/file.c	/^file_read (struct file *file, void *buffer, off_t size) $/;"	f
 file_read_at	src/filesys/file.c	/^file_read_at (struct file *file, void *buffer, off_t size, off_t file_ofs) $/;"	f
 file_reopen	src/filesys/file.c	/^file_reopen (struct file *file) $/;"	f
+file_sector_number	src/filesys/file.c	/^file_sector_number (int fd){$/;"	f
 file_seek	src/filesys/file.c	/^file_seek (struct file *file, off_t new_pos)$/;"	f
 file_size	src/tests/tests.pm	/^sub file_size {$/;"	s
 file_tell	src/filesys/file.c	/^file_tell (struct file *file) $/;"	f
@@ -1021,6 +1022,7 @@ filesys_create	src/filesys/filesys.c	/^filesys_create (const char *name, off_t i
 filesys_create_dir	src/filesys/filesys.c	/^filesys_create_dir (const char* name) {$/;"	f
 filesys_done	src/filesys/filesys.c	/^filesys_done (void) $/;"	f
 filesys_init	src/filesys/filesys.c	/^filesys_init (bool format) $/;"	f
+filesys_inumber	src/filesys/filesys.c	/^filesys_inumber(int fd){$/;"	f
 filesys_open	src/filesys/filesys.c	/^filesys_open (const char *name)$/;"	f
 filesys_remove	src/filesys/filesys.c	/^filesys_remove (const char *name) $/;"	f
 find_bucket	src/lib/kernel/hash.c	/^find_bucket (struct hash *h, struct hash_elem *e) $/;"	f	file:
