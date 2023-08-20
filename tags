@@ -1005,7 +1005,7 @@ file_open	src/filesys/file.c	/^file_open (struct inode *inode, bool is_dir) $/;"
 file_read	src/filesys/file.c	/^file_read (struct file *file, void *buffer, off_t size) $/;"	f
 file_read_at	src/filesys/file.c	/^file_read_at (struct file *file, void *buffer, off_t size, off_t file_ofs) $/;"	f
 file_reopen	src/filesys/file.c	/^file_reopen (struct file *file) $/;"	f
-file_sector_number	src/filesys/file.c	/^file_sector_number (int fd){$/;"	f
+file_sector_number	src/filesys/file.c	/^file_sector_number (struct file* file){$/;"	f
 file_seek	src/filesys/file.c	/^file_seek (struct file *file, off_t new_pos)$/;"	f
 file_size	src/tests/tests.pm	/^sub file_size {$/;"	s
 file_tell	src/filesys/file.c	/^file_tell (struct file *file) $/;"	f
@@ -1022,7 +1022,6 @@ filesys_create	src/filesys/filesys.c	/^filesys_create (const char *name, off_t i
 filesys_create_dir	src/filesys/filesys.c	/^filesys_create_dir (const char* name) {$/;"	f
 filesys_done	src/filesys/filesys.c	/^filesys_done (void) $/;"	f
 filesys_init	src/filesys/filesys.c	/^filesys_init (bool format) $/;"	f
-filesys_inumber	src/filesys/filesys.c	/^filesys_inumber(int fd){$/;"	f
 filesys_open	src/filesys/filesys.c	/^filesys_open (const char *name)$/;"	f
 filesys_remove	src/filesys/filesys.c	/^filesys_remove (const char *name) $/;"	f
 find_bucket	src/lib/kernel/hash.c	/^find_bucket (struct hash *h, struct hash_elem *e) $/;"	f	file:

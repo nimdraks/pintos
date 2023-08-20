@@ -3,6 +3,7 @@
 #include "userprog/process.h"
 #include "filesys/filesys.h"
 #include "filesys/file.h"
+#include "filesys/directory.h"
 #include <stdio.h>
 #include <string.h>
 #include <syscall-nr.h>
@@ -247,7 +248,7 @@ syscall_handler (struct intr_frame *f)
 			break;
 
 		case SYS_INUMBER:
-			fd = (char*)*(espP+1);
+			fd = *(espP+1);
 
 			file = thread_open_fd(fd);
 			if (file==NULL){
@@ -259,7 +260,7 @@ syscall_handler (struct intr_frame *f)
 			break;
 
 		case SYS_ISDIR:
-			fd = (char*)*(espP+1);
+			fd = *(espP+1);
 
 			file = thread_open_fd(fd);
 			if (file==NULL){
@@ -270,6 +271,22 @@ syscall_handler (struct intr_frame *f)
 			f->eax=file_is_dir(file);
 			break;
 
+		case SYS_READDIR:
+			fd = *(espP+1);
+			fileName = (char*)*(espP+2);
+
+			file = thread_open_fd(fd);
+			if (file==NULL){
+				exit_unexpectedly(t);
+				return;
+			}
+
+			if(!file_is_dir(file)){
+				exit_unexpectedly(t);
+				return;
+			};
+
+			f->eax=dir_readdir(dir_open(file_get_inode(file)), fileName);
 		default:
 			break;
 	}

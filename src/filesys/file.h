@@ -35,5 +35,5 @@ off_t file_tell (struct file *);
 off_t file_length (struct file *);
 
 bool file_is_dir(struct file*);
-block_sector_t file_sector_number(int fd);
+block_sector_t file_sector_number(struct file*);
 #endif /* filesys/file.h */

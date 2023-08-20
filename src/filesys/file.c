@@ -178,12 +178,7 @@ file_is_dir (struct file *file) {
 
 
 block_sector_t
-file_sector_number (int fd){
-	struct file* file = thread_open_fd(fd);
-	if(file == NULL){
-		return -1;
-	}
-
+file_sector_number (struct file* file){
 	return inode_to_sector(file->inode);
 }
 
