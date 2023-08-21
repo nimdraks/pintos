@@ -276,6 +276,7 @@ dir_remove (struct dir *dir, const char *name)
 			&& ee.inode_sector == e.inode_sector)
 			goto done;
 	}
+	free(cwd);
 
   /* Open inode. */
   inode = inode_open (e.inode_sector);
