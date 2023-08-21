@@ -15,14 +15,6 @@
 
 /* On-disk inode.
    Must be exactly BLOCK_SECTOR_SIZE bytes long. */
-struct inode_disk
-  {
-    block_sector_t start;               /* First data sector. */
-    off_t length;                       /* File size in bytes. */
-    unsigned magic;                     /* Magic number. */
-    uint32_t unused[125];               /* Not used. */
-  };
-
 struct inode_disk_first
   {
     off_t length;                       /* File size in bytes. */
@@ -226,27 +218,6 @@ struct inode
     int deny_write_cnt;                 /* 0: writes ok, >0: deny writes. */
   };
 
-
-/* Returns the block device sector that contains byte offset POS
-   within INODE.
-  Returns -1 if INODE does not contain data for a byte at offset
-   POS. */
-static block_sector_t
-byte_to_sector (const struct inode *inode, off_t pos) 
-{
-  ASSERT (inode != NULL);
-  block_sector_t ret = -1;
-
-  struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);    
-  struct inode_disk* id = (struct inode_disk*)(bc->data);
-
-
- if (pos < id->length)
-   ret = id->start + pos / BLOCK_SECTOR_SIZE;         
- free(bc);
- return ret;
-}
- 
 /* List of open inodes, so that opening a single inode twice
    returns the same `struct inode'. */
 static struct list open_inodes;
