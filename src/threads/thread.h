@@ -130,7 +130,8 @@ struct thread
 		struct file* tFile;
 #endif
 
-		block_sector_t cwd_sector;	
+		block_sector_t cwd_sector;
+		bool cwd_is_removed;	
 
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */

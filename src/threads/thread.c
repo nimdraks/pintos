@@ -123,6 +123,8 @@ thread_init (void)
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
 	initial_thread->cwd_sector = ROOT_DIR_SECTOR;
+	initial_thread->cwd_is_removed = false;
+
 	ready_threads++;
 }
 
@@ -212,6 +214,7 @@ thread_create (const char *name, int priority,
 	t->p_tid = thread_current()->tid;
 	t->tFile = NULL;
 	t->cwd_sector = ROOT_DIR_SECTOR;
+	t->cwd_is_removed = false;
 
   /* Prepare thread for first run by initializing its stack.
      Do this atomically so intermediate values for the 'stack' 

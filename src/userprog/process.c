@@ -60,6 +60,7 @@ process_execute (const char *file_name)
 
 	struct thread* new_t = tid_thread(tid);
 	new_t->cwd_sector = thread_current()->cwd_sector;
+	new_t->cwd_is_removed = thread_current()->cwd_is_removed;
 
 	/* Wait the process load proeperly */
 	sema_down( &(thread_current()->execSema));
