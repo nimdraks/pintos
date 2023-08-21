@@ -226,6 +226,7 @@ struct inode
     int deny_write_cnt;                 /* 0: writes ok, >0: deny writes. */
   };
 
+
 /* Returns the block device sector that contains byte offset POS
    within INODE.
   Returns -1 if INODE does not contain data for a byte at offset
@@ -234,18 +235,18 @@ static block_sector_t
 byte_to_sector (const struct inode *inode, off_t pos) 
 {
   ASSERT (inode != NULL);
-	block_sector_t ret = -1;
+  block_sector_t ret = -1;
 
-	struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);	
-	struct inode_disk* id = (struct inode_disk*)(bc->data);
+  struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);    
+  struct inode_disk* id = (struct inode_disk*)(bc->data);
 
 
-  if (pos < id->length)
-    ret = id->start + pos / BLOCK_SECTOR_SIZE;		
-	free(bc);
-	return ret;
+ if (pos < id->length)
+   ret = id->start + pos / BLOCK_SECTOR_SIZE;         
+ free(bc);
+ return ret;
 }
-
+ 
 /* List of open inodes, so that opening a single inode twice
    returns the same `struct inode'. */
 static struct list open_inodes;
@@ -264,52 +265,6 @@ inode_init (void)
    Returns false if memory or disk allocation fails. */
 bool
 inode_create (block_sector_t sector, off_t length){
-	if(false){
-		return inode_create_1 (sector, length);
-	}
-	return inode_create_2 (sector, length);
-}
-
-
-bool
-inode_create_1 (block_sector_t sector, off_t length)
-{
-  struct inode_disk *disk_inode = NULL;
-  bool success = false;
-
-  ASSERT (length >= 0);
-
-  /* If this assertion fails, the inode structure is not exactly
-     one sector in size, and you should fix that. */
-  ASSERT (sizeof *disk_inode == BLOCK_SECTOR_SIZE);
-
-  disk_inode = calloc (1, sizeof *disk_inode);
-  if (disk_inode != NULL)
-    {
-      size_t sectors = bytes_to_sectors (length);
-      disk_inode->length = length;
-      disk_inode->magic = INODE_MAGIC;
-      if (free_map_allocate (sectors, &disk_inode->start)) 
-        {
-          block_write (fs_device, sector, disk_inode);
-          if (sectors > 0) 
-            {
-              static char zeros[BLOCK_SECTOR_SIZE];
-              size_t i;
-              
-              for (i = 0; i < sectors; i++) 
-                block_write (fs_device, disk_inode->start + i, zeros);
-            }
-          success = true; 
-        } 
-      free (disk_inode);
-    }
-  return success;
-}
-
-bool
-inode_create_2 (block_sector_t sector, off_t length)
-{
   ASSERT (length >= 0);
   ASSERT (sizeof(struct inode_disk_first) == BLOCK_SECTOR_SIZE)
 
@@ -407,45 +362,6 @@ inode_get_inumber (const struct inode *inode)
    If INODE was also a removed inode, frees its blocks. */
 void
 inode_close (struct inode* inode){
-	if (false){
-		inode_close_1 (inode);
-	} else {
-		inode_close_2 (inode);
-	}
-	
-}
-
-void
-inode_close_1 (struct inode *inode) 
-{
-  /* Ignore null pointer. */
-  if (inode == NULL)
-    return;
-
-  /* Release resources if this was the last opener. */
-  if (--inode->open_cnt == 0)
-    {
-      /* Remove from inode list and release lock. */
-      list_remove (&inode->elem);
- 
-      /* Deallocate blocks if removed. */
-      if (inode->removed) 
-        {
-          free_map_release (inode->sector, 1);
-					
-					struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);	
-					struct inode_disk* id = (struct inode_disk*)(bc->data);
-          free_map_release (id->start, bytes_to_sectors (id->length));
-					free(bc);
-        }
-
-      free (inode); 
-    }
-}
-
-void
-inode_close_2 (struct inode *inode) 
-{
   /* Ignore null pointer. */
   if (inode == NULL)
     return;
@@ -498,73 +414,8 @@ inode_remove (struct inode *inode)
    Returns the number of bytes actually read, which may be less
    than SIZE if an error occurs or end of file is reached. */
 off_t
-inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) 
-{
-	if (false)
-		return inode_read_at_1 (inode, buffer_, size, offset);
-	
-	return inode_read_at_2 (inode, buffer_, size, offset);
-}
-
-
-off_t
-inode_read_at_1 (struct inode *inode, void *buffer_, off_t size, off_t offset) 
-{
-  uint8_t *buffer = buffer_;
-  off_t bytes_read = 0;
-	struct buffer_cache* bc;
-
-  while (size > 0) 
-    {
-      /* Disk sector to read, starting byte offset within sector. */
-      block_sector_t sector_idx = byte_to_sector (inode, offset);
-      int sector_ofs = offset % BLOCK_SECTOR_SIZE;
-
-      /* Bytes left in inode, bytes left in sector, lesser of the two. */
-      off_t inode_left = inode_length (inode) - offset;
-      int sector_left = BLOCK_SECTOR_SIZE - sector_ofs;
-      int min_left = inode_left < sector_left ? inode_left : sector_left;
-
-      /* Number of bytes to actually copy out of this sector. */
-      int chunk_size = size < min_left ? size : min_left;
-      if (chunk_size <= 0)
-        break;
-
-			bc = get_buffer_cache_value_from_sector(sector_idx);
-
-#ifdef INFO
-			printf("bc selected when read inode at sector_idx %d\n", sector_idx);
-#endif
-
-     if (sector_ofs == 0 && chunk_size == BLOCK_SECTOR_SIZE)
-        {
-					memcpy(buffer + bytes_read, bc->data, BLOCK_SECTOR_SIZE);
-        }
-      else 
-        {
-          /* Read sector into bounce buffer, then partially copy
-             into caller's buffer. */
-          memcpy (buffer + bytes_read, bc->data + sector_ofs, chunk_size);
-        }
-     
-			free(bc); 
-      /* Advance. */
-      size -= chunk_size;
-      offset += chunk_size;
-      bytes_read += chunk_size;
-    }
-
-#ifdef INFO
-	printf("inode_read at is finished\n");
-#endif
-
-  return bytes_read;
-}
-
-off_t
-inode_read_at_2 (struct inode *inode, void *buffer_, off_t size, off_t offset) 
-{
-  uint8_t *buffer = buffer_;
+inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
+	uint8_t *buffer = buffer_;
   off_t bytes_read = 0;
 	off_t offset_sector = 0;
 	struct buffer_cache* bc;
@@ -638,67 +489,7 @@ inode_read_at_2 (struct inode *inode, void *buffer_, off_t size, off_t offset)
    growth is not yet implemented.) */
 off_t
 inode_write_at (struct inode *inode, const void *buffer_, off_t size,
-                off_t offset) 
-{
-	if (false)
-		return inode_write_at_1 (inode, buffer_, size, offset); 
-
-	return inode_write_at_2 (inode, buffer_, size, offset);
-}
-
-off_t
-inode_write_at_1 (struct inode *inode, const void *buffer_, off_t size,
-                off_t offset) 
-{
-  const uint8_t *buffer = buffer_;
-  off_t bytes_written = 0;
-
-  if (inode->deny_write_cnt)
-    return 0;
-
-  while (size > 0) 
-    {
-      /* Sector to write, starting byte offset within sector. */
-      block_sector_t sector_idx = byte_to_sector (inode, offset);
-      int sector_ofs = offset % BLOCK_SECTOR_SIZE;
-
-      /* Bytes left in inode, bytes left in sector, lesser of the two. */
-      off_t inode_left = inode_length (inode) - offset;
-      int sector_left = BLOCK_SECTOR_SIZE - sector_ofs;
-      int min_left = inode_left < sector_left ? inode_left : sector_left;
-
-      /* Number of bytes to actually write into this sector. */
-      int chunk_size = size < min_left ? size : min_left;
-      if (chunk_size <= 0)
-        break;
-
-#ifdef INFO
-			printf("bc selected when write inode at sector_idx %d\n", sector_idx);
-#endif
-
-      if (sector_ofs == 0 && chunk_size == BLOCK_SECTOR_SIZE)
-        {
-          /* Write full sector directly to disk. */
-					write_src_to_buffer_cache_from_sector(sector_idx, 0, buffer+bytes_written, BLOCK_SECTOR_SIZE);
-       }
-      else 
-        {
-					write_src_to_buffer_cache_from_sector(sector_idx, sector_ofs, buffer+bytes_written, chunk_size);
-        }
-
-      /* Advance. */
-      size -= chunk_size;
-      offset += chunk_size;
-      bytes_written += chunk_size;
-    }
-
-  return bytes_written;
-}
-
-off_t
-inode_write_at_2 (struct inode *inode, const void *buffer_, off_t size,
-                off_t offset) 
-{
+                off_t offset) {
   const uint8_t *buffer = buffer_;
   off_t bytes_written = 0;
 	off_t offset_sector = 0;
@@ -783,26 +574,6 @@ inode_allow_write (struct inode *inode)
 /* Returns the length, in bytes, of INODE's data. */
 off_t
 inode_length (const struct inode *inode){
-	if (false)
-		return inode_byte_length_1(inode);
-	return inode_byte_length_2(inode);
-}
-
-off_t
-inode_byte_length_1(const struct inode *inode)
-{
-	struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);	
-	struct inode_disk* id = (struct inode_disk*)(bc->data);
-	off_t ret = id->length;
-
-	free(bc);
-
-	return ret;
-}
-
-off_t
-inode_byte_length_2(const struct inode *inode)
-{
 	struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);	
 	struct inode_disk_first* id = (struct inode_disk_first*)(bc->data);
 	ASSERT(id->magic==INODE_MAGIC);
