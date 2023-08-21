@@ -459,8 +459,6 @@ inode_close_2 (struct inode *inode)
       /* Deallocate blocks if removed. */
       if (inode->removed) 
         {
-          free_map_release (inode->sector, 1);
-					
 					struct buffer_cache* bc = get_buffer_cache_value_from_sector(inode->sector);
 			  	struct inode_disk_first* id_first = (struct inode_disk_first*)(bc->data);
 
@@ -471,6 +469,15 @@ inode_close_2 (struct inode *inode)
 						block_sector_t sector = offset_to_sector(id_first, i);
 						free_map_release(sector, 1);
 					}
+
+					block_sector_t second_t;
+					for (i = 0; i < ID_FIRST_SIZE; i++) {
+						second_t=id_first->id_second_table[i];
+						if(second_t!=0)
+          		free_map_release (second_t, 1);
+					}
+
+          free_map_release (inode->sector, 1);
 					free(bc);
         }
 
