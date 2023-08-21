@@ -157,6 +157,7 @@ filesys_change_dir(const char *name){
 
 	if (strcmp(name, "/") == 0){
 		thread_current()->cwd_sector=ROOT_DIR_SECTOR;
+		thread_current()->cwd_is_removed=false;
 		return true;
 	}
 
@@ -172,6 +173,7 @@ filesys_change_dir(const char *name){
 
 	if (inode != NULL){
 		thread_current()->cwd_sector=inode_to_sector(inode);
+		thread_current()->cwd_is_removed=false;
 		success=true;
 	}
 

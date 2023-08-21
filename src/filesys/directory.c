@@ -265,8 +265,11 @@ dir_remove (struct dir *dir, const char *name)
   if (!lookup (dir, name, &e, &ofs))
     goto done;
 
-	if (e.inode_sector == ROOT_DIR_SECTOR || e.inode_sector == thread_current()->cwd_sector)
+	if (e.inode_sector == ROOT_DIR_SECTOR)
 		goto done;
+
+	if (e.inode_sector == thread_current()->cwd_sector)
+		thread_current()->cwd_is_removed=true;
 
 	struct dir* cwd = dir_open(inode_open(thread_current()->cwd_sector));
 	if (cwd != NULL) {
@@ -345,9 +348,12 @@ dir_open_recursive (const char* path) {
 	struct dir* curr=NULL;
 	if (is_absolute(path))
 		curr = dir_open_root();
- 	else 
-		curr = dir_open(inode_open(thread_current()->cwd_sector));
+ 	else{ 
+		if (thread_current()->cwd_is_removed)
+			return NULL;
 
+		curr = dir_open(inode_open(thread_current()->cwd_sector));
+	}
 #ifdef INFO9
 	printf("dir_open_recursive: curr %d, token_count %d\n", inode_to_sector(dir_to_inode(curr)), token_count);
 #endif
