@@ -55,12 +55,7 @@ filesys_create (const char *name, off_t initial_size)
   block_sector_t inode_sector = 0;
   struct dir *dir;
 
-
-	if(false){
-		dir = dir_open(inode_open(thread_current()->cwd_sector));
-	} else {
-		dir = dir_open_recursive(name);
-	}
+	dir = dir_open_recursive(name);
 
 	char* name_end = get_name_from_end(name);
 
@@ -128,11 +123,7 @@ filesys_open (const char *name)
 		return file_open(inode_open(ROOT_DIR_SECTOR), true);
 	}
 
-	if(false){
-		dir = dir_open(inode_open(thread_current()->cwd_sector));
-	} else {
-		dir = dir_open_recursive(name);
-	}
+	dir = dir_open_recursive(name);
 
 	char* name_end = get_name_from_end(name);
 
@@ -191,11 +182,7 @@ filesys_remove (const char *name)
 {
   struct dir *dir;
 
-	if(false){
-		dir = dir_open(inode_open(thread_current()->cwd_sector));
-	} else {
-		dir = dir_open_recursive(name);
-	}
+	dir = dir_open_recursive(name);
 
 	char* name_end = get_name_from_end(name);
 
