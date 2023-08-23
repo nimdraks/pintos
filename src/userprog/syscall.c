@@ -285,7 +285,9 @@ syscall_handler (struct intr_frame *f)
 				exit_unexpectedly(t);
 				return;
 			};
-
+#ifdef INFO10
+			printf("SYS_READDIR will be called; file %p, fileName %s, fd %d\n", file, fileName, fd);
+#endif
 			f->eax=dir_readdir(dir_open(file_get_inode(file)), fileName);
 		default:
 			break;

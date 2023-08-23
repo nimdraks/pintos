@@ -319,7 +319,7 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
 {
   struct dir_entry e;
 
-#ifdef INFO9
+#ifdef INFO10
 	printf("dir_readdir: dir %d\n", inode_to_sector(dir_get_inode(dir)));
 #endif
 
@@ -328,7 +328,7 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
       dir->pos += sizeof e;
       if (e.in_use && !(strcmp(e.name, ".")==0 || strcmp(e.name, "..")==0))
         {
-#ifdef INFO9
+#ifdef INFO10
 					printf("dir_readdir: inode %d, name %s\n", e.inode_sector, e.name);
 #endif
           strlcpy (name, e.name, NAME_MAX + 1);
