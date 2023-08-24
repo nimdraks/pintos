@@ -1023,6 +1023,23 @@ thread_open_fd (int fd){
 	return NULL;
 }
 
+struct dir*
+thread_open_fd_dir (int fd){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->fdList));
+	struct fileDesc* fdStruct;
+
+	for ( e = list_begin(&(t->fdList)); e != list_end(&(t->fdList));
+				e = list_next(e))
+	{
+		fdStruct = list_entry (e, struct fileDesc, elem);
+		if (fdStruct->fd == fd && file_is_dir(fdStruct->file)){
+			return fdStruct->dir;
+		}
+	}
+
+	return NULL;
+}
 
 bool
 thread_close_fd (int fd){
