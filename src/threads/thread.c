@@ -19,6 +19,7 @@
 #include "filesys/cache.h"
 #endif
 #include "filesys/filesys.h"
+#include "filesys/directory.h"
 
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
@@ -994,6 +995,11 @@ thread_make_fd (struct file* file)
 	}
 	fdStruct->fd = defaultfd;
 	fdStruct->file = file;
+	if (file_is_dir(file))
+		fdStruct->dir = dir_open(file_get_inode(file)); 
+	else
+		fdStruct->dir = NULL;
+
 	list_push_back(&(t->fdList),&(fdStruct->elem));
  
  	return fdStruct->fd;

@@ -10,6 +10,7 @@ struct fileDesc
 	{
 		int fd;
 		struct file* file;
+		struct dir* dir;
 		struct list_elem elem;
 	};
 
