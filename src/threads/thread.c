@@ -1037,6 +1037,7 @@ thread_close_fd (int fd){
 		if (fdStruct->fd == fd){
 			list_remove(e);
 			file_close(fdStruct->file);
+			dir_close(fdStruct->dir);
 			free(fdStruct);
 			return true;	
 		}
@@ -1056,6 +1057,7 @@ thread_close_all_fd (void){
       e = list_pop_front ( &(t->fdList) );
 			fdStruct = list_entry (e, struct fileDesc, elem);
 			file_close(fdStruct->file);
+			dir_close(fdStruct->dir);
 			free(fdStruct);
 	}
 }
