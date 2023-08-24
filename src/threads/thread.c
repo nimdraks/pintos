@@ -988,7 +988,7 @@ thread_make_fd (struct file* file)
 			defaultfd++;
 	}
  
-	fdStruct = malloc(sizeof(fdStruct));
+	fdStruct = malloc(sizeof(struct fileDesc));
 	if (fdStruct == NULL){
 		return -1;
 	}
