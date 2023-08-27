@@ -11,9 +11,9 @@ struct inode_disk_first* new_inode_disk_first(off_t);
 struct inode_disk_second* new_inode_disk_second(void);
 char* new_zeros_sector(void);
 void test_zero_sector_size(void);
-block_sector_t offset_to_sector_with_expand(block_sector_t, off_t);
-block_sector_t offset_to_sector_with_expand_second(block_sector_t, off_t*);
-block_sector_t offset_to_sector(struct inode_disk_first*, off_t);
+int offset_to_sector_with_expand(block_sector_t, off_t);
+int offset_to_sector_with_expand_second(block_sector_t, off_t*);
+int offset_to_sector(struct inode_disk_first*, off_t);
 
 
 void inode_init (void);

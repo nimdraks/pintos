@@ -68,10 +68,9 @@ test_zero_sector_size(void){
 }
 
 
-block_sector_t 
+int
 offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
-	int i=0;
-	block_sector_t ret=0;
+	int i=0, ret=0;
 
 	struct buffer_cache* bc = get_buffer_cache_value_from_sector(id_first_sector);
 	struct inode_disk_first* id_first=(struct inode_disk_first*)(bc->data);
@@ -87,7 +86,7 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 		if (id_first->id_second_table[i] == 0){
 			block_sector_t id_second_sector;
 			if(!free_map_allocate (1, &id_second_sector)){
-				PANIC("failed to allocated a sector for id_second\n");
+				return -1;
 			}
 			id_first->id_second_table[i] = id_second_sector;
 			write_src_to_buffer_cache_from_sector(id_first_sector, 0, id_first, BLOCK_SECTOR_SIZE);
@@ -98,7 +97,12 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 		printf("id_first idx at expand_first: %d, and its id_second_sector: %d\n", i, id_first->id_second_table[i]);
 #endif
 		ret = offset_to_sector_with_expand_second(id_first->id_second_table[i], &offset);
-		if (ret!=0){
+		if (ret==-1){
+			free(bc);
+			free(zeros);
+			return -1;
+		}
+		else if (ret!=0){
 			free(bc);
 			free(zeros);
 			return ret;
@@ -109,13 +113,12 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 	free(zeros);
 	PANIC("failed to find block_sector_t at offset_to_sector_with_expand");
 
-	return 0;
+	return -1;
 }
 
-block_sector_t
+int
 offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offset){
-	int i=0;
-	block_sector_t ret=0;
+	int i=0, ret=0;
 	char *zeros = new_zeros_sector();
  	struct buffer_cache* bc = get_buffer_cache_value_from_sector(id_second_sector);
 	struct inode_disk_second* id_second=(struct inode_disk_second*)(bc->data);
@@ -124,7 +127,7 @@ offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offs
 		if (id_second->data_table[i]==0){
 			block_sector_t data_sector;
 			if(!free_map_allocate (1, &data_sector)){
-				PANIC("failed to allocated a sector for data_sector\n");
+				return -1;
 			}
 			id_second->data_table[i] = data_sector;
 			write_src_to_buffer_cache_from_sector(id_second_sector, 0, id_second, BLOCK_SECTOR_SIZE);
@@ -149,11 +152,10 @@ offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offs
 
 	free(bc);
 	free(zeros);
-
 	return ret;
 }
 
-block_sector_t 
+int
 offset_to_sector(struct inode_disk_first* id_first, off_t offset)
 {
 #ifdef INFO4
@@ -162,9 +164,8 @@ offset_to_sector(struct inode_disk_first* id_first, off_t offset)
 
 	ASSERT(id_first->magic==INODE_MAGIC);
 
-	int i=0, j=0;
+	int i=0, j=0, ret=-1;
 	off_t remain_offset=offset;
-	block_sector_t ret=-1;
  	struct buffer_cache* bc;
 	struct inode_disk_second* id_second;
  
