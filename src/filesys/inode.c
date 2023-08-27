@@ -86,6 +86,8 @@ offset_to_sector_with_expand(block_sector_t id_first_sector, off_t offset){
 		if (id_first->id_second_table[i] == 0){
 			block_sector_t id_second_sector;
 			if(!free_map_allocate (1, &id_second_sector)){
+				free(bc);
+				free(zeros);
 				return -1;
 			}
 			id_first->id_second_table[i] = id_second_sector;
@@ -127,6 +129,8 @@ offset_to_sector_with_expand_second(block_sector_t id_second_sector, off_t* offs
 		if (id_second->data_table[i]==0){
 			block_sector_t data_sector;
 			if(!free_map_allocate (1, &data_sector)){
+				free(bc);
+				free(zeros);
 				return -1;
 			}
 			id_second->data_table[i] = data_sector;
@@ -171,6 +175,7 @@ offset_to_sector(struct inode_disk_first* id_first, off_t offset)
  
 	for(i=0; i<ID_FIRST_SIZE; i++){
 		if (id_first->id_second_table[i] == 0){
+			free(bc);
 			break;
 		}
 
@@ -254,7 +259,10 @@ inode_create (block_sector_t sector, off_t length){
 
   size_t sectors = bytes_to_sectors (length);
 	off_t offset_sectors = sectors-1;
-	block_sector_t data_sector = offset_to_sector_with_expand(sector, offset_sectors);
+	int data_sector = offset_to_sector_with_expand(sector, offset_sectors);
+	if (data_sector==-1){
+		return false;
+	}
 #ifdef INFO5
 	printf("inode %d create with sectors %d, length %d\n", sector, sectors, length);
 #endif
@@ -474,8 +482,11 @@ inode_write_at (struct inode *inode, const void *buffer_, off_t size,
     {
       /* Sector to write, starting byte offset within sector. */
 			offset_sector = offset / BLOCK_SECTOR_SIZE;
-      block_sector_t sector_idx = offset_to_sector_with_expand (inode->sector, offset_sector);
+      int sector_idx = offset_to_sector_with_expand (inode->sector, offset_sector);
       int sector_ofs = offset % BLOCK_SECTOR_SIZE;
+
+			if (sector_idx==-1)
+				break;
 
       /* Bytes left in inode, bytes left in sector, lesser of the two. */
   //    off_t inode_left = inode_length (inode) - offset;
