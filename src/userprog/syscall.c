@@ -82,6 +82,7 @@ syscall_handler (struct intr_frame *f)
 	char* copyExecFile=NULL;
 	int execPid=0;
 	int waitPid=0;
+	struct dir* dir=NULL;
 
 	switch(syscallNum){
 		case SYS_HALT:
@@ -275,20 +276,16 @@ syscall_handler (struct intr_frame *f)
 			fd = *(espP+1);
 			fileName = (char*)*(espP+2);
 
-			file = thread_open_fd(fd);
-			if (file==NULL){
+			dir = thread_open_fd_dir(fd);
+			if (dir==NULL){
 				exit_unexpectedly(t);
 				return;
 			}
 
-			if(!file_is_dir(file)){
-				exit_unexpectedly(t);
-				return;
-			};
 #ifdef INFO10
 			printf("SYS_READDIR will be called; file %p, fileName %s, fd %d\n", file, fileName, fd);
 #endif
-			f->eax=dir_readdir(dir_open(file_get_inode(file)), fileName);
+			f->eax=dir_readdir(dir, fileName);
 		default:
 			break;
 	}
