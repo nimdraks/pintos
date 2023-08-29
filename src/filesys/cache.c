@@ -34,7 +34,7 @@ get_buffer_cache_value_from_sector(block_sector_t sector_idx){
 	lock_acquire(&buffer_cache_lock);
 
   struct buffer_cache* bc = get_buffer_cache_from_sector(sector_idx);
-#ifdef INFO7
+#ifdef INFO11
 	printf("get_buffer_cache_value sector_idx:%d, bc: %p, ret:%p\n", sector_idx, bc, ret);
 #endif
 	memcpy(ret, bc, sizeof(struct buffer_cache));

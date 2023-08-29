@@ -302,6 +302,10 @@ inode_open (block_sector_t sector)
         }
     }
 
+#ifdef INFO12
+	printf("inode_open newly: sector %d\n", sector);
+#endif
+
   /* Allocate memory. */
   inode = malloc (sizeof *inode);
   if (inode == NULL)
@@ -379,6 +383,7 @@ inode_close (struct inode* inode){
 
       free (inode); 
     }
+
 }
 
 /* Marks INODE to be deleted when it is closed by the last caller who

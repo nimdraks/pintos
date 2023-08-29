@@ -276,10 +276,12 @@ dir_remove (struct dir *dir, const char *name)
 		struct dir_entry ee;
 		off_t ofss;
   	if(lookup (cwd, "..", &ee, &ofss)
-			&& ee.inode_sector == e.inode_sector)
+			&& ee.inode_sector == e.inode_sector){
+			dir_close(cwd);
 			goto done;
+		}
 	}
-	free(cwd);
+	dir_close(cwd);
 
   /* Open inode. */
   inode = inode_open (e.inode_sector);
