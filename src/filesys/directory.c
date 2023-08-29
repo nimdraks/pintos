@@ -309,6 +309,9 @@ dir_remove (struct dir *dir, const char *name)
   success = true;
 
  done:
+#ifdef INFO12
+	printf("dir_remove: success %d\n", success);
+#endif
   inode_close (inode);
   return success;
 }
@@ -356,7 +359,7 @@ dir_open_recursive (const char* path) {
 
 		curr = dir_open(inode_open(thread_current()->cwd_sector));
 	}
-#ifdef INFO9
+#ifdef INFO12
 	printf("dir_open_recursive: curr %d, token_count %d\n", inode_to_sector(dir_to_inode(curr)), token_count);
 #endif
 	

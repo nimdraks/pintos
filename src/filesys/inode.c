@@ -308,9 +308,12 @@ inode_open (block_sector_t sector)
 
   /* Allocate memory. */
   inode = malloc (sizeof *inode);
-  if (inode == NULL)
+  if (inode == NULL){
+#ifdef INFO12
+	printf("inode_open newly: failed to malloc\n");
+#endif
     return NULL;
-
+	}
   /* Initialize. */
   list_push_front (&open_inodes, &inode->elem);
   inode->sector = sector;
@@ -380,7 +383,9 @@ inode_close (struct inode* inode){
           free_map_release (inode->sector, 1);
 					free(bc);
         }
-
+#ifdef INFO12
+			printf("inode_close: sector %d\n", inode->sector);
+#endif
       free (inode); 
     }
 

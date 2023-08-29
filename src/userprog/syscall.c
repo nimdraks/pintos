@@ -239,11 +239,17 @@ syscall_handler (struct intr_frame *f)
 			break;
 
 		case SYS_CHDIR:
+#ifdef INFO12
+			printf("SYS_CHDIR\n");
+#endif
 			fileName = (char*)*(espP+1);
 			f->eax=filesys_change_dir(fileName);
 			break;
 
 		case SYS_REMOVE:
+#ifdef INFO12
+			printf("SYS_REMOVE\n");
+#endif
 			fileName = (char*)*(espP+1);
 			f->eax=filesys_remove(fileName);
 			break;

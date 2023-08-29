@@ -186,6 +186,10 @@ filesys_remove (const char *name)
 
 	char* name_end = get_name_from_end(name);
 
+#ifdef INFO12
+	printf("filesys_remove: name %s, name_end %s\n", name, name_end);
+#endif
+
   bool success = dir != NULL && dir_remove (dir, name_end);
 
   dir_close (dir); 
