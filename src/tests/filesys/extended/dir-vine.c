@@ -73,7 +73,9 @@ test_main (void)
   quiet = true;
   while (i-- > 10) 
     {
+#ifdef INFO12
 			printf("%d iteration remove\n", i);
+#endif
       char file_name[16], dir_name[16];
 
       snprintf (file_name, sizeof file_name, "file%d", i);
