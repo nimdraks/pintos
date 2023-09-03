@@ -607,6 +607,10 @@ hex_dump (uintptr_t ofs, const void *buf_, size_t size, bool ascii)
         end = start + size;
       n = end - start;
 
+#ifdef INFO12
+			printf("%d %d %d\n", size, start, end);
+#endif
+
       /* Print line. */
       printf ("%08jx  ", (uintmax_t) ROUND_DOWN (ofs, per_line));
       for (i = 0; i < start; i++)

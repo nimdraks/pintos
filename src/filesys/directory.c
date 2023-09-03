@@ -439,7 +439,10 @@ get_name_from_end(const char* path) {
    
 	char* ret = malloc (strlen(prev)+1);
 	memcpy(ret, prev, strlen(prev)+1);
- 
+
+#ifdef INFO12
+	printf("get_name_from_end: %s\n", ret);
+#endif
   return ret;
 }
 

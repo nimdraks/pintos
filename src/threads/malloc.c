@@ -108,8 +108,12 @@ malloc (size_t size)
          Allocate enough pages to hold SIZE plus an arena. */
       size_t page_cnt = DIV_ROUND_UP (size + sizeof *a, PGSIZE);
       a = palloc_get_multiple (0, page_cnt);
-      if (a == NULL)
+#ifdef INFO12
+					printf("malloc: d->block_size %d, size %d, a %p, at case 1\n", d->block_size, size, a);
+#endif
+      if (a == NULL){
         return NULL;
+			}
 
       /* Initialize the arena to indicate a big block of PAGE_CNT
          pages, and return it. */
@@ -128,6 +132,9 @@ malloc (size_t size)
 
       /* Allocate a page. */
       a = palloc_get_page (0);
+#ifdef INFO12
+					printf("malloc: d->block_size %d, size %d, a %p, at case 2\n", d->block_size, size, a);
+#endif
       if (a == NULL) 
         {
           lock_release (&d->lock);
