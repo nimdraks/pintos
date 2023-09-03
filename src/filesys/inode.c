@@ -323,7 +323,8 @@ inode_open (block_sector_t sector)
 
 
 	/* Load to Buffer Cache */
-	get_buffer_cache_value_from_sector(sector);	
+	struct buffer_cache* bc=get_buffer_cache_value_from_sector(sector);	
+	free(bc);
 
   return inode;
 }
