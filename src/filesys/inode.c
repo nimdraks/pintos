@@ -174,7 +174,7 @@ offset_to_sector(struct inode_disk_first* id_first, off_t offset)
 	struct inode_disk_second* id_second;
  
 	for(i=0; i<ID_FIRST_SIZE; i++){
-#ifdef INFO13
+#ifdef INFO14
 		printf("offset_to_sector: %d\n", id_first->id_second_table[i]);
 #endif
 		if (id_first->id_second_table[i] == 0){
@@ -421,7 +421,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
   while (size > 0) 
     {
       /* Disk sector to read, starting byte offset within sector. */
-#ifdef INFO3
+#ifdef INFO
 			printf("%p, offset: %d, size: %d, bytes_read: %d at read\n", inode,  offset, size, bytes_read );
 #endif
 			bc = get_buffer_cache_value_from_sector(inode->sector);
@@ -429,8 +429,10 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 			ASSERT(id_first->magic==INODE_MAGIC);
 
 			offset_sector = offset / BLOCK_SECTOR_SIZE;
-      block_sector_t sector_idx = offset_to_sector (id_first, offset_sector);
+      int sector_idx = offset_to_sector (id_first, offset_sector);
 			free(bc);
+			if (sector_idx < 0)
+				break;
 
       int sector_ofs = offset % BLOCK_SECTOR_SIZE;
 
@@ -441,7 +443,7 @@ inode_read_at (struct inode *inode, void *buffer_, off_t size, off_t offset) {
 
       /* Number of bytes to actually copy out of this sector. */
       int chunk_size = size < min_left ? size : min_left;
-#ifdef INFO3
+#ifdef INFO
 			printf("chunk_size %d, sector_idx %d, inode_length %d\n", chunk_size, sector_idx, inode_length(inode));
 #endif
       if (chunk_size <= 0)
