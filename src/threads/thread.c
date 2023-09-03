@@ -353,6 +353,9 @@ thread_exit (void)
   process_exit ();
 #endif
 
+#ifdef INFO15
+	printf("thread_exit\n");
+#endif
 #ifdef FILESYS
 	write_dirty_buffer_cache_to_sector();
 #endif

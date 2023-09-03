@@ -137,6 +137,9 @@ main (void)
 //	thread_update_recent_cpu();
 
   /* Finish up. */
+#ifdef FILESYS
+	write_dirty_buffer_cache_to_sector();
+#endif
   shutdown ();
   thread_exit ();
 }
