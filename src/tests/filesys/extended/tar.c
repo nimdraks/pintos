@@ -14,6 +14,7 @@ static bool make_tar_archive (const char *archive_name,
 int
 main (int argc, char *argv[]) 
 {
+    usage ();
   if (argc < 3)
     usage ();
 

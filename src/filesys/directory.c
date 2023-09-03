@@ -130,18 +130,20 @@ lookup (const struct dir *dir, const char *name,
   ASSERT (name != NULL);
 
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
-       ofs += sizeof e) 
-    if (e.in_use && !strcmp (name, e.name)) 
-      {
-#ifdef INFO8
+       ofs += sizeof e){ 
+#ifdef INFO15
 	printf("dir %d, name %s, e.in_use %d, e.name %s, e.sector %d at lookup\n", inode_to_sector(dir->inode), name, e.in_use, e.name, e.inode_sector);
 #endif
+    if (e.in_use && !strcmp (name, e.name)) 
+      {
         if (ep != NULL)
           *ep = e;
         if (ofsp != NULL)
           *ofsp = ofs;
         return true;
       }
+	}
+
   return false;
 }
 

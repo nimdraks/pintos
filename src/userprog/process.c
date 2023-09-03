@@ -47,6 +47,9 @@ process_execute (const char *file_name)
 
   /* Check File existence */
 	file = filesys_open(file_name);
+#ifdef INFO15
+	printf("process_execute: file %p\n", file);
+#endif
 	if (file == NULL){
 		return -1;
 	}
@@ -64,6 +67,10 @@ process_execute (const char *file_name)
 
 	/* Wait the process load proeperly */
 	sema_down( &(thread_current()->execSema));
+
+#ifdef INFO15
+	printf("process_execute: thread_current()->success %d\n", thread_current()->success);
+#endif
 	if(! (thread_current()->success )){
 		return -1;
 	}
@@ -265,7 +272,7 @@ load (char *file_name, void (**eip) (void), void **esp)
 	char *argvs;
 	file_name = strtok_r (input_str, " ", &argvs);
 
-#ifdef INFO4
+#ifdef INFO14
 	printf("load file %s\n", file_name);
 #endif
 

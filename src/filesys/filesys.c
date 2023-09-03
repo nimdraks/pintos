@@ -115,7 +115,7 @@ filesys_open (const char *name)
   struct inode *inode = NULL;
 	bool is_dir=false;
 
-#ifdef INFO9
+#ifdef INFO15
 	printf("filesys_open: name %s\n", name);
 #endif
 	if (strcmp(name, "/") == 0){
@@ -126,6 +126,10 @@ filesys_open (const char *name)
 	dir = dir_open_recursive(name);
 
 	char* name_end = get_name_from_end(name);
+
+#ifdef INFO15
+	printf("filesys_open: name_end %s\n", name_end);
+#endif
 
   if (dir != NULL){
     dir_lookup (dir, name_end, &inode);
