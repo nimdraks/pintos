@@ -170,10 +170,13 @@ offset_to_sector(struct inode_disk_first* id_first, off_t offset)
 
 	int i=0, j=0, ret=-1;
 	off_t remain_offset=offset;
- 	struct buffer_cache* bc;
+ 	struct buffer_cache* bc=NULL;
 	struct inode_disk_second* id_second;
  
 	for(i=0; i<ID_FIRST_SIZE; i++){
+#ifdef INFO13
+		printf("offset_to_sector: %d\n", id_first->id_second_table[i]);
+#endif
 		if (id_first->id_second_table[i] == 0){
 			free(bc);
 			break;
