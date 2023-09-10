@@ -120,6 +120,11 @@ check_sector (struct block *block, block_sector_t sector)
 void
 block_read (struct block *block, block_sector_t sector, void *buffer)
 {
+#ifdef INFO5
+	if(sector == 0){
+		printf("sector 0 block read at block %p\n", block);
+	}
+#endif
   check_sector (block, sector);
   block->ops->read (block->aux, sector, buffer);
   block->read_cnt++;
@@ -133,6 +138,12 @@ block_read (struct block *block, block_sector_t sector, void *buffer)
 void
 block_write (struct block *block, block_sector_t sector, const void *buffer)
 {
+#ifdef INFO5
+	if(sector == 0){
+		printf("sector 0 block write at block %p\n", block);
+	}
+#endif
+
   check_sector (block, sector);
   ASSERT (block->type != BLOCK_FOREIGN);
   block->ops->write (block->aux, sector, buffer);

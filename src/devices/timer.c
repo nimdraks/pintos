@@ -7,6 +7,7 @@
 #include "threads/interrupt.h"
 #include "threads/synch.h"
 #include "threads/thread.h"
+#include "filesys/cache.h"
   
 /* See [8254] for hardware details of the 8254 timer chip. */
 
@@ -179,6 +180,11 @@ timer_interrupt (struct intr_frame *args UNUSED)
   ticks++;
   thread_tick ();
 	thread_check_awake(ticks);
+
+#ifdef FILESYS
+	clock_algorithm_for_buffer_cache_arr(ticks);
+#endif
+
 	if(thread_mlfqs){
 		thread_current_update_recent_cpu();
 		if(ticks%TIMER_FREQ==0){

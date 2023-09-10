@@ -3,17 +3,19 @@
 
 #include "filesys/off_t.h"
 #include <list.h>
+#include "devices/block.h"
 
 struct inode;
 struct fileDesc
 	{
 		int fd;
 		struct file* file;
+		struct dir* dir;
 		struct list_elem elem;
 	};
 
 /* Opening and closing files. */
-struct file *file_open (struct inode *);
+struct file *file_open (struct inode *, bool);
 struct file *file_reopen (struct file *);
 void file_close (struct file *);
 struct inode *file_get_inode (struct file *);
@@ -33,4 +35,6 @@ void file_seek (struct file *, off_t);
 off_t file_tell (struct file *);
 off_t file_length (struct file *);
 
+bool file_is_dir(struct file*);
+block_sector_t file_sector_number(struct file*);
 #endif /* filesys/file.h */

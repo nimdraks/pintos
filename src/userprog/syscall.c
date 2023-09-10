@@ -3,6 +3,7 @@
 #include "userprog/process.h"
 #include "filesys/filesys.h"
 #include "filesys/file.h"
+#include "filesys/directory.h"
 #include <stdio.h>
 #include <string.h>
 #include <syscall-nr.h>
@@ -81,7 +82,7 @@ syscall_handler (struct intr_frame *f)
 	char* copyExecFile=NULL;
 	int execPid=0;
 	int waitPid=0;
-
+	struct dir* dir=NULL;
 
 	switch(syscallNum){
 		case SYS_HALT:
@@ -100,6 +101,9 @@ syscall_handler (struct intr_frame *f)
 		case SYS_CREATE:
 			fileName = (char*)*(espP+1);
 			fileInitSize = *(espP+2);
+#ifdef INFO16
+			printf("sys_create: fileName %s, fileInitSize %d\n", fileName, fileInitSize);
+#endif
 			if(check_ptr_invalidity(t, (void*)fileName) || fileName==NULL ){
 				exit_unexpectedly(t);
 				return;
@@ -109,10 +113,16 @@ syscall_handler (struct intr_frame *f)
 				f->eax=0;
 			else
 				f->eax=filesys_create(fileName, fileInitSize);
+#ifdef INFO16
+			printf("sys_create: finished %d\n", f->eax);
+#endif
 			break;
 
 		case SYS_OPEN:
 			fileName = (char*)*(espP+1);
+#ifdef INFO16
+			printf("sys_open: fileName %s \n", fileName);
+#endif
 			if(check_ptr_invalidity(t, (void*)fileName) || fileName==NULL ){
 				exit_unexpectedly(t);
 				return;
@@ -128,6 +138,9 @@ syscall_handler (struct intr_frame *f)
 			}
 			fd = thread_make_fd(file);
 			f->eax=fd;
+#ifdef INFO16
+			printf("sys_open: finished %d at fileName %s\n", f->eax, fileName);
+#endif
 			break; 
 
 		case SYS_CLOSE:
@@ -162,6 +175,13 @@ syscall_handler (struct intr_frame *f)
 			fd = *(espP+1);		
 			file = thread_open_fd(fd);
 			file_seek(file, *(espP+2));	
+			break;
+
+		case SYS_TELL:
+			fd = *(espP+1);		
+			file = thread_open_fd(fd);
+			f->eax = file_tell(file);	
+			break;
 
 		case SYS_FILESIZE:
 			fd = *(espP+1);
@@ -181,18 +201,39 @@ syscall_handler (struct intr_frame *f)
 			fileBuffer = (char*)*(espP+2);
 			fileSize = *(espP+3);
 
+#ifdef INFO16
+			printf("SYS_WRITE: fd %d, fileBuffer %p, fileSize %d\n", fd, fileBuffer, fileSize);
+#endif
+
 			if(check_ptr_invalidity(t,fileBuffer)){
+#ifdef INFO16
+			printf("sys_write: err1\n");
+#endif
 				exit_unexpectedly(t);
 				return;
 			}
 
 			file = thread_open_fd(fd);
 			if (file==NULL){
+#ifdef INFO16
+			printf("sys_write: err2\n");
+#endif
+				exit_unexpectedly(t);
+				return;
+			}
+
+			if (file_is_dir(file)){
+#ifdef INFO16
+			printf("sys_write: err3\n");
+#endif
 				exit_unexpectedly(t);
 				return;
 			}
 
 			f->eax = file_write(file, fileBuffer, fileSize);
+#ifdef INFO16
+			printf("SYS_WRITE: writtend byte %d\n", f->eax);
+#endif
 			break;
 
 		case SYS_EXEC:
@@ -213,6 +254,68 @@ syscall_handler (struct intr_frame *f)
 			f->eax=process_wait(waitPid);
 			break;
 
+		case SYS_MKDIR:
+			fileName = (char*)*(espP+1);
+			f->eax=filesys_create_dir(fileName);
+			break;
+
+		case SYS_CHDIR:
+#ifdef INFO12
+			printf("SYS_CHDIR\n");
+#endif
+			fileName = (char*)*(espP+1);
+			f->eax=filesys_change_dir(fileName);
+			break;
+
+		case SYS_REMOVE:
+#ifdef INFO12
+			printf("SYS_REMOVE\n");
+#endif
+			fileName = (char*)*(espP+1);
+			f->eax=filesys_remove(fileName);
+			break;
+
+		case SYS_INUMBER:
+			fd = *(espP+1);
+
+			file = thread_open_fd(fd);
+			if (file==NULL){
+				exit_unexpectedly(t);
+				return;
+			}
+
+			f->eax=file_sector_number(file);
+			break;
+
+		case SYS_ISDIR:
+			fd = *(espP+1);
+
+			file = thread_open_fd(fd);
+			if (file==NULL){
+				exit_unexpectedly(t);
+				return;
+			}
+
+			f->eax=file_is_dir(file);
+#ifdef INFO16
+			printf("sys_isdir: f->eax %d at fd %d\n", f->eax, fd);
+#endif
+			break;
+
+		case SYS_READDIR:
+			fd = *(espP+1);
+			fileName = (char*)*(espP+2);
+
+			dir = thread_open_fd_dir(fd);
+			if (dir==NULL){
+				exit_unexpectedly(t);
+				return;
+			}
+
+#ifdef INFO16
+			printf("SYS_READDIR will be called; dir %p, fileName %s, fd %d\n", dir, fileName, fd);
+#endif
+			f->eax=dir_readdir(dir, fileName);
 		default:
 			break;
 	}

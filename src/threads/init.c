@@ -36,6 +36,7 @@
 #include "devices/ide.h"
 #include "filesys/filesys.h"
 #include "filesys/fsutil.h"
+#include "filesys/cache.h"
 #endif
 
 /* Page directory with kernel mappings only. */
@@ -121,6 +122,7 @@ main (void)
 
 #ifdef FILESYS
   /* Initialize file system. */
+	buffer_cache_init();
   ide_init ();
   locate_block_devices ();
   filesys_init (format_filesys);
@@ -135,6 +137,9 @@ main (void)
 //	thread_update_recent_cpu();
 
   /* Finish up. */
+#ifdef FILESYS
+	write_dirty_buffer_cache_to_sector();
+#endif
   shutdown ();
   thread_exit ();
 }
@@ -321,6 +326,10 @@ run_actions (char **argv)
       {NULL, 0, NULL},
     };
 
+#ifdef FILESYS
+	run_dirty_buffer_cache_writer();	
+#endif 
+
   while (*argv != NULL)
     {
       const struct action *a;
@@ -342,7 +351,9 @@ run_actions (char **argv)
       a->function (argv);
       argv += a->argc;
     }
-  
+
+
+ 
 }
 
 /* Prints a kernel command line help message and powers off the

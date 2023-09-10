@@ -47,6 +47,9 @@ process_execute (const char *file_name)
 
   /* Check File existence */
 	file = filesys_open(file_name);
+#ifdef INFO16
+	printf("process_execute: file %p\n", file);
+#endif
 	if (file == NULL){
 		return -1;
 	}
@@ -58,8 +61,16 @@ process_execute (const char *file_name)
     palloc_free_page (fn_copy);
 	thread_make_childSema(tid);
 
+	struct thread* new_t = tid_thread(tid);
+	new_t->cwd_sector = thread_current()->cwd_sector;
+	new_t->cwd_is_removed = thread_current()->cwd_is_removed;
+
 	/* Wait the process load proeperly */
 	sema_down( &(thread_current()->execSema));
+
+#ifdef INFO16
+	printf("process_execute: thread_current()->success %d\n", thread_current()->success);
+#endif
 	if(! (thread_current()->success )){
 		return -1;
 	}
@@ -84,6 +95,10 @@ start_process (void *file_name_)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
   success = load (file_name, &if_.eip, &if_.esp);
+
+#ifdef INFO16
+	printf("start_process: load status success %d\n", success);
+#endif
 
   /* If load failed, quit. */
   palloc_free_page (file_name);
@@ -260,7 +275,10 @@ load (char *file_name, void (**eip) (void), void **esp)
 	char *input_str=file_name;
 	char *argvs;
 	file_name = strtok_r (input_str, " ", &argvs);
-	
+
+#ifdef INFO14
+	printf("load file %s\n", file_name);
+#endif
 
   /* Allocate and activate page directory. */
   t->pagedir = pagedir_create ();

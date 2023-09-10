@@ -15,6 +15,11 @@
 #ifdef USERPROG
 #include "userprog/process.h"
 #endif
+#ifdef FILESYS
+#include "filesys/cache.h"
+#endif
+#include "filesys/filesys.h"
+#include "filesys/directory.h"
 
 /* Random value for struct thread's `magic' member.
    Used to detect stack overflow.  See the big comment at the top
@@ -118,6 +123,9 @@ thread_init (void)
   init_thread (initial_thread, "main", PRI_DEFAULT);
   initial_thread->status = THREAD_RUNNING;
   initial_thread->tid = allocate_tid ();
+	initial_thread->cwd_sector = ROOT_DIR_SECTOR;
+	initial_thread->cwd_is_removed = false;
+
 	ready_threads++;
 }
 
@@ -206,6 +214,8 @@ thread_create (const char *name, int priority,
   tid = t->tid = allocate_tid ();
 	t->p_tid = thread_current()->tid;
 	t->tFile = NULL;
+	t->cwd_sector = ROOT_DIR_SECTOR;
+	t->cwd_is_removed = false;
 
   /* Prepare thread for first run by initializing its stack.
      Do this atomically so intermediate values for the 'stack' 
@@ -348,6 +358,14 @@ thread_exit (void)
 #ifdef USERPROG
   process_exit ();
 #endif
+
+#ifdef INFO15
+	printf("thread_exit\n");
+#endif
+#ifdef FILESYS
+	write_dirty_buffer_cache_to_sector();
+#endif
+
 	thread_close_all_fd();
 	thread_remove_all_childSema();
   /* Remove thread from all threads list, set our status to dying,
@@ -954,12 +972,17 @@ thread_make_fd (struct file* file)
 			defaultfd++;
 	}
  
-	fdStruct = malloc(sizeof(fdStruct));
+	fdStruct = malloc(sizeof(struct fileDesc));
 	if (fdStruct == NULL){
 		return -1;
 	}
 	fdStruct->fd = defaultfd;
 	fdStruct->file = file;
+	if (file_is_dir(file))
+		fdStruct->dir = dir_open(file_get_inode(file)); 
+	else
+		fdStruct->dir = NULL;
+
 	list_push_back(&(t->fdList),&(fdStruct->elem));
  
  	return fdStruct->fd;
@@ -983,6 +1006,23 @@ thread_open_fd (int fd){
 	return NULL;
 }
 
+struct dir*
+thread_open_fd_dir (int fd){
+	struct thread* t = thread_current();
+	struct list_elem* e=list_begin(&(t->fdList));
+	struct fileDesc* fdStruct;
+
+	for ( e = list_begin(&(t->fdList)); e != list_end(&(t->fdList));
+				e = list_next(e))
+	{
+		fdStruct = list_entry (e, struct fileDesc, elem);
+		if (fdStruct->fd == fd && file_is_dir(fdStruct->file)){
+			return fdStruct->dir;
+		}
+	}
+
+	return NULL;
+}
 
 bool
 thread_close_fd (int fd){
@@ -997,6 +1037,7 @@ thread_close_fd (int fd){
 		if (fdStruct->fd == fd){
 			list_remove(e);
 			file_close(fdStruct->file);
+			dir_close(fdStruct->dir);
 			free(fdStruct);
 			return true;	
 		}
@@ -1016,6 +1057,7 @@ thread_close_all_fd (void){
       e = list_pop_front ( &(t->fdList) );
 			fdStruct = list_entry (e, struct fileDesc, elem);
 			file_close(fdStruct->file);
+			dir_close(fdStruct->dir);
 			free(fdStruct);
 	}
 }

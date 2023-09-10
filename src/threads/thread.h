@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "threads/synch.h"
 #include "filesys/file.h"
+#include "devices/block.h"
 
 /* States in a thread's life cycle. */
 enum thread_status
@@ -129,6 +130,9 @@ struct thread
 		struct file* tFile;
 #endif
 
+		block_sector_t cwd_sector;
+		bool cwd_is_removed;	
+
     /* Owned by thread.c. */
     unsigned magic;                     /* Detects stack overflow. */
   };
@@ -207,6 +211,7 @@ struct thread* tid_thread(tid_t tid);
 
 int thread_make_fd(struct file* file);
 struct file* thread_open_fd (int fd);
+struct dir* thread_open_fd_dir (int fd);
 bool thread_close_fd (int fd);
 void thread_close_all_fd (void);
 
