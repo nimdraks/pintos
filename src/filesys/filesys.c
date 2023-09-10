@@ -56,10 +56,12 @@ filesys_create (const char *name, off_t initial_size)
   struct dir *dir;
 
 	dir = dir_open_recursive(name);
+	if (dir == NULL)
+		return false;
 
 	char* name_end = get_name_from_end(name);
 
-#ifdef INFO7
+#ifdef INFO16
 	printf("filesys_create: dir %p\n", dir);
 	printf("filesys_create: parent sector %d, name_end %s\n", inode_to_sector(dir_to_inode(dir)), name_end);
 #endif
@@ -68,6 +70,10 @@ filesys_create (const char *name, off_t initial_size)
                   && free_map_allocate (1, &inode_sector)
                   && inode_create (inode_sector, initial_size)
                   && dir_add_file (dir, name_end, inode_sector));
+
+#ifdef INFO16
+	printf("filesys_create: inode_sector %d\n", inode_sector);
+#endif
 
   if (!success && inode_sector != 0) 
     free_map_release (inode_sector, 1);
@@ -83,6 +89,9 @@ filesys_create_dir (const char* name) {
   block_sector_t inode_sector = 0;
 
 	struct dir* parent = dir_open_recursive(name);
+	if(parent == NULL)
+		return false;
+
 	char* name_end = get_name_from_end(name);
 
 #ifdef INFO7
@@ -115,7 +124,7 @@ filesys_open (const char *name)
   struct inode *inode = NULL;
 	bool is_dir=false;
 
-#ifdef INFO15
+#ifdef INFO16
 	printf("filesys_open: name %s\n", name);
 #endif
 	if (strcmp(name, "/") == 0){
@@ -127,13 +136,16 @@ filesys_open (const char *name)
 
 	char* name_end = get_name_from_end(name);
 
-#ifdef INFO15
+#ifdef INFO16
 	printf("filesys_open: name_end %s\n", name_end);
 #endif
 
   if (dir != NULL){
     dir_lookup (dir, name_end, &inode);
 		is_dir = dir_is_dir (dir, name_end);
+#ifdef INFO16
+	printf("filesys_open: is_dir %d at name %s\n", is_dir, name);
+#endif
 	}
   dir_close (dir);
 
@@ -190,7 +202,7 @@ filesys_remove (const char *name)
 
 	char* name_end = get_name_from_end(name);
 
-#ifdef INFO12
+#ifdef INFO16
 	printf("filesys_remove: name %s, name_end %s\n", name, name_end);
 #endif
 

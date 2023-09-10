@@ -131,7 +131,7 @@ lookup (const struct dir *dir, const char *name,
 
   for (ofs = 0; inode_read_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
        ofs += sizeof e){ 
-#ifdef INFO15
+#ifdef INFO16
 	printf("dir %d, name %s, e.in_use %d, e.name %s, e.sector %d at lookup\n", inode_to_sector(dir->inode), name, e.in_use, e.name, e.inode_sector);
 #endif
     if (e.in_use && !strcmp (name, e.name)) 
@@ -228,9 +228,7 @@ dir_add (struct dir *dir, const char *name, block_sector_t inode_sector, bool is
   e.in_use = true;
   strlcpy (e.name, name, sizeof e.name);
   e.inode_sector = inode_sector;
-	if (is_dir){
-		e.is_dir = is_dir;
-	}
+	e.is_dir = is_dir;
 
   success = inode_write_at (dir->inode, &e, sizeof e, ofs) == sizeof e;
 
@@ -292,17 +290,22 @@ dir_remove (struct dir *dir, const char *name)
 
   /* Erase directory entry. */
   e.in_use = false;
+	memset(e.name, 0, NAME_MAX+1);
+	e.inode_sector = 0;
   if (inode_write_at (dir->inode, &e, sizeof e, ofs) != sizeof e) 
     goto done;
 
-#ifdef INFO8
+#ifdef INFO16
 	printf("remove succeed at dir %d, target %d\n", inode_to_sector(dir->inode), e.inode_sector);
-	struct dir_entry eee;
-	off_t ofsss;
-	inode_read_at (dir->inode, &eee, sizeof eee, ofs);
+//	struct dir_entry eee;
+//	off_t ofsss;
+//	inode_read_at (dir->inode, &eee, sizeof eee, ofs);
 //	printf("eee.in_use %d, ofs %d\n", eee.in_use, ofs);
 //	printf("eee.in_use %d, lookup %d name %s after write for checking remove\n", eee.in_use, lookup(dir, name, &eee, &ofsss), name);
 //	printf("ofsss %d\n", ofsss);
+  struct dir_entry eeee;
+  off_t ofssss;
+	lookup (dir, "abc", &eeee, &ofssss);
 #endif
 
 
@@ -311,7 +314,7 @@ dir_remove (struct dir *dir, const char *name)
   success = true;
 
  done:
-#ifdef INFO12
+#ifdef INFO16
 	printf("dir_remove: success %d\n", success);
 #endif
   inode_close (inode);
@@ -326,8 +329,8 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
 {
   struct dir_entry e;
 
-#ifdef INFO10
-	printf("dir_readdir: dir %d\n", inode_to_sector(dir_get_inode(dir)));
+#ifdef INFO16
+	printf("dir_readdir: dir %d, inode %p\n", inode_to_sector(dir_get_inode(dir)), dir->inode);
 #endif
 
   while (inode_read_at (dir->inode, &e, sizeof e, dir->pos) == sizeof e) 
@@ -335,7 +338,7 @@ dir_readdir (struct dir *dir, char name[NAME_MAX + 1])
       dir->pos += sizeof e;
       if (e.in_use && !(strcmp(e.name, ".")==0 || strcmp(e.name, "..")==0))
         {
-#ifdef INFO10
+#ifdef INFO16
 					printf("dir_readdir: inode %d, name %s\n", e.inode_sector, e.name);
 #endif
           strlcpy (name, e.name, NAME_MAX + 1);
@@ -361,7 +364,7 @@ dir_open_recursive (const char* path) {
 
 		curr = dir_open(inode_open(thread_current()->cwd_sector));
 	}
-#ifdef INFO12
+#ifdef INFO16
 	printf("dir_open_recursive: curr %d, token_count %d\n", inode_to_sector(dir_to_inode(curr)), token_count);
 #endif
 	

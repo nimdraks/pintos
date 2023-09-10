@@ -47,7 +47,7 @@ process_execute (const char *file_name)
 
   /* Check File existence */
 	file = filesys_open(file_name);
-#ifdef INFO15
+#ifdef INFO16
 	printf("process_execute: file %p\n", file);
 #endif
 	if (file == NULL){
@@ -68,7 +68,7 @@ process_execute (const char *file_name)
 	/* Wait the process load proeperly */
 	sema_down( &(thread_current()->execSema));
 
-#ifdef INFO15
+#ifdef INFO16
 	printf("process_execute: thread_current()->success %d\n", thread_current()->success);
 #endif
 	if(! (thread_current()->success )){
@@ -95,6 +95,10 @@ start_process (void *file_name_)
   if_.cs = SEL_UCSEG;
   if_.eflags = FLAG_IF | FLAG_MBS;
   success = load (file_name, &if_.eip, &if_.esp);
+
+#ifdef INFO16
+	printf("start_process: load status success %d\n", success);
+#endif
 
   /* If load failed, quit. */
   palloc_free_page (file_name);

@@ -387,7 +387,7 @@ inode_close (struct inode* inode){
           free_map_release (inode->sector, 1);
 					free(bc);
         }
-#ifdef INFO12
+#ifdef INFO16
 			printf("inode_close: sector %d\n", inode->sector);
 #endif
       free (inode); 
